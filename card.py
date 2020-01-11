@@ -16,7 +16,7 @@ VALUES = ["9", "10", "11", "12", "13", "14"]
 POINTS = {"9": 0, "10": 10, "11": 2, "12": 3, "13": 4, "14": 11}
 BIDDING = {("h12", "h13"): 100, ("c12", "c13"): 60, ("s12", "s13"): 40, ("d12", "d13"): 80}
 WHERE = ["HAND", "CARD_DECK", "STACK", "PLAYED_LEFT"]
-STATUS_GAME = ["VALUE_DECLARATION", "STACK_CHOOSING", "GAME", "SCORING"]
+
 
 def getCardList():
     cardlist = []
@@ -31,7 +31,7 @@ class Signals(QObject):
 
 
 class Card(QGraphicsPixmapItem):
-    def __init__(self, suit, value, location):
+    def __init__(self, suit, value, location=None):
         super(Card, self).__init__()
         self.signals = Signals()
 
@@ -79,68 +79,9 @@ class Card(QGraphicsPixmapItem):
         super(Card, self).mousePressEvent(e)
         if self.location == "HAND" and StatusGame.getInstance().get_status_name() == "GAME":
             self.signals.carddeck.emit()
-        elif self.location == "HAND" and StatusGame.getInstance().get_status_name() == "STACK_CHOOSING":
+        elif self.location == "HAND" and StatusGame.getInstance().get_status_name() == "STACK_CARD_TAKING":
             self.signals.cardstack.emit()
         e.accept()
-
-        '''if not self.is_face_up:
-            self.turn_face_up()
-            return
-        else:
-            self.turn_back_up()
-
-        super(Card, self).mouseReleaseEvent(e)'''
-
-    #def mouseDoubleClickEvent(self, e):
-
-
-
-'''
-        if not self.is_face_up and self.stack.cards[-1] == self:
-            self.turn_face_up()  # We can do this without checking.
-            e.accept()
-            return
-
-        if self.stack and not self.stack.is_free_card(self):
-            e.ignore()
-            return
-
-        self.stack.activate()
-
-        e.accept()
-
-        super(Card, self).mouseReleaseEvent(e)
-
-
-    def mouseReleaseEvent(self, e):
-        self.stack.deactivate()
-
-        items = self.collidingItems()
-        if items:
-            # Find the topmost item from a different stack:
-            for item in items:
-                if ((isinstance(item, Card) and item.stack != self.stack) or
-                        (isinstance(item, StackBase) and item != self.stack)):
-
-                    if item.stack.is_valid_drop(self):
-                        # Remove card + all children from previous stack, add to the new.
-                        # Note: the only place there will be children is on a workstack.
-                        cards = self.stack.remove_card(self)
-                        item.stack.add_cards(cards)
-                        break
-
-        # Refresh this card's stack, pulling it back if it was dropped.
-        self.stack.update()
-
-        super(Card, self).mouseReleaseEvent(e)
-
-    def mouseDoubleClickEvent(self, e):
-        if self.stack.is_free_card(self):
-            self.signals.doubleclicked.emit()
-            e.accept()
-
-        super(Card, self).mouseDoubleClickEvent(e)
-'''
 
 class CardDeck(QGraphicsRectItem):
     def __init__(self):
@@ -177,9 +118,18 @@ class CardStack(QGraphicsPixmapItem):
         self.setShapeMode(QGraphicsPixmapItem.BoundingRectShape)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)
 
+        self.stack_index = 1
         self.setZValue(-1)
         self.cards = []
         self.isShowed = False
+
+    def get_one_card(self):
+        temp = self.stack_index
+        if self.stack_index == 0:
+            self.stack_index = 1
+        else:
+            self.stack_index = 0
+        return self.cards[temp]
 
     def addCards(self, cards):
         temp = self.x()
@@ -198,9 +148,9 @@ class CardStack(QGraphicsPixmapItem):
         card.location = "STACK"
         self.cards.append(card)
 
-    def remove_card(self, card):
-        card.location = "HAND"
-        return self.cards.remove(card)
+    def remove_card(self, card, location):
+        card.location = location.__str__()
+        self.cards.remove(card)
 
     def showCards(self):
         for card in self.cards[:]:

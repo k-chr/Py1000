@@ -1,24 +1,22 @@
 from initdialog import *
 from player import *
+from statusgame import *
 
 STTACK_CHOICE = -1
 
 #window constants
 PLAY_SCENE_SIZE = 852, 480
-WINDOW_SIZE = 1100, 500
+WINDOW_SIZE = 1200, 520
 OFFSET_X = 5
 OFFSET_Y = 340
 
 class MainWindow(QMainWindow):
     def add_to_left(self):
-        card1 = self.my_carddeck.remove_card()
-        card2 = self.player_carddeck.remove_card()
-        card1.location = "PLAYED_LEFT"
-        card2.location = "PLAYED_LEFT"
-        self.playscene.removeItem(card1)
-        self.playscene.removeItem(card2)
-        self.player.add_card_to_left(card1)
-        self.player.add_card_to_left(card2)
+        for carddeck in self.carddecks:
+            card = carddeck.remove_card()
+            self.playscene.removeItem(card)
+            card.location = "PLAYED_LEFT"
+            self.player.add_card_to_left(card)
 
     def setScore(self):
         self.score.setText(self.player.calculate_score().__str__())
@@ -35,66 +33,46 @@ class MainWindow(QMainWindow):
             card.signals.cardstack.connect(lambda card=card: self.change_card_with_stack(card))
 
     def drop_card_from_hand(self, card):
-        if self.my_carddeck.card is None:
+        if self.carddecks[0].card is None:
             self.player.remove_card_from_hand(card)
             anime = QVariantAnimation(self)
             anime.valueChanged.connect(card.setOffset)
             anime.setDuration(500)
             anime.setStartValue(card.offset())
-            anime.setEndValue(self.my_carddeck.pos())
+            anime.setEndValue(self.carddecks[0].pos())
             anime.start()
-            self.my_carddeck.add_card(card)
+            self.carddecks[0].add_card(card)
 
     def change_card_with_stack(self, card):
         if self.stack_index < 0:
-            print('olabogacosiestalo')
+            print('olabogacosiestaloxd')
             return
 
         anime1 = QVariantAnimation(self)
         anime2 = QVariantAnimation(self)
         self.player.remove_card_from_hand(card)
-        if self.is_first_stack:
-            stack_card = self.numberOne.cards[self.stack_index]
-            self.numberOne.remove_card(stack_card)
-            temp_pos_stack = stack_card.offset()
-            temp_pos_card = card.offset()
 
-            anime1.valueChanged.connect(stack_card.setOffset)
-            anime1.setDuration(500)
-            anime1.setStartValue(stack_card.offset())
-            anime1.setEndValue(temp_pos_card)
-            anime1.start()
+        stack_card = self.cardstacks[self.stack_choice].get_one_card()
+        self.cardstacks[self.stack_choice].remove_card(stack_card, "HAND")
+        temp_pos_stack = stack_card.offset()
+        temp_pos_card = card.offset()
 
-            self.player.add_card_to_hand(stack_card)
+        anime1.valueChanged.connect(stack_card.setOffset)
+        anime1.setDuration(500)
+        anime1.setStartValue(stack_card.offset())
+        anime1.setEndValue(temp_pos_card)
+        anime1.start()
 
-            anime2.valueChanged.connect(card.setOffset)
-            anime2.setDuration(500)
-            anime2.setStartValue(card.offset())
-            anime2.setEndValue(temp_pos_stack)
-            anime2.start()
+        self.player.add_card_to_hand(stack_card)
 
-            self.numberOne.add_card(card)
-        else:
-            stack_card = self.numberOne.cards[self.stack_index]
-            self.numberTwo.remove_card(stack_card)
-            temp_pos_stack = stack_card.offset()
-            temp_pos_card = card.offset()
+        anime2.valueChanged.connect(card.setOffset)
+        anime2.setDuration(500)
+        anime2.setStartValue(card.offset())
+        anime2.setEndValue(temp_pos_stack)
+        anime2.start()
 
-            anime1.valueChanged.connect(stack_card.setOffset)
-            anime1.setDuration(500)
-            anime1.setStartValue(stack_card.offset())
-            anime1.setEndValue(temp_pos_card)
-            anime1.start()
+        self.cardstacks[self.stack_choice].add_card(card)
 
-            self.player.add_card_to_hand(stack_card)
-
-            anime2.valueChanged.connect(card.setOffset)
-            anime2.setDuration(500)
-            anime2.setStartValue(card.offset())
-            anime2.setEndValue(temp_pos_stack)
-            anime2.start()
-
-            self.numberTwo.add_card(card)
         self.stack_index -= 1
 
 
@@ -128,12 +106,15 @@ class MainWindow(QMainWindow):
         return self.player_info_wg
 
 
+    def set_stack_choice(self, value):
+        self.stack_choice = value
+
     def __init__(self):
         super(MainWindow, self).__init__()
 
         #PLAYER CONTENT
         self.player = Player()
-        self.is_first_stack = True
+        self.stack_choice = 0
         self.stack_index = 1
 
         #BACKGROUND + PLAYSCENE
@@ -152,24 +133,10 @@ class MainWindow(QMainWindow):
         self.init_hand_cards(temp_cards)
 
         #DECKS
-        self.my_carddeck = CardDeck()
-        self.player_carddeck = CardDeck()
         self.init_card_decks()
 
         #STACKS
-        self.numberOne = CardStack(1)
-        self.numberTwo = CardStack(2)
-        self.numberOne.setPos(QPointF(50, 50))
-        self.numberTwo.setPos(QPointF(550, 50))
-
-        numberCards = []
-        for x in range(0, 2):
-            c = Card('C', '9', "STACK")
-            numberCards.append(c)
-            self.playscene.addItem(c)
-        self.numberOne.addCards(numberCards)
-        self.playscene.addItem(self.numberOne)
-        self.playscene.addItem(self.numberTwo)
+        self.init_card_stacks()
 
         #MERGING GUI ELEMENTS
         w = QWidget()
@@ -180,21 +147,52 @@ class MainWindow(QMainWindow):
         hbox.addWidget(self.view)
         hbox.addWidget(self.player_info())
 
+        #STATUS HELP STATUS GAME
+        self.statusBar = QStatusBar()
+        self.statusBar.setStyleSheet("color: blue;")
+        self.setStatusBar(self.statusBar)
+        #TODO: ustawić tak, by po przesłaniu od serwera informacji o stanie tutaj też to się zmieniało
+        self.statusBar.showMessage(STATUS_GAME[StatusGame.getInstance().get_status_name()])
         self.initUI()
 
     def initUI(self):
         self.setGeometry(150, 150, *WINDOW_SIZE)
         self.setWindowTitle("CARD GAME THOUSAND")
+
         self.setFixedSize(*WINDOW_SIZE)
         self.show()
         self.toggle_declare_value_dialog()
 
     def init_card_decks(self):
-        self.my_carddeck.setPos(350, 175)
-        self.player_carddeck.setPos(350, 50)
-        self.playscene.addItem(self.my_carddeck)
-        self.playscene.addItem(self.player_carddeck)
+        self.carddecks = [] #0 - my carddeck, 1 - player cardeck
+        y = 175
+        for i in range (0, 2):
+            carddeck = CardDeck()
+            carddeck.setPos(350, y)
+            y -= 125
+            self.carddecks.append(carddeck)
+            self.playscene.addItem(carddeck)
 
+    def init_card_stacks(self):
+        self.cardstacks = []
+        x = 50
+        for i in range(0, 2):
+            cardstack = CardStack(i+1) # 1 - 1, 2 - 2
+            cardstack.setPos(QPoint(x, 50))
+            x += 500
+            self.cardstacks.append(cardstack)
+            self.playscene.addItem(cardstack)
+
+        #temporary
+        numberCards = []
+        for x in range(0, 2):
+            card = Card('C', '9', "STACK")
+            card.signals.carddeck.connect(lambda card=card: self.drop_card_from_hand(card))
+            card.signals.cardstack.connect(lambda card=card: self.change_card_with_stack(card))
+            numberCards.append(card)
+            self.playscene.addItem(card)
+
+        self.cardstacks[0].addCards(numberCards)
 
     def toggle_declare_value_dialog(self, name=None):
         value, ok = InitDialog.getDialog(self, "Declare value", name)

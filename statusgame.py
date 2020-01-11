@@ -1,4 +1,10 @@
 
+STATUS_GAME = {"VALUE_DECLARATION": "Choose value to declare. ",
+                "STACK_CHOOSING": "Choose number of card stack. ",
+                "STACK_CARD_TAKING": "Take cards from stack by choosing unwanted hand's card.",
+                "GAME": "Game time!",
+                "SCORING": "Scoring time!"}
+
 class StatusGame:
     __instance = None
 
@@ -14,7 +20,7 @@ class StatusGame:
         if StatusGame.__instance != None:
             raise Exception("This class is a singleton!")
         else:
-            self.__status_name = "STACK_CHOOSING"
+            self.__status_name = "STACK_CARD_TAKING"
             StatusGame.__instance = self
 
     def get_status_name(self):
