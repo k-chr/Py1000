@@ -1,14 +1,6 @@
-import sys
-import os
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from card import *
 from initdialog import *
 from player import *
 
-#TODO: inaczej to, bo nie zmienie później + jakoś żeby to do karty przesłać
-STATUS_GAME = "GAME"
 STTACK_CHOICE = -1
 
 #window constants
@@ -54,25 +46,56 @@ class MainWindow(QMainWindow):
             self.my_carddeck.add_card(card)
 
     def change_card_with_stack(self, card):
+        if self.stack_index < 0:
+            print('olabogacosiestalo')
+            return
+
+        anime1 = QVariantAnimation(self)
+        anime2 = QVariantAnimation(self)
+        self.player.remove_card_from_hand(card)
         if self.is_first_stack:
-            stack_card = self.numberOne.remove_card(self.numberOne.cards[self.stack_index])
-            temp_pos = stack_card.pos()
+            stack_card = self.numberOne.cards[self.stack_index]
+            self.numberOne.remove_card(stack_card)
+            temp_pos_stack = stack_card.offset()
+            temp_pos_card = card.offset()
 
-            card.setOffset(*temp_pos)
+            anime1.valueChanged.connect(stack_card.setOffset)
+            anime1.setDuration(500)
+            anime1.setStartValue(stack_card.offset())
+            anime1.setEndValue(temp_pos_card)
+            anime1.start()
+
+            self.player.add_card_to_hand(stack_card)
+
+            anime2.valueChanged.connect(card.setOffset)
+            anime2.setDuration(500)
+            anime2.setStartValue(card.offset())
+            anime2.setEndValue(temp_pos_stack)
+            anime2.start()
+
             self.numberOne.add_card(card)
-
-            stack_card.setOffset(*card.pos())
-            self.player.add_card_to_hand(stack_card)
         else:
-            stack_card = self.numberTwo.remove_card(self.numberOne.cards[self.stack_index])
-            temp_pos = stack_card.pos()
+            stack_card = self.numberOne.cards[self.stack_index]
+            self.numberTwo.remove_card(stack_card)
+            temp_pos_stack = stack_card.offset()
+            temp_pos_card = card.offset()
 
-            card.setOffset(*temp_pos)
-            self.numberTwo.add_card(card)
+            anime1.valueChanged.connect(stack_card.setOffset)
+            anime1.setDuration(500)
+            anime1.setStartValue(stack_card.offset())
+            anime1.setEndValue(temp_pos_card)
+            anime1.start()
 
-            stack_card.setOffset(*card.pos())
             self.player.add_card_to_hand(stack_card)
-        self.stack_index += 1
+
+            anime2.valueChanged.connect(card.setOffset)
+            anime2.setDuration(500)
+            anime2.setStartValue(card.offset())
+            anime2.setEndValue(temp_pos_stack)
+            anime2.start()
+
+            self.numberTwo.add_card(card)
+        self.stack_index -= 1
 
 
     def player_info(self):
@@ -104,14 +127,14 @@ class MainWindow(QMainWindow):
         self.player_info_wg.setLayout(vbox)
         return self.player_info_wg
 
+
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.status_game = "GAME"
 
         #PLAYER CONTENT
         self.player = Player()
         self.is_first_stack = True
-        self.stack_index = 0
+        self.stack_index = 1
 
         #BACKGROUND + PLAYSCENE
         self.view = QGraphicsView()
@@ -165,7 +188,6 @@ class MainWindow(QMainWindow):
         self.setFixedSize(*WINDOW_SIZE)
         self.show()
         self.toggle_declare_value_dialog()
-
 
     def init_card_decks(self):
         self.my_carddeck.setPos(350, 175)

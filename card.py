@@ -2,6 +2,7 @@ from PyQt5.QtCore import QSize, QRect, QObject, pyqtSignal, QRectF, QPointF, pyq
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGraphicsPixmapItem, QGraphicsItem, QGraphicsRectItem
 import os
+from statusgame import *
 
 #CARD CONSTANTS
 SIDE_FACE = 0
@@ -72,16 +73,15 @@ class Card(QGraphicsPixmapItem):
     def color(self):
         return 'r' if self.suit in ('h', 'd') else 'b'
 
+
     #poprzekształcać dobrze
     def mousePressEvent(self, e):
-        if self.location == "HAND" and STATUS_GAME == "GAME":
-            super(Card, self).mousePressEvent(e)
+        super(Card, self).mousePressEvent(e)
+        if self.location == "HAND" and StatusGame.getInstance().get_status_name() == "GAME":
             self.signals.carddeck.emit()
-            e.accept()
-        elif self.location == "HAND" and STATUS_GAME == "STACK_CHOOSING":
-            super(Card, self).mousePressEvent(e)
+        elif self.location == "HAND" and StatusGame.getInstance().get_status_name() == "STACK_CHOOSING":
             self.signals.cardstack.emit()
-            e.accept()
+        e.accept()
 
         '''if not self.is_face_up:
             self.turn_face_up()
