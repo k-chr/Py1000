@@ -128,12 +128,12 @@ class MainWindow(QMainWindow):
         self.view.setScene(self.playscene)
         self.playscene.setSceneRect(QRectF(0, 0, *PLAY_SCENE_SIZE))
 
-        felt = QBrush(QPixmap(os.path.join('images', 'green_bg2.jpg')))
+        felt = QBrush(QPixmap(os.path.join('images\\backgrounds', 'bg2.png')))
         self.playscene.setBackgroundBrush(felt)
 
         #HAND
         temp_cards = []
-        for _ in range(0, 10): temp_cards.append(Card('C', '10', "HAND"))
+        for _ in range(0, 10): temp_cards.append(Card('C', '12', "HAND"))
         #above is temporary
         self.init_hand_cards(temp_cards)
 

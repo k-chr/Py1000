@@ -49,20 +49,21 @@ class Card(QGraphicsPixmapItem):
 
     def load_images(self):
         self.face = QPixmap(
-            os.path.join('cards', '%s%s.png' % (self.value, self.suit))
+            os.path.join('images\\cards', '%s%s.png' % (self.value, self.suit))
         )
         self.back = QPixmap(
-            os.path.join('images', 'back.png')
+            os.path.join('images\\cards', 'back.png')
         )
 
     def turn_face_up(self):
         self.side = SIDE_FACE
         self.setPixmap(self.face)
+        self.setScale(CARD_DIMENSIONS.width() / self.face.width())
 
     def turn_back_up(self):
         self.side = SIDE_BACK
         self.setPixmap(self.back)
-
+        self.setScale(CARD_DIMENSIONS.width() / self.back.width())
     @property
     def is_face_up(self):
         return self.side == SIDE_FACE
