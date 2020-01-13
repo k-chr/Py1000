@@ -13,18 +13,20 @@ class RandomCardGenerator:
                     self.cards.append(Card(suit, value))
 
     def generate_player_cards(self):
-        cardlist = []
+        cardlist1 = []
+        cardlist2 = []
         for i in range(0, 10):
-            temp = self.random_card()
-            cardlist.append(temp)
-        return cardlist
+            cardlist1.append(self.random_card())
+            cardlist2.append(self.random_card())
+        return cardlist1, cardlist2
 
     def generate_stack_cards(self):
-        cardstack = []
+        cardstack1 = []
+        cardstack2 = []
         for i in range(0, 2):
-            temp = self.random_card()
-            cardstack.append(temp)
-        return cardstack
+            cardstack1.append(self.random_card())
+            cardstack2.append(self.random_card())
+        return cardstack1, cardstack2
 
     def random_card(self):
         temp = random.choice(self.cards)

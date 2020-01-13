@@ -26,9 +26,7 @@ def getCardList():
     return cardlist
 
 class Signals(QObject):
-    carddeck = pyqtSignal()
-    cardstack = pyqtSignal()
-
+    clicked = pyqtSignal()
 
 class Card(QGraphicsPixmapItem):
     def __init__(self, suit, value, location=None):
@@ -73,14 +71,9 @@ class Card(QGraphicsPixmapItem):
     def color(self):
         return 'r' if self.suit in ('h', 'd') else 'b'
 
-
-    #poprzekształcać dobrze
     def mousePressEvent(self, e):
         super(Card, self).mousePressEvent(e)
-        if self.location == "HAND" and StatusGame.getInstance().get_status_name() == "GAME":
-            self.signals.carddeck.emit()
-        elif self.location == "HAND" and StatusGame.getInstance().get_status_name() == "STACK_CARD_TAKING":
-            self.signals.cardstack.emit()
+        self.signals.clicked.emit()
         e.accept()
 
 class CardDeck(QGraphicsRectItem):

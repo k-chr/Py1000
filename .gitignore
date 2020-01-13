@@ -1,3 +1,11 @@
-.idea
-.spyproject
-__pycache__
+/.idea/workspace.xml
+/__pycache__/card.cpython-36.pyc
+/__pycache__/initdialog.cpython-36.pyc
+/__pycache__/mainwindow.cpython-36.pyc
+/__pycache__/player.cpython-36.pyc
+/__pycache__/statusgame.cpython-36.pyc
+/.idea/workspace.xml
+/.idea/CardGameThousand.iml
+/.idea/encodings.xml
+/.idea/misc.xml
+/.idea/modules.xml
