@@ -9,3 +9,5 @@
 /.idea/encodings.xml
 /.idea/misc.xml
 /.idea/modules.xml
+.spyproject
+__pycache__
