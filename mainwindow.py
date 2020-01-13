@@ -29,8 +29,13 @@ class MainWindow(QMainWindow):
             self.player.hand_cards.append(card)
             self.playscene.addItem(card)
             temp += CARD_DIMENSIONS.width() + CARD_SPACING_X
-            card.signals.carddeck.connect(lambda card=card: self.drop_card_from_hand(card))
-            card.signals.cardstack.connect(lambda card=card: self.change_card_with_stack(card))
+            card.signals.clicked.connect(lambda card=card: self.change_card_location(card))
+
+    def change_card_location(self, card):
+        if card.location == "HAND" and StatusGame.getInstance().get_status_name() == "GAME":
+            self.drop_card_from_hand(card)
+        elif card.location == "HAND" and StatusGame.getInstance().get_status_name() == "STACK_CARD_TAKING":
+            self.change_card_with_stack(card)
 
     def drop_card_from_hand(self, card):
         if self.carddecks[0].card is None:
@@ -187,24 +192,22 @@ class MainWindow(QMainWindow):
         numberCards = []
         for x in range(0, 2):
             card = Card('C', '9', "STACK")
-            card.signals.carddeck.connect(lambda card=card: self.drop_card_from_hand(card))
-            card.signals.cardstack.connect(lambda card=card: self.change_card_with_stack(card))
+            card.signals.clicked.connect(lambda card=card: self.change_card_location(card))
             numberCards.append(card)
             self.playscene.addItem(card)
 
         self.cardstacks[0].addCards(numberCards)
 
-    def toggle_declare_value_dialog(self, name=None):
-        value, ok = InitDialog.getDialog(self, "Declare value", name)
-        value = round(value/10) * 10
-
-        if self.declared.text() == "":
-            self.declared.setText(self.player.declared_value.__str__())
+    def toggle_declare_value_dialog(self):
+        value, ok = InitDialog.getDialog(self, "Declare value")
 
         if ok is True:
             self.declared.setText(value.__str__())
             self.player.declared_value = value
             self.declared.setReadOnly(True)
+        else:
+            if self.declared.text() == "":
+                self.declared.setText("100")
 
 
 
