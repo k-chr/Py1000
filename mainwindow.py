@@ -1,14 +1,15 @@
 from initdialog import *
 from player import *
 from statusgame import *
-
+from PyQt5.QtCore import *
+from welcomelayout import WelcomeLayout
 STTACK_CHOICE = -1
 
 #window constants
-PLAY_SCENE_SIZE = 852, 480
-WINDOW_SIZE = 1200, 520
+PLAY_SCENE_SIZE = 1200, 800
+WINDOW_SIZE = 1500, 1000
 OFFSET_X = 5
-OFFSET_Y = 340
+OFFSET_Y = 500
 
 class MainWindow(QMainWindow):
     def add_to_left(self):
@@ -109,48 +110,68 @@ class MainWindow(QMainWindow):
 
         self.player_info_wg.setLayout(vbox)
         return self.player_info_wg
-
-
-    def set_stack_choice(self, value):
-        self.stack_choice = value
-
-    def __init__(self):
-        super(MainWindow, self).__init__()
-
-        #PLAYER CONTENT
-        self.player = Player()
-        self.stack_choice = 0
-        self.stack_index = 1
-
-        #BACKGROUND + PLAYSCENE
+    def create_game_layout(self):
         self.view = QGraphicsView()
         self.playscene = QGraphicsScene()
         self.view.setScene(self.playscene)
         self.playscene.setSceneRect(QRectF(0, 0, *PLAY_SCENE_SIZE))
+        bg = QPixmap(os.path.join('images\\backgrounds', 'bg2.png'))
+        bg = bg.scaled(self.playscene.width(), self.playscene.height())
+        brushBg = QBrush(bg)
+        self.playscene.setBackgroundBrush(brushBg)
+        hbox = QHBoxLayout()
+        hbox.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        hbox.addWidget(self.view)
+        hbox.addWidget(self.player_info())
+        return hbox
+    def create_welcome_game_layout(self):
+        if(self.welcomeLayout is None):
+            banner = QPixmap(os.path.join('images', 'banner.png'))
+            w_bg = QPixmap(os.path.join('images', 'main.jpg'))
+            self.welcomeLayout = WelcomeLayout(WINDOW_SIZE, 350, banner, ['host', 'peer', 'settings', 'help', 'quit'],w_bg)
+        return self.welcomeLayout
+    def set_stack_choice(self, value):
+        self.stack_choice = value
+    def handle_menu(self, button):
+        print(button.name)
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.welcomeLayout = None
+        #PLAYER CONTENT
+        self.player = None
+        self.stack_choice = 0
+        self.stack_index = 1
 
-        felt = QBrush(QPixmap(os.path.join('images\\backgrounds', 'bg2.png')))
-        self.playscene.setBackgroundBrush(felt)
+        ##BACKGROUND + PLAYSCENE
+        #self.view = QGraphicsView()
+        #self.playscene = QGraphicsScene()
+        #self.view.setScene(self.playscene)
+        #self.playscene.setSceneRect(QRectF(0, 0, *PLAY_SCENE_SIZE))
+        #bg = QPixmap(os.path.join('images\\backgrounds', 'bg2.png'))
+        #bg = bg.scaled(self.playscene.width(), self.playscene.height())
+        #brushBg = QBrush(bg)
+        #self.playscene.setBackgroundBrush(brushBg)
 
         #HAND
         temp_cards = []
         for _ in range(0, 10): temp_cards.append(Card('C', '12', "HAND"))
         #above is temporary
-        self.init_hand_cards(temp_cards)
+        #self.init_hand_cards(temp_cards)
 
         #DECKS
-        self.init_card_decks()
+        #self.init_card_decks()
 
         #STACKS
-        self.init_card_stacks()
+        #self.init_card_stacks()
 
         #MERGING GUI ELEMENTS
-        w = QWidget()
-        self.setCentralWidget(w)
-        hbox = QHBoxLayout()
-        w.setLayout(hbox)
-        hbox.setAlignment(Qt.AlignLeft | Qt.AlignTop)
-        hbox.addWidget(self.view)
-        hbox.addWidget(self.player_info())
+        self.w = QWidget()
+        self.setCentralWidget(self.w)
+        #hbox = QHBoxLayout()
+        self.w.setLayout(self.create_welcome_game_layout())
+        #hbox.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        #hbox.addWidget(self.view)
+        #hbox.addWidget(self.player_info())
 
         #STATUS HELP STATUS GAME
         self.statusBar = QStatusBar()
@@ -160,14 +181,13 @@ class MainWindow(QMainWindow):
         self.statusBar.showMessage(STATUS_GAME[StatusGame.getInstance().get_status_name()])
         self.initUI()
 
+    def initPlayer(self):
+        self.player = Player()
     def initUI(self):
-        self.setGeometry(150, 150, *WINDOW_SIZE)
-        self.setWindowTitle("CARD GAME THOUSAND")
-
-        self.setFixedSize(*WINDOW_SIZE)
+        self.setGeometry(100, 100, *WINDOW_SIZE)
+        self.setWindowTitle("Py1000 - THE CARD GAME ")
+        self.setFixedSize(WINDOW_SIZE[0]+ 2 , WINDOW_SIZE[1] + 2)
         self.show()
-        self.toggle_declare_value_dialog()
-
     def init_card_decks(self):
         self.carddecks = [] #0 - my carddeck, 1 - player cardeck
         y = 175
@@ -197,7 +217,10 @@ class MainWindow(QMainWindow):
             self.playscene.addItem(card)
 
         self.cardstacks[0].addCards(numberCards)
-
+        
+    def run_networking_dialog(self):
+        result = PeerDialog.getDialog(self, "Welcome player!")
+        
     def toggle_declare_value_dialog(self):
         value, ok = InitDialog.getDialog(self, "Declare value")
 

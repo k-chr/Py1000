@@ -7,8 +7,8 @@ from statusgame import *
 #CARD CONSTANTS
 SIDE_FACE = 0
 SIDE_BACK = 1
-CARD_DIMENSIONS = QSize(80, 116)
-CARD_RECT = QRect(0, 0, 80, 116)
+CARD_DIMENSIONS = QSize(120, 174)
+CARD_RECT = QRect(0, 0,120, 174)
 CARD_SPACING_X = 4.5
 
 SUITS = ["c", "s", "h", "d"] #D - diamonds ♦, S - spades ♠, H - hearts ♥, C - clubs ♣
@@ -51,19 +51,19 @@ class Card(QGraphicsPixmapItem):
         self.face = QPixmap(
             os.path.join('images\\cards', '%s%s.png' % (self.value, self.suit))
         )
+        self.face = self.face.scaled(CARD_DIMENSIONS.width(), CARD_DIMENSIONS.height())
         self.back = QPixmap(
             os.path.join('images\\cards', 'back.png')
         )
+        self.back = self.back.scaled(CARD_DIMENSIONS.width(), CARD_DIMENSIONS.height())
 
     def turn_face_up(self):
         self.side = SIDE_FACE
         self.setPixmap(self.face)
-        self.setScale(CARD_DIMENSIONS.width() / self.face.width())
 
     def turn_back_up(self):
         self.side = SIDE_BACK
         self.setPixmap(self.back)
-        self.setScale(CARD_DIMENSIONS.width() / self.back.width())
     @property
     def is_face_up(self):
         return self.side == SIDE_FACE
