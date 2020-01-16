@@ -2,14 +2,17 @@ from card import *
 MAX_VALUE = 1000
 
 class Player:
+    __server = None
+    __client = None
     def __init__(self):
+        self.bidding_initiator = False
         self.hand_cards = []
         self.score = 0
         self.declared_value = 100
         self.is_main_player = False
         self.is_reported = False
 
-        self.played_left = [] #cards gain during play time
+        self.played_left = [] #cards gained during play time
 
     #declared
     def add_to_declared_value(self, value):
@@ -76,14 +79,14 @@ class Player:
 
     #LEFT CARDS
     def add_cards_to_left(self, cards):
-        self.hand_cards = cards
+        self.played_left = cards
 
     def remove_all_cards_from_left(self):
-        cards = self.hand_cards
+        cards = self.played_left
         return cards
 
     def add_card_to_left(self, card):
-        self.hand_cards.append(card)
+        self.played_left.append(card)
 
     def remove_card_from_left(self, card):
-        self.hand_cards.remove(card)
+        self.played_left.remove(card)
