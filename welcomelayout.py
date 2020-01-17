@@ -5,15 +5,18 @@ Created on Wed Jan 15 18:55:35 2020
 @author: Kamil Chrustowski
 """
 import os
+import sys
+from threading import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from banner import Banner
 from gamebutton import GameButton
+from config import Config, ConfigDialog
 class WelcomeLayout(QHBoxLayout):
     quitSignal = pyqtSignal()
     
-    def __init__(self,windowSize,bannerHeight, bannerPixmap,buttonNames,backgroundPixmap, parent=None):
+    def __init__(self,windowSize,bannerHeight, bannerPixmap,buttonNames,backgroundPixmap,player, parent=None):
         super(WelcomeLayout, self).__init__(parent)
         self.setAlignment(Qt.AlignCenter)
         self.banner = Banner(bannerPixmap, bannerHeight)
@@ -37,15 +40,24 @@ class WelcomeLayout(QHBoxLayout):
         self.addWidget(self.widget)
         self.setContentsMargins(0,0,0,0)
         self.buttonGroup.buttonClicked.connect(self.handleMenu)
+        self.playerInstance = player
     def handleMenu(self, button):
         if button.name == 'host':
             print('I\'m a host button')
+            self.playerInstance.playAsHost()
+            
         elif button.name == 'peer':
             print('I\'m a peer button')
         elif button.name == 'settings':
             print('I\'m a settings button')
+            value = ConfigDialog.getDialog()
+            print(value)
         elif button.name == 'help':
             print('I\'m a help button')
+            
         elif button.name == 'quit':
             print('I\'m a quit button')
+            QCoreApplication.quit()
+            
+    
             

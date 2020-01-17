@@ -12,6 +12,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtNetwork import *
 from PyQt5.QtWidgets import *
 class CommunicationHandler:
+    messageReceived = pyqtSignal(str)
     __socket = None
     __should_exit = False
     __receiving_service = QThreadPool()
@@ -20,16 +21,23 @@ class CommunicationHandler:
     __sending_service.setMaxThreadCount(1)
     def __init__(self, socket):
         self.__socket = socket
-        self.__receiving_service.start(self.get_message)
+        self.__socket.readyread.connect(get_message)  
+    def cleanUp(self):
+        print("cleaning up")
+        self.__should_exit = True
+        self.__sending_service.waitForDone()
+        self.__receiving_service.waitForDone()
+        self.__socket.disconnectFromHost()
     def get_message(self):
-        print("Perhaps I got a message")
-        while self.__should_exit == False:
-            if self.socket.bytesAvailable()>0:
-                msg = self.socket.readAll()
-                print(type(msg), msg.count())
-                message = msg.data().decode()
-                print(f"Received message: {message}")
-                       
+        def wrapper():
+            if self.__should_exit == False:
+                if self.__socket.bytesAvailable()>0:
+                    msg = self.__socket.readAll()
+                    print(type(msg), msg.count())
+                    message = msg.data()
+                    print(f"Received message: {message}")
+                    self.messageReceived.emit(message)       
+        self.__receiving_service.start(FunctionalRunnable(wrapper))
     def send_message(self,message):
         def wrapper(cmd):
             self.__socket.write(cmd)
