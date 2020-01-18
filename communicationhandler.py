@@ -21,7 +21,7 @@ class CommunicationHandler:
     __sending_service.setMaxThreadCount(1)
     def __init__(self, socket):
         self.__socket = socket
-        self.__socket.readyread.connect(get_message)  
+        self.__socket.readyread.connect(self.get_message)
     def cleanUp(self):
         print("cleaning up")
         self.__should_exit = True

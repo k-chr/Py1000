@@ -19,7 +19,6 @@ class Server:
     __serverService = QThreadPool()
     __serverService.setMaxThreadCount(1)
     __client = None
-    __thread= None
     def __init__(self, ip):
         self.__server = QTcpServer()
         self.__server.setMaxPendingConnections(1)
