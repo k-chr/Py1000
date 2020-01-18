@@ -1,5 +1,5 @@
 from PyQt5.Qt import *
-from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QLineEdit, QSlider
+from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel
 
 
 class InitDialog(QDialog):
