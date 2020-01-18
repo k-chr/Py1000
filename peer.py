@@ -29,7 +29,7 @@ class Peer(QObject):
         if error == QAbstractSocket.ConnectionRefusedError:
             print(
                 'Unable to send data to port: "{}"'.format(
-                    self.TCP_SEND_TO_PORT
+                    self.__port
                 )
             )
             print("trying to reconnect")
