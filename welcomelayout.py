@@ -48,6 +48,7 @@ class WelcomeLayout(QHBoxLayout):
             
         elif button.name == 'peer':
             print('I\'m a peer button')
+            self.playerInstance.playAsPeer()
         elif button.name == 'settings':
             print('I\'m a settings button')
             value = ConfigDialog.getDialog()

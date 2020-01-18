@@ -39,7 +39,7 @@ class Server:
     def cleanUp(self):
         print("closing connection")
         self.__serverService.waitForDone()
-        self.__clients[0].cleanUp()
+        self.__client.cleanUp()
         self.__server.close()
         self.__client = None
         self.__ip = ""

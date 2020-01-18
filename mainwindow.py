@@ -128,7 +128,7 @@ class MainWindow(QMainWindow):
         if(self.welcomeLayout is None):
             banner = QPixmap(os.path.join('images', 'banner.png'))
             w_bg = QPixmap(os.path.join('images', 'main.jpg'))
-            self.welcomeLayout = WelcomeLayout(WINDOW_SIZE, 350, banner, ['host', 'peer', 'settings', 'help', 'quit'],w_bg)
+            self.welcomeLayout = WelcomeLayout(WINDOW_SIZE, 350, banner, ['host', 'peer', 'settings', 'help', 'quit'],w_bg, self.player)
         return self.welcomeLayout
     def set_stack_choice(self, value):
         self.stack_choice = value
@@ -139,9 +139,10 @@ class MainWindow(QMainWindow):
         self.welcomeLayout = None
         #PLAYER CONTENT
         self.player = None
+        self.setWindowIcon(QIcon(QPixmap(os.path.join('images', 'ico.png'))))
         self.stack_choice = 0
         self.stack_index = 1
-
+        self.initPlayer()
         ##BACKGROUND + PLAYSCENE
         #self.view = QGraphicsView()
         #self.playscene = QGraphicsScene()
@@ -180,7 +181,7 @@ class MainWindow(QMainWindow):
         #TODO: ustawić tak, by po przesłaniu od serwera informacji o stanie tutaj też to się zmieniało
         self.statusBar.showMessage(STATUS_GAME[StatusGame.getInstance().get_status_name()])
         self.initUI()
-
+        
     def initPlayer(self):
         self.player = Player()
     def initUI(self):
@@ -217,9 +218,7 @@ class MainWindow(QMainWindow):
             self.playscene.addItem(card)
 
         self.cardstacks[0].addCards(numberCards)
-        
-    def run_networking_dialog(self):
-        result = PeerDialog.getDialog(self, "Welcome player!")
+    
         
     def toggle_declare_value_dialog(self):
         value, ok = InitDialog.getDialog(self, "Declare value")
