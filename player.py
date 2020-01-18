@@ -1,6 +1,10 @@
 from card import *
 MAX_VALUE = 1000
-
+from server import *
+from threading import *
+from time import sleep
+from networkdialog import NetworkDialog
+from peer import Peer
 class Player:
     __server = None
     __client = None
@@ -17,8 +21,22 @@ class Player:
     #declared
     def add_to_declared_value(self, value):
         self.declared_value += value
-
-
+    def playAsPeer(self):
+        ip, result = NetworkDialog.getDialog('Peer') 
+        print(ip,' ',result)
+        if(result):
+            self.__client = Peer(ip)
+            self.__client.tryToConnect()
+    def playAsHost(self):
+        self.__server = Server()
+        ip, result = NetworkDialog.getDialog('Host',receiver= self.__server) 
+        print(ip,' ',result)
+    def has_client(self):
+        print(self.__client is None == False)
+        return self.__client is None == False
+    def set_client(self,client):
+        print("Im called")
+        self.__client = client
     #SCORE
     def set_score(self, value):
         self.score = value

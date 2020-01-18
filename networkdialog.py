@@ -20,14 +20,14 @@ class PulsingProgressBar(QProgressBar):
         self.setValue(0)
         self.setFixedSize(QSize(width, height))
         self.setStyle(QStyleFactory.create('WindowsVista'))
-        self.setStyleSheet("QProgressBar::chunk {background-color: #05B8CC;}")
+        self.setStyleSheet("QProgressBar:horizontal {border: 1px solid gray;border-radius: 3px;background: white;padding: 1px;}QProgressBar::chunk {background: qlineargradient(x1: 0, y1: 0.5, x2: 1, y2: 0.5, stop: 0 #05B8CC, stop: 1 white);}")
         self.setTextVisible(False)
         self.glow = QGraphicsDropShadowEffect()
         self.glow.setBlurRadius(0)
         self.setGraphicsEffect(self.glow)
         self.glow.setXOffset(0)
         self.glow.setYOffset(0)
-        self.glow.setColor(QColor("0x05B8CC"))
+        self.glow.setColor(QColor("#05B8CC"))
         self.animu = QPropertyAnimation(self.glow, b"blurRadius")
         self.animu.setStartValue(0)
         self.animu.setEndValue(100)
@@ -39,6 +39,7 @@ class PulsingProgressBar(QProgressBar):
         self.setValue(100)
         self.animu.stop()
 class NetworkDialog(QDialog):
+    ipFound = pyqtSignal(str)
     __ip = ""
     progressBar = None
     ipGroup = None
@@ -66,6 +67,7 @@ class NetworkDialog(QDialog):
                         ip = entry.ip()
                         if ip.protocol() == QAbstractSocket.IPv4Protocol and ip != localhost:
                             print(ip.toString())
+                            
                             return ip
     
         self.__ip = getIPv4Address().toString()
@@ -130,10 +132,15 @@ class NetworkDialog(QDialog):
                 value = False
         self.button.setEnabled(value)
     @staticmethod
-    def getDialog(who,parent=None):
+    def getDialog(who,receiver=None, parent = None):
         dialog = NetworkDialog(who, parent)
+        if receiver != None:
+            dialog.ipFound.connect(receiver.receiveIp)
+            dialog.ipFound.emit(dialog.getIp())
+            receiver.opponnentConnected.connect(dialog.finishHostDialog)
         dialog.setWindowTitle("Py1000 - network dialog")
         dialog.setWindowIcon(QIcon(QPixmap(os.path.join('images', 'ico.png'))))
         result = dialog.exec_()
         value = dialog.getIp()
+        
         return (value, result == QDialog.Accepted)
