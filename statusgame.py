@@ -1,3 +1,4 @@
+from PyQt5.QtCore import *
 
 STATUS_GAME = {"VALUE_DECLARATION": "Choose value to declare. ",
                 "STACK_CHOOSING": "Choose number of card stack. ",
@@ -6,7 +7,10 @@ STATUS_GAME = {"VALUE_DECLARATION": "Choose value to declare. ",
                 "SCORING": "Scoring time!",
                 "APP_START":"Choose game mode or adjust settings or get some help with game rules"}
 
-class StatusGame:
+class Signals(QObject):
+    statusChanged = pyqtSignal()
+
+class StatusGame(QObject):
     __instance = None
 
     @staticmethod
@@ -23,6 +27,7 @@ class StatusGame:
         else:
             #self.__status_name = "APP_START"
             self.__status_name = "STACK_CHOOSING"
+            self.signals = Signals()
             StatusGame.__instance = self
 
     def get_status_name(self):
@@ -30,3 +35,4 @@ class StatusGame:
 
     def set_status_name(self, name):
         self.__status_name = str(name)
+        self.signals.statusChanged.emit()

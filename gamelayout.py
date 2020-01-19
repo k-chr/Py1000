@@ -4,7 +4,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from card import *
 
-PLAY_SCENE_SIZE = 1200, 900
+PLAY_SCENE_SIZE = 1000, 700
 
 class GameLayout(QHBoxLayout):
     def __init__(self, player, windowSize=None, parent=None):
@@ -15,10 +15,10 @@ class GameLayout(QHBoxLayout):
         self.stack_choice = None
         self.stack_index = 1
 
-        self.addWidget(self.create_playscene())
+        self.addWidget(self.create_playscene(windowSize))
         self.addWidget(self.create_player_info(player))
 
-    def create_playscene(self):
+    def create_playscene(self, WINDOW_SIZE):
         self.view = QGraphicsView()
         self.view.setAlignment(Qt.AlignAbsolute)
         self.playscene = QGraphicsScene()
@@ -71,8 +71,8 @@ class GameLayout(QHBoxLayout):
 
     def init_opponent_cards(self, cards, CARD_DIMENSIONS):
         y_temp = 0
-        x_temp = 0
         spacing_x = self.playscene.width() / len(cards) - CARD_DIMENSIONS.width()
+        x_temp = spacing_x / 2
         for i, card in enumerate(cards):
             card.turn_back_up()
             card.setOffset(x_temp, y_temp)
@@ -83,7 +83,7 @@ class GameLayout(QHBoxLayout):
     def init_hand_cards(self, cards, CARD_DIMENSIONS):
         y_temp = self.playscene.height() - CARD_DIMENSIONS.height()
         spacing_x = self.playscene.width() / len(cards) - CARD_DIMENSIONS.width()
-        x_temp = 0
+        x_temp = spacing_x / 2
         for i, card in enumerate(cards):
             card.turn_face_up()
             card.setOffset(x_temp, y_temp)

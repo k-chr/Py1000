@@ -6,7 +6,7 @@ from welcomelayout import WelcomeLayout
 from gamelayout import GameLayout
 
 #window constants
-WINDOW_SIZE = 1500, 1000
+WINDOW_SIZE = 1000, 700
 OFFSET_X = 5
 OFFSET_Y = 500
 
@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
         self.statusBar = QStatusBar()
         self.statusBar.setStyleSheet("color: blue;")
         self.setStatusBar(self.statusBar)
-        #TODO: ustawić tak, by po przesłaniu od serwera informacji o stanie tutaj też to się zmieniało
+        StatusGame.getInstance().signals.statusChanged.connect(lambda: self.set_status(StatusGame.getInstance().get_status_name()))
         self.set_status(StatusGame.getInstance().get_status_name())
         self.initUI()
 
@@ -99,7 +99,7 @@ class MainWindow(QMainWindow):
     def initUI(self):
         self.setGeometry(100, 100, *WINDOW_SIZE)
         self.setWindowTitle("Py1000 - THE CARD GAME ")
-        #self.setFixedSize(WINDOW_SIZE[0]+ 2 , WINDOW_SIZE[1] + 2)
+        self.setFixedSize(WINDOW_SIZE[0]+ 2 , WINDOW_SIZE[1] + 2)
         self.show()
 
         
