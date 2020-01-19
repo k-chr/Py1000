@@ -21,7 +21,8 @@ class StatusGame:
         if StatusGame.__instance != None:
             raise Exception("This class is a singleton!")
         else:
-            self.__status_name = "APP_START"
+            #self.__status_name = "APP_START"
+            self.__status_name = "STACK_CHOOSING"
             StatusGame.__instance = self
 
     def get_status_name(self):
