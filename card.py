@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QSize, QRect, QObject, pyqtSignal, QRectF, QPointF, pyqtProperty, QVariantAnimation
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import *
+from PyQt5.Qt import *
 import os
 from statusgame import *
 
@@ -33,7 +34,7 @@ class Card(QGraphicsPixmapItem):
     def __init__(self, suit, value, location=None):
         super(Card, self).__init__()
         self.signals = Signals()
-
+        self.setTransformationMode(Qt.SmoothTransformation)
         self.suit = suit
         self.value = value
         self.side = None
