@@ -4,7 +4,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from card import *
 
-PLAY_SCENE_SIZE = 1200, 700
+PLAY_SCENE_SIZE = 1200, 900
 
 class GameLayout(QHBoxLayout):
     def __init__(self, player, windowSize=None, parent=None):
@@ -93,7 +93,7 @@ class GameLayout(QHBoxLayout):
 
     def init_card_decks(self, CARD_DIMENSIONS):
         self.carddecks = []  # 0 - my carddeck, 1 - player cardeck
-        x = self.playscene.width() / 2
+        x = self.playscene.width() / 2 - CARD_DIMENSIONS.width() / 2
         y = self.playscene.height() / 2
         for i in range(0, 2):
             carddeck = CardDeck()
@@ -104,13 +104,13 @@ class GameLayout(QHBoxLayout):
 
     def init_card_stacks(self, cards1, cards2, CARD_DIMENSIONS): #cards to tupla
         self.cardstacks = []
-        x = 0
-        y = self.playscene.height() / 2
+        x = self.playscene.width() * 2 / 3
+        y = self.playscene.height() / 2 - CARD_DIMENSIONS.height() / 2
         for i in range(2, 0, -1):
             cardstack = CardStack(i)  # 1 - 1, 2 - 2
             cardstack.signals.clicked.connect(lambda cardstack=cardstack: self.set_stack_choice(cardstack))
             cardstack.setPos(QPoint(x, y))
-            y -= CARD_DIMENSIONS.height() + 2
+            x = self.playscene.width() / 8
             self.cardstacks.append(cardstack)
             self.playscene.addItem(cardstack)
 

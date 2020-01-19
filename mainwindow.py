@@ -4,10 +4,8 @@ from statusgame import *
 from PyQt5.QtCore import *
 from welcomelayout import WelcomeLayout
 from gamelayout import GameLayout
-STTACK_CHOICE = -1
 
 #window constants
-PLAY_SCENE_SIZE = 1200, 800
 WINDOW_SIZE = 1500, 1000
 OFFSET_X = 5
 OFFSET_Y = 500
