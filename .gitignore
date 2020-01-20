@@ -12,3 +12,5 @@
 .spyproject
 __pycache__
 /.idea/vcs.xml
+build
+dist

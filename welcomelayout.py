@@ -4,15 +4,14 @@ Created on Wed Jan 15 18:55:35 2020
 
 @author: Kamil Chrustowski
 """
-import os
-import sys
-from threading import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from os import path
+from PyQt5.QtCore import pyqtSignal, Qt, QCoreApplication 
+from PyQt5.QtGui import QBrush, QPalette, QPixmap
+from PyQt5.QtWidgets import QHBoxLayout,QVBoxLayout, QButtonGroup,QWidget, QApplication, QSizePolicy
 from banner import Banner
 from gamebutton import GameButton
-from config import Config, ConfigDialog
+from statusgame import StatusGame
+from config import ConfigDialog
 class WelcomeLayout(QHBoxLayout):
     quitSignal = pyqtSignal()
     
@@ -20,7 +19,7 @@ class WelcomeLayout(QHBoxLayout):
         super(WelcomeLayout, self).__init__(parent)
         self.setAlignment(Qt.AlignCenter)
         self.banner = Banner(bannerPixmap, bannerHeight)
-        self.buttonList = [GameButton(QPixmap(os.path.join('images/buttons', name+'.png')), name) for name in buttonNames]
+        self.buttonList = [GameButton(QPixmap(path.join('images/buttons', name+'.png')), name) for name in buttonNames]
         self.buttonGroup = QButtonGroup()
         self.menu = QVBoxLayout()
         self.menu.addWidget(self.banner)
@@ -30,8 +29,8 @@ class WelcomeLayout(QHBoxLayout):
             self.menu.addWidget(button)
         self.menu.setContentsMargins(200, 3, 200, 50)
         self.widget = QWidget()
-        self.widget.setFixedSize(windowSize[0], windowSize[1])
-        self.bg = backgroundPixmap.scaled(windowSize[0], windowSize[1])
+        geometry = QApplication.desktop().geometry()
+        self.bg = backgroundPixmap.scaled(geometry.width(),geometry.height())
         self.bgPalette = QPalette()
         self.bgPalette.setBrush(QPalette.Background,QBrush(self.bg))
         self.widget.setPalette(self.bgPalette)
@@ -44,10 +43,12 @@ class WelcomeLayout(QHBoxLayout):
     def handleMenu(self, button):
         if button.name == 'host':
             print('I\'m a host button')
+            StatusGame.getInstance().set_status_name("WAITING_FOR_OPPONNENT")
             self.playerInstance.playAsHost()
             
         elif button.name == 'peer':
             print('I\'m a peer button')
+            StatusGame.getInstance().set_status_name("TYPE_IP")
             self.playerInstance.playAsPeer()
         elif button.name == 'settings':
             print('I\'m a settings button')

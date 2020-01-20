@@ -1,12 +1,18 @@
-from PyQt5.QtCore import *
+from PyQt5.QtCore import QObject, pyqtSignal
 
-STATUS_GAME = {"VALUE_DECLARATION": "Choose value to declare. ",
+STATUS_GAME = { "VALUE_DECLARATION": "Choose value to declare. ",
                 "STACK_CHOOSING": "Choose number of card stack. ",
+                "CARDS_HANDIN":"Wait until server gives you cards to play",
+                "WAITING_FOR_OPPONNENT" : "Waiting for opponnent to connect...",
+                "TYPE_IP": "Provide your IP address into text fields and press START button",
                 "STACK_CARD_TAKING": "Take cards from stack by choosing unwanted hand's card.",
                 "GAME": "Game time!",
                 "SCORING": "Scoring time!",
-                "APP_START":"Choose game mode or adjust settings or get some help with game rules"}
-
+                "APP_START":"Choose game mode or adjust settings or get some help with game rules",
+                "OPPONNENT_MOVE":"Waiting for opponnent move...",
+                "YOUR_MOVE":"It\'s your turn...",
+                "TRUMP_CHANGE":"Trump suit changed!",
+                "CONNECTION_FAILED":"Failed to connect, check if you have connection to LAN"}
 class Signals(QObject):
     statusChanged = pyqtSignal()
 
@@ -25,8 +31,7 @@ class StatusGame(QObject):
         if StatusGame.__instance != None:
             raise Exception("This class is a singleton!")
         else:
-            #self.__status_name = "APP_START"
-            self.__status_name = "STACK_CHOOSING"
+            self.__status_name = "APP_START"
             self.signals = Signals()
             StatusGame.__instance = self
 

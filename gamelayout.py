@@ -3,33 +3,69 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from card import *
+from initdialog import InitDialog
+from config import Config
+PLAY_SCENE_SIZE = 1200, 900
 
-PLAY_SCENE_SIZE = 1000, 700
-
+class Suit(QWidget):
+    __size =[50,50]
+    __suit = ""
+    __pixmap = None
+    __pixmaps = {'C':'club.png','H':'heart.png', 'S':'spade.png', 'D':'diamond.png'}
+    def __init__(self, suit=""):
+        super(Suit, self).__init__()
+        self.setFixedHeight(self.__size[1])
+        self.setFixedWidth(self.__size[0])
+        self.setAttribute(Qt.WA_NoSystemBackground, True)
+        self.setStyleSheet("background-color: transparent;background: none; background-repeat: none; border: 10px;")
+        self.__suit = suit
+        self.__pixmap = None if suit == "" else QPixmap(os.path.join('images', self.__pixmaps[self.__suit]))
+    def changeSuit(self, suit):
+        name = self.__pixmaps.get(suit, '')
+        if(name != ''):
+            self.__suit = suit
+            self.__pixmap = QPixmap(os.path.join('images', self.__pixmaps[self.__suit]))
+            self.update()
+    def paintEvent(self, event):
+        painter = QPainter()
+        painter.begin(self)
+        painter.drawPixmap(0,0, self.__pixmap.scaled(QSize(self.width(), self.height())))
 class GameLayout(QHBoxLayout):
     def __init__(self, player, windowSize=None, parent=None):
         super(GameLayout, self).__init__(parent)
         self.setAlignment(Qt.AlignAbsolute)
         self.player = player
-
+        self.player.cardsToHandInReady.connect(self.initCards)
+        self.setContentsMargins(0,0,0,0)
         self.stack_choice = None
-        self.stack_index = 1
-
+        self.stack_index = 1     
         self.addWidget(self.create_playscene(windowSize))
         self.addWidget(self.create_player_info(player))
-
+    def runBiddingDialog(self):
+        value, result = InitDialog.getDialog(min=140, max = 230)
+        print(value, result)
     def create_playscene(self, WINDOW_SIZE):
         self.view = QGraphicsView()
         self.view.setAlignment(Qt.AlignAbsolute)
         self.playscene = QGraphicsScene()
         self.view.setScene(self.playscene)
+        self.view.setStyleSheet("background-color: transparent;background: none; background-repeat: none;")
         self.playscene.setSceneRect(QRectF(0, 0, *PLAY_SCENE_SIZE))
-        bg = QPixmap(os.path.join('images\\backgrounds', 'bg2.png'))
-        bg = bg.scaled(self.playscene.width(), self.playscene.height())
-        brushBg = QBrush(bg)
+        self.bg = QPixmap(Config.getInstance().get_background_config())
+        geometry = QApplication.desktop().geometry()
+        self.bg = self.bg.scaled(geometry.width(), geometry.height())
+        brushBg = QBrush()
+        brushBg.setColor(QColor(255,255,255,255) )
         self.playscene.setBackgroundBrush(brushBg)
         return self.view
-
+    def paintEvent(self, event):
+         painter = QPainter()
+         painter.begin(self)
+         painter.drawPixmap(0,0, self.bg)
+    def initCards(self,server, player, stacks):
+        self.init_hand_cards(server, CARD_DIMENSIONS)
+        self.init_opponent_cards(player, CARD_DIMENSIONS)
+        self.init_card_stacks(stacks[0], stacks[1], CARD_DIMENSIONS)
     def create_player_info(self, player):
         self.player_info_wg = QWidget()
         self.player_info_wg.setFixedWidth(200)
@@ -50,11 +86,8 @@ class GameLayout(QHBoxLayout):
         vbox.addWidget(self.declared)
 
         # tutaj coś pokombinować
-        vbox.addWidget(QLabel('Current reported color:'))
-        reported = QLineEdit()
-        reported.setReadOnly(True)
-        reported.setText("red")
-        reported.setStyleSheet("background: red")
+        vbox.addWidget(QLabel('Current reported suit:'))
+        reported = Suit('C')
         vbox.addWidget(reported)
 
         self.player_info_wg.setLayout(vbox)
@@ -74,11 +107,11 @@ class GameLayout(QHBoxLayout):
         spacing_x = self.playscene.width() / len(cards) - CARD_DIMENSIONS.width()
         x_temp = spacing_x / 2
         for i, card in enumerate(cards):
-            card.turn_back_up()
+            card.turn_face_up()
             card.setOffset(x_temp, y_temp)
             self.playscene.addItem(card)
             x_temp += CARD_DIMENSIONS.width() + spacing_x
-            card.signals.clicked.connect(lambda card=card: self.change_card_location(card))
+            #card.signals.clicked.connect(lambda card=card: self.change_card_location(card))
 
     def init_hand_cards(self, cards, CARD_DIMENSIONS):
         y_temp = self.playscene.height() - CARD_DIMENSIONS.height()
@@ -116,9 +149,11 @@ class GameLayout(QHBoxLayout):
 
         for card in cards1:
             card.signals.clicked.connect(lambda card=card: self.change_card_location(card))
+            card.turn_face_up()
             self.playscene.addItem(card)
         for card in cards2:
             card.signals.clicked.connect(lambda card=card: self.change_card_location(card))
+            card.turn_face_up()
             self.playscene.addItem(card)
         self.cardstacks.reverse()
         self.cardstacks[0].addCards(cards1)

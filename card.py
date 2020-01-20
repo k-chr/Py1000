@@ -4,13 +4,13 @@ from PyQt5.QtWidgets import *
 from PyQt5.Qt import *
 import os
 from statusgame import *
-
+from random import randint
 #CARD CONSTANTS
 SIDE_FACE = 0
 SIDE_BACK = 1
 CARD_DIMENSIONS = QSize(120, 174)
 CARD_RECT = QRect(0, 0,120, 174)
-CARD_SPACING_X = 2
+CARD_SPACING_X = 10
 
 SUITS = ["c", "s", "h", "d"] #D - diamonds ♦, S - spades ♠, H - hearts ♥, C - clubs ♣
 VALUES = ["9", "10", "11", "12", "13", "14"]
@@ -31,6 +31,8 @@ class Signals(QObject):
 
 
 class Card(QGraphicsPixmapItem):
+    def __eq__(self, obj):
+        return isinstance(obj, Card) and obj.suit == self.suit and self.value == obj.value
     def __init__(self, suit, value, location=None):
         super(Card, self).__init__()
         self.signals = Signals()
@@ -43,7 +45,6 @@ class Card(QGraphicsPixmapItem):
         self.location = location
 
         self.setShapeMode(QGraphicsPixmapItem.BoundingRectShape)
-        #self.setFlag(QGraphicsItem.ItemIsMovable)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)
 
         self.setZValue(-1)
@@ -92,14 +93,12 @@ class CardDeck(QGraphicsRectItem):
         if self.card is None:
             self.card = card
             self.card.location = "CARD_DECK"
-            #self.update()
 
     def remove_card(self):
         if self.card is not None:
             self.card.location = None
             tmp = self.card
             self.card = None
-            #self.update()
             return tmp
 
     def update(self):
@@ -133,7 +132,7 @@ class CardStack(QGraphicsPixmapItem):
         for card in cards[:]:
             card.setOffset(temp_x, self.y())
             temp_x += CARD_DIMENSIONS.width()
-            card.turn_back_up()
+            card.turn_face_up()
         self.cards = cards
 
     def removeCards(self):
@@ -161,5 +160,3 @@ class CardStack(QGraphicsPixmapItem):
         super(CardStack, self).mousePressEvent(e)
         self.signals.clicked.emit()
         e.accept()
-
-

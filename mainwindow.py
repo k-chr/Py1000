@@ -4,7 +4,7 @@ from statusgame import *
 from PyQt5.QtCore import *
 from welcomelayout import WelcomeLayout
 from gamelayout import GameLayout
-
+from card import CARD_DIMENSIONS
 #window constants
 WINDOW_SIZE = 1000, 700
 OFFSET_X = 5
@@ -14,6 +14,8 @@ class MainWindow(QMainWindow):
     def create_game_layout(self):
         if(self.gameLayout is None and self.player is not None): #jak już ustawi playera to wtedy dopiero ma ustawić game layout
             self.gameLayout = GameLayout(self.player, WINDOW_SIZE)
+            self.gameLayout.init_card_decks(CARD_DIMENSIONS)
+            
             return self.gameLayout
 
     def create_welcome_game_layout(self):
@@ -29,7 +31,9 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.welcomeLayout = None
         self.gameLayout = None
-
+        self.resize(1500, 1100)
+        self.showMaximized()
+        self.showFullScreen()
         #PLAYER CONTENT
         self.player = None
         self.setWindowIcon(QIcon(QPixmap(os.path.join('images', 'ico.png'))))
@@ -46,11 +50,15 @@ class MainWindow(QMainWindow):
 
         #IZA DO TESTÓW:
         self.initPlayer()
-
+        self.cursor_pix = QPixmap(os.path.join('images', 'gondola_coursor.png'))
+        self.cursor_scaled_pix = self.cursor_pix.scaled(QSize(25, 25), Qt.KeepAspectRatio)
+        self.current_cursor = QCursor(self.cursor_scaled_pix, -1, -1)
+        
         # MERGING GUI ELEMENTS
         self.w = QWidget()
+        self.w.setCursor(self.current_cursor)
         self.setCentralWidget(self.w)
-        self.w.setLayout(self.create_game_layout())
+        self.w.setLayout(self.create_welcome_game_layout())
 
         #HAND
         temp_cards = []
@@ -60,11 +68,11 @@ class MainWindow(QMainWindow):
             self.player.add_card_to_hand(card)
             temp_cards2.append(Card('C', '12'))
         #above is temporary
-        self.gameLayout.init_hand_cards(self.player.hand_cards, CARD_DIMENSIONS)
-        self.gameLayout.init_opponent_cards(temp_cards2, CARD_DIMENSIONS)
+        #self.gameLayout.init_hand_cards(self.player.hand_cards, CARD_DIMENSIONS)
+        #self.gameLayout.init_opponent_cards(temp_cards2, CARD_DIMENSIONS)
 
         #DECKS
-        self.gameLayout.init_card_decks(CARD_DIMENSIONS)
+        #
 
         #STACKS
         # temporary
@@ -77,7 +85,7 @@ class MainWindow(QMainWindow):
             card = Card('C', '11', "STACK")
             c2.append(card)
 
-        self.gameLayout.init_card_stacks(c1, c2, CARD_DIMENSIONS)
+        #self.gameLayout.init_card_stacks(c1, c2, CARD_DIMENSIONS)
 
         #IZA KONIEC TESTÓW
 
@@ -88,18 +96,21 @@ class MainWindow(QMainWindow):
         self.statusBar.setStyleSheet("color: blue;")
         self.setStatusBar(self.statusBar)
         StatusGame.getInstance().signals.statusChanged.connect(lambda: self.set_status(StatusGame.getInstance().get_status_name()))
+        StatusGame.getInstance().signals.statusChanged.connect(lambda: self.player.on_status_changed(StatusGame.getInstance().get_status_name()))
         self.set_status(StatusGame.getInstance().get_status_name())
         self.initUI()
-
+        self.setFixedSize(self.size())
     def set_status(self, status_name):
         self.statusBar.showMessage(STATUS_GAME[status_name])
-
+        if(status_name == "GAME"):
+            QWidget().setLayout(self.w.layout())
+            self.w.setLayout(self.create_game_layout())
     def initPlayer(self):
         self.player = Player()
     def initUI(self):
-        self.setGeometry(100, 100, *WINDOW_SIZE)
+        #self.setGeometry(100, 100, *WINDOW_SIZE)
         self.setWindowTitle("Py1000 - THE CARD GAME ")
-        self.setFixedSize(WINDOW_SIZE[0]+ 2 , WINDOW_SIZE[1] + 2)
+        #self.setFixedSize(WINDOW_SIZE[0]+ 2 , WINDOW_SIZE[1] + 2)
         self.show()
 
         

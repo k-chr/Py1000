@@ -3,19 +3,25 @@ MAX_VALUE = 1000
 from server import *
 from threading import *
 from time import sleep
+from statusgame import StatusGame
 from networkdialog import NetworkDialog
 from peer import Peer
-class Player:
+from initdialog import InitDialog
+from PyQt5.QtCore import QObject, pyqtSignal
+from randomcardgenerator import RandomCardGenerator
+class Player(QObject):
     __server = None
     __client = None
+    cardsToHandInReady = pyqtSignal(list,list,tuple)
     def __init__(self):
+        super(Player, self).__init__()
         self.bidding_initiator = False
         self.hand_cards = []
         self.score = 0
         self.declared_value = 100
         self.is_main_player = False
-        self.is_reported = False
-
+        self.reportedSuits = []
+        self.opponnent_cards = []
         self.played_left = [] #cards gained during play time
 
     #declared
@@ -27,16 +33,26 @@ class Player:
         if(result):
             self.__client = Peer(ip)
             self.__client.tryToConnect()
+        else:
+            StatusGame.getInstance().set_status_name("APP_START")
     def playAsHost(self):
         self.__server = Server()
         ip, result = NetworkDialog.getDialog('Host',receiver= self.__server) 
         print(ip,' ',result)
+        StatusGame.getInstance().set_status_name("GAME")
     def has_client(self):
         print(self.__client is None == False)
         return self.__client is None == False
-    def set_client(self,client):
-        print("Im called")
-        self.__client = client
+
+    def on_status_changed(self, status):
+        if status == "GAME":
+            if self.__server is not None:
+               generator = RandomCardGenerator(0) 
+               stack1,stack2, player,server = generator.generate_stack_and_players_cards()
+               self.hand_cards = server
+               self.opponnent_cards = player
+               self.cardsToHandInReady.emit(self.hand_cards, self.opponnent_cards,(tuple(stack1), tuple(stack2)))
+               
     #SCORE
     def set_score(self, value):
         self.score = value
@@ -61,11 +77,7 @@ class Player:
         for card in self.played_left[:]:
             value += POINTS.get(card.value, 0)
 
-        if self.is_reported:
-            for tup in BIDDING.keys():
-                if self.is_card_in_left(tup[0]) and self.is_card_in_left(tup[1]):
-                    value += BIDDING.get(tup)
-
+        
         if self.is_main_player:
             if value >= self.declared_value:
                 self.addToScore(self.declared_value)

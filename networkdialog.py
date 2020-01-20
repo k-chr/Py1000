@@ -82,6 +82,8 @@ class NetworkDialog(QDialog):
         label.setFont(newfont)
         layout.addWidget(label)
         return layout
+    def error(self):
+        self.done(QDialog.Rejected)
     def finishHostDialog(self):
         self.done(QDialog.Accepted)
     def endDialog(self):
@@ -137,6 +139,7 @@ class NetworkDialog(QDialog):
         if receiver != None:
             dialog.ipFound.connect(receiver.receiveIp)
             dialog.ipFound.emit(dialog.getIp())
+            receiver.connectionFailed.connect(dialog.error)
             receiver.opponnentConnected.connect(dialog.finishHostDialog)
         dialog.setWindowTitle("Py1000 - network dialog")
         dialog.setWindowIcon(QIcon(QPixmap(os.path.join('images', 'ico.png'))))
