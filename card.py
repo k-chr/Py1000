@@ -49,7 +49,13 @@ class Card(QGraphicsPixmapItem):
 
         self.setZValue(-1)
         self.load_images()
-
+    def rotate180H(self):
+        coord = self.boundingRect().center()
+        self.setTransformOriginPoint(coord)
+        self.setRotation(180)
+        
+    def getTuple(self):
+        return (self.suit, self.value)
     def load_images(self):
         self.face = QPixmap(
             os.path.join('images\\cards', '%s%s.png' % (self.value, self.suit))
@@ -105,6 +111,9 @@ class CardDeck(QGraphicsRectItem):
         self.card.setOffset(self.pos() + QPointF(self.offset_x, self.offset_y))
 
 class CardStack(QGraphicsPixmapItem):
+    __clicks = 0
+    stackAccepted = pyqtSignal(int)
+    current_selection = -1
     def __init__(self, number):
         super(CardStack, self).__init__()
         self.signals = Signals()
@@ -113,19 +122,22 @@ class CardStack(QGraphicsPixmapItem):
         self.setPixmap(self.pixmap)
         self.setShapeMode(QGraphicsPixmapItem.BoundingRectShape)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)
-
+        self.signals.clicked.connect(self.countClicks)
         self.stack_index = 1
         self.setZValue(-1)
         self.cards = []
         self.isShowed = False
-
-    def get_one_card(self):
-        temp = self.stack_index
-        if self.stack_index == 0:
-            self.stack_index = 1
+    def onCardToExchange(self, cardID):
+        if(cardID == self.current_selection):
+            self.current_selection = -1
         else:
-            self.stack_index = 0
-        return self.cards[temp]
+            self.current_selection = cardID
+        
+    def get_one_card(self):
+        if self.current_selection == -1:
+            return None
+        else:
+            return self.cards[self.current_selection]
 
     def addCards(self, cards):
         temp_x = self.x() + self.pixmap.width()
@@ -139,7 +151,15 @@ class CardStack(QGraphicsPixmapItem):
         for card in self.cards[:]:
             card.location = None
         self.cards = []
-
+    def countClicks(self):
+        if StatusGame.getInstance().get_status_name() == "STACK_CHOOSING" or StatusGame.getInstance().get_status_name() == "STACK_CARD_TAKING":
+            if(self.__clicks < 2):
+                self.__clicks += 1
+            else:
+                return
+            if(self.countClicks >= 2):
+                self.hideCards()
+                self.stackAccepted.emit(self.number)
     def add_card(self, card):
         card.location = "STACK"
         self.cards.append(card)

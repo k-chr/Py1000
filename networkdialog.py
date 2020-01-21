@@ -44,9 +44,14 @@ class NetworkDialog(QDialog):
     progressBar = None
     ipGroup = None
     button = None
+    toClose = False
     interf = ["Network Bridge","Ethernet","Wi-Fi"]
     def closeEvent(self, event):
-        event.ignore()
+        if(self.toClose == True):
+            print("CLOSE THIS SHIT")
+            event.accept()    
+        else:    
+            event.ignore()
 
     def __init__(self, who, parent=None):
         super(NetworkDialog, self).__init__(parent)
@@ -83,8 +88,12 @@ class NetworkDialog(QDialog):
         layout.addWidget(label)
         return layout
     def error(self):
-        self.done(QDialog.Rejected)
+        #self.toClose=True
+        print("HERE")
+        QTimer.singleShot(3000,lambda: self.done(QDialog.Rejected))
+        print("HERE2")
     def finishHostDialog(self):
+        print("ajm hir")
         self.done(QDialog.Accepted)
     def endDialog(self):
         if self.progressBar != None:
@@ -136,14 +145,20 @@ class NetworkDialog(QDialog):
     @staticmethod
     def getDialog(who,receiver=None, parent = None):
         dialog = NetworkDialog(who, parent)
+        
+        print(receiver)
         if receiver != None:
-            dialog.ipFound.connect(receiver.receiveIp)
-            dialog.ipFound.emit(dialog.getIp())
+            print("HERES")
             receiver.connectionFailed.connect(dialog.error)
             receiver.opponnentConnected.connect(dialog.finishHostDialog)
+            dialog.ipFound.connect(receiver.receiveIp)
+            dialog.ipFound.emit(dialog.getIp())
+
         dialog.setWindowTitle("Py1000 - network dialog")
         dialog.setWindowIcon(QIcon(QPixmap(os.path.join('images', 'ico.png'))))
         result = dialog.exec_()
+        
         value = dialog.getIp()
+        print(result, value)
         
         return (value, result == QDialog.Accepted)

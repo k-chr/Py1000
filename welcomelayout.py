@@ -45,7 +45,6 @@ class WelcomeLayout(QHBoxLayout):
             print('I\'m a host button')
             StatusGame.getInstance().set_status_name("WAITING_FOR_OPPONNENT")
             self.playerInstance.playAsHost()
-            
         elif button.name == 'peer':
             print('I\'m a peer button')
             StatusGame.getInstance().set_status_name("TYPE_IP")

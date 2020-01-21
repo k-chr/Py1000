@@ -2,7 +2,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 
 STATUS_GAME = { "VALUE_DECLARATION": "Choose value to declare. ",
                 "STACK_CHOOSING": "Choose number of card stack. ",
-                "CARDS_HANDIN":"Wait until server gives you cards to play",
+                "CARDS_HANDIN":"Wait until server gives you cards to play.",
                 "WAITING_FOR_OPPONNENT" : "Waiting for opponnent to connect...",
                 "TYPE_IP": "Provide your IP address into text fields and press START button",
                 "STACK_CARD_TAKING": "Take cards from stack by choosing unwanted hand's card.",

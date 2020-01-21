@@ -14,10 +14,13 @@ class MainWindow(QMainWindow):
     def create_game_layout(self):
         if(self.gameLayout is None and self.player is not None): #jak już ustawi playera to wtedy dopiero ma ustawić game layout
             self.gameLayout = GameLayout(self.player, WINDOW_SIZE)
-            self.gameLayout.init_card_decks(CARD_DIMENSIONS)
+            
             
             return self.gameLayout
-
+    def closeEvent(self,event):
+        if(self.player is not None):
+            self.player.cleanUp()
+        event.accept()
     def create_welcome_game_layout(self):
         if(self.welcomeLayout is None):
             banner = QPixmap(os.path.join('images', 'banner.png'))

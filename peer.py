@@ -21,6 +21,13 @@ class Peer(QObject):
     __handler = None
     __curr_reconnection = 0
     __max_reconnection = 5
+    gotCards = pyqtSignal(list,list,list,list)
+    trumpChanged = pyqtSignal(str)
+    cardPlayed = pyqtSignal(tuple)
+    stackChanged = pyqtSignal(tuple, int)
+    new_bid = pyqtSignal(int)
+    who_starts = pyqtSignal(str)
+    value_declared = pyqtSignal(int)
     def __init__(self, ip):
         super(Peer, self).__init__()
         self.__ip = ip
@@ -43,27 +50,52 @@ class Peer(QObject):
             QTimer.singleShot(1000, self.tryToConnect)
     def tryToConnect(self):
         self.__socket.connectToHost(self.__ip, self.__port)
+    def cleanUp(self):
+        self.__handler.cleanUp()
     def __rcvCmd(self, command):
         dictionary = loads(command)
         print(dictionary)
+        event = dictionary.get('EVENT',"")
+        if (event == 'WHO_STARTS'):
+            self.who_starts.emit(dictionary['WHO'])
+        elif (event == 'NEW_BID'):
+            self.new_bid.emit(dictionary['BID_VALUE'])
+        elif (event== 'STACK_CHANGED'):
+            self.stackChanged.emit(dictionary['CARDS'], dictionary['STACK_INDEX'])
+        elif (event == 'TRUMP_CHANGED'):
+            self.trumpChanged.emit(dictionary['NEW_SUIT'])
+        elif (event == 'VALUE_DECLARED'):
+            self.value_declared.emit(dictionary['GAME_VALUE'])
+        elif (event == 'CARD_PLAYED'):
+            self.cardPlayed.emit(dictionary['CARD'])
+        elif (event == 'CARDS_HANDIN'):
+            self.gotCards.emit(dictionary['SERVER_CARDS'],
+                               dictionary['PLAYER_CARDS'],
+                               dictionary['FIRST_STACK'],
+                               dictionary["SECOND_STACK"])
     def sendCmd(self, cmd):
         self.__handler.send_message(dumps(cmd))
     def initCommunication(self):
-        self.__handler.send_message(dumps(self.prerpareClientMessage(eventType='STACK_CHANGED')))
+        self.__handler.send_message(dumps(self.prerpareClientMessage(eventType='INIT')))
     def on_connected(self):
         print("I\'m Connected")
         StatusGame.getInstance().set_status_name("GAME")
         self.__handler = CommunicationHandler(self.__socket)
+        self.__socket.readyRead.connect(self.__get_message)
         self.__handler.messageReceived.connect(self.__rcvCmd)
         
-        QTimer.singleShot(1000, self.initCommunication)
+        QTimer.singleShot(10, self.initCommunication)
+    def __get_message(self):
+        self.__handler.get_message()
     def prerpareClientMessage(self, eventType, **kwargs):
         def switch(x):
             return {
                 'CARD_PLAYED': {'EVENT':'CARD_PLAYED', 'CARD':kwargs.get('CARD', ())},
                 'NEW_BID':{'EVENT':'NEW_BID', 'BID_VALUE':kwargs.get('BID_VALUE', 0)},
-                'STACK_CHANGED':{'EVENT':'STACK_CHANGED', 'CARDS':kwargs.get('CARDS', [(),()])},
+                'STACK_CHANGED':{'EVENT':'STACK_CHANGED', 'STACK_INDEX':kwargs.get('STACK_INDEX', 0),
+                                 'CARDS':kwargs.get('CARDS', [(),()])},
                 'VALUE_DECLARED':{'EVENT':'VALUE_DECLARED', 'GAME_VALUE':kwargs.get('GAME_VALUE',0)},
-                'TRUMP_CHANGED':{'EVENT':'TRUMP_CHANGED','NEW_SUIT':kwargs.get('NEW_SUIT','')}
+                'TRUMP_CHANGED':{'EVENT':'TRUMP_CHANGED','NEW_SUIT':kwargs.get('NEW_SUIT','')},
+                'INIT':{'EVENT':'INIT'}
             }.get(x, {}) 
         return switch(eventType)
