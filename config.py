@@ -8,10 +8,24 @@ import os
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+
 OPTIONS = {'Gondola full of stars':'bg1.png',
            'Gondola swimming in the lake of tears':'bg2.png',
            'Gondola on the Moon':'bg3.png',
-           'Gondola 2077':'bg4.png'}
+           'Gondola 2077':'bg4.png'
+           }
+
+SHADOWS = {'bg1.png':'#8fd9ff',
+           'bg2.png':'#386890',
+           'bg3.png': '#f8f4dd',
+           'bg4.png': '#617479'
+           }
+
+TEXT = {   'bg1.png':'#476677',
+           'bg2.png':'#f0f8ff',
+           'bg3.png': '#2c1b01',
+           'bg4.png': '#fffff0'
+        }
 def getKey(value):
     for key, val in OPTIONS.items():
         if val == value:
@@ -35,17 +49,24 @@ class Config:
         else:
             self.__playingBackground = os.path.join('images\\backgrounds', 'bg2.png')
             self.__name = 'bg2.png'
+            self.__shadow = SHADOWS[self.__name]
+            self.__text = TEXT[self.__name]
             Config.__instance = self
-            
+    def get_shadow_config(self):
+        return self.__shadow
+    def get_text_config(self):
+        return self.__text
     def get_background_config(self):
         return self.__playingBackground
     def get_name(self):
         return self.__name
     def set_background_config(self, name):
         self.__name = name
+        self.__shadow = SHADOWS[self.__name]
+        self.__text = TEXT[self.__name]
         self.__playingBackground = os.path.join('images\\backgrounds',name)
         print(self.__playingBackground)
-        
+            
 class ConfigDialog(QDialog):
     def closeEvent(self, event):
         event.ignore()

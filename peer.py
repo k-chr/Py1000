@@ -21,10 +21,12 @@ class Peer(QObject):
     __handler = None
     __curr_reconnection = 0
     __max_reconnection = 5
+    opponnentScoreChanged = pyqtSignal(int)
+    who_takes = pyqtSignal(str)
     gotCards = pyqtSignal(list,list,list,list)
     trumpChanged = pyqtSignal(str)
     cardPlayed = pyqtSignal(tuple)
-    stackChanged = pyqtSignal(tuple, int)
+    stackChanged = pyqtSignal(list, int)
     new_bid = pyqtSignal(int)
     who_starts = pyqtSignal(str)
     value_declared = pyqtSignal(int)
@@ -39,6 +41,7 @@ class Peer(QObject):
         if(self.__curr_reconnection >= self.__max_reconnection):
             StatusGame.getInstance().set_status_name("CONNECTION_FAILED")
             QTimer.singleShot(3000, lambda:StatusGame.getInstance().set_status_name("APP_START") )
+            self.__curr_reconnection = 0
             return
         if error == QAbstractSocket.ConnectionRefusedError:
             print(
@@ -73,10 +76,14 @@ class Peer(QObject):
                                dictionary['PLAYER_CARDS'],
                                dictionary['FIRST_STACK'],
                                dictionary["SECOND_STACK"])
+        elif (event == 'WHO_TAKES'):
+            self.who_takes.emit(dictionary['WHO'])
+        elif(event == 'SCORE'):
+            self.opponnentScoreChanged.emit(dictionary['VALUE'])
     def sendCmd(self, cmd):
         self.__handler.send_message(dumps(cmd))
     def initCommunication(self):
-        self.__handler.send_message(dumps(self.prerpareClientMessage(eventType='INIT')))
+        self.__handler.send_message(dumps(self.prepareClientMessage(eventType='INIT')))
     def on_connected(self):
         print("I\'m Connected")
         StatusGame.getInstance().set_status_name("GAME")
@@ -87,9 +94,10 @@ class Peer(QObject):
         QTimer.singleShot(10, self.initCommunication)
     def __get_message(self):
         self.__handler.get_message()
-    def prerpareClientMessage(self, eventType, **kwargs):
+    def prepareClientMessage(self, eventType, **kwargs):
         def switch(x):
             return {
+                'SCORE':{'EVENT':'SCORE', 'VALUE':kwargs.get('VALUE',0)},
                 'CARD_PLAYED': {'EVENT':'CARD_PLAYED', 'CARD':kwargs.get('CARD', ())},
                 'NEW_BID':{'EVENT':'NEW_BID', 'BID_VALUE':kwargs.get('BID_VALUE', 0)},
                 'STACK_CHANGED':{'EVENT':'STACK_CHANGED', 'STACK_INDEX':kwargs.get('STACK_INDEX', 0),

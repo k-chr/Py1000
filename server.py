@@ -14,13 +14,14 @@ from random import randint
 from statusgame import StatusGame
 class Server(QObject):
     __lock = Lock()
+    opponnentScoreChanged = pyqtSignal(int)
     opponnentConnected = pyqtSignal()
     gameEnded = pyqtSignal()
     initPlayerChoosen = pyqtSignal(int)
     connectionFailed = pyqtSignal()
     trumpChanged = pyqtSignal(str)
     cardPlayed = pyqtSignal(tuple)
-    stackChanged = pyqtSignal(tuple, int)
+    stackChanged = pyqtSignal(list, int)
     new_bid = pyqtSignal(int)
     value_declared = pyqtSignal(int)
     __server = None
@@ -64,7 +65,8 @@ class Server(QObject):
             self.value_declared.emit(dictionary['GAME_VALUE'])
         elif (event == 'CARD_PLAYED'):
             self.cardPlayed.emit(dictionary['CARD'])
-        
+        elif(event == 'SCORE'):
+            self.opponnentScoreChanged.emit(dictionary['VALUE'])
     def randomizeStartingPlayer(self):
         val = randint(0,1)
         self.startingPlayer = val
@@ -80,9 +82,10 @@ class Server(QObject):
         self.__server.close()
         self.__client = None
         self.__ip = None
-    def prerpareServerMessage(self, eventType, **kwargs):
+    def prepareServerMessage(self, eventType, **kwargs):
         def switch(x):
             return {
+                'SCORE':{'EVENT':'SCORE', 'VALUE':kwargs.get('VALUE',0)},
                 'CARD_PLAYED': {'EVENT':'CARD_PLAYED', 'CARD':kwargs.get('CARD', ())},
                 'NEW_BID':{'EVENT':'NEW_BID', 'BID_VALUE':kwargs.get('BID_VALUE', 0)},
                 'STACK_CHANGED':{'EVENT':'STACK_CHANGED', 'CARDS':kwargs.get('CARDS', [(),()]), 'STACK_INDEX':kwargs.get('STACK_INDEX', 0)},
@@ -92,7 +95,8 @@ class Server(QObject):
                                 'PLAYER_CARDS':kwargs.get('PLAYER_CARDS', []),
                                 'FIRST_STACK':kwargs.get('STACKS',[[],[]])[1],
                                 'SECOND_STACK':kwargs.get('STACKS',[[],[]])[0]},
-                'WHO_STARTS':{'EVENT':'WHO_STARTS', 'WHO':kwargs.get('WHO', 'NONE')}
+                'WHO_STARTS':{'EVENT':'WHO_STARTS', 'WHO':kwargs.get('WHO', 'NONE')},
+                'WHO_TAKES':{"EVENT":"WHO_TAKES", "WHO":kwargs.get('WHO', 'NONE')}
             }.get(x, {}) 
         return switch(eventType)
     def startListen(self):

@@ -12,10 +12,10 @@ CARD_DIMENSIONS = QSize(120, 174)
 CARD_RECT = QRect(0, 0,120, 174)
 CARD_SPACING_X = 10
 
-SUITS = ["c", "s", "h", "d"] #D - diamonds ♦, S - spades ♠, H - hearts ♥, C - clubs ♣
+SUITS = ["C", "S", "H", "D"] #D - diamonds ♦, S - spades ♠, H - hearts ♥, C - clubs ♣
 VALUES = ["9", "10", "11", "12", "13", "14"]
 POINTS = {"9": 0, "10": 10, "11": 2, "12": 3, "13": 4, "14": 11}
-BIDDING = {("h12", "h13"): 100, ("c12", "c13"): 60, ("s12", "s13"): 40, ("d12", "d13"): 80}
+BIDDING = {'H': 100, 'C': 60, 'S': 40, 'D': 80}
 WHERE = ["HAND", "HAND_STACK", "CARD_DECK", "STACK", "PLAYED_LEFT"]
 
 
@@ -28,11 +28,32 @@ def getCardList():
 
 class Signals(QObject):
     clicked = pyqtSignal()
-
+    stackAccepted = pyqtSignal(int)
 
 class Card(QGraphicsPixmapItem):
+    def isPair(self, obj):
+        if isinstance(obj, Card) == False:
+            return False
+        if self.suit == obj.suit:
+            if (self.value == 12 and obj.value == 13) or (self.value == 13 and obj.value == 12):
+                return True
+        return False
+    def __hash__(self):
+        print("CARD hashed with value: ")
+        print(hash(self.value) + hash(self.suit))
+        return hash(self.value) + hash(self.suit)
+    def __repr__(self):
+        return str(self.suit) + str(self.value)
+    def __cmp__(self, obj):
+        return 0 if isinstance(obj, Card) == True and obj.suit == self.suit and self.value == obj.value else 1 if self < obj else -1
+    def __ne__(self,obj):
+        return isinstance(obj, Card) == False or obj.suit != self.suit or self.value != obj.value
     def __eq__(self, obj):
-        return isinstance(obj, Card) and obj.suit == self.suit and self.value == obj.value
+        return isinstance(obj, Card) == True and obj.suit == self.suit and self.value == obj.value
+    def __gt__(self, obj):
+        return isinstance(obj, Card) and obj.suit == self.suit and obj.value < self.value
+    def __lt__(self, obj):
+        return isinstance(obj, Card) and obj.suit == self.suit and obj.value > self.value
     def __init__(self, suit, value, location=None):
         super(Card, self).__init__()
         self.signals = Signals()
@@ -112,10 +133,11 @@ class CardDeck(QGraphicsRectItem):
 
 class CardStack(QGraphicsPixmapItem):
     __clicks = 0
-    stackAccepted = pyqtSignal(int)
+    
     current_selection = -1
     def __init__(self, number):
         super(CardStack, self).__init__()
+        print("STACK CONSTRUCTOR")
         self.signals = Signals()
         self.number = number
         self.pixmap = QPixmap(os.path.join('images', '%s.png' % (number)))
@@ -128,6 +150,8 @@ class CardStack(QGraphicsPixmapItem):
         self.cards = []
         self.isShowed = False
     def onCardToExchange(self, cardID):
+        if(StatusGame.getInstance().get_status_name() != "STACK_CARD_TAKING"):
+            return
         if(cardID == self.current_selection):
             self.current_selection = -1
         else:
@@ -142,10 +166,11 @@ class CardStack(QGraphicsPixmapItem):
     def addCards(self, cards):
         temp_x = self.x() + self.pixmap.width()
         for card in cards[:]:
+            card.location = "STACK"
             card.setOffset(temp_x, self.y())
             temp_x += CARD_DIMENSIONS.width()
-            card.turn_face_up()
-        self.cards = cards
+            card.turn_back_up()
+        self.cards = list(cards)
 
     def removeCards(self):
         for card in self.cards[:]:
@@ -157,9 +182,9 @@ class CardStack(QGraphicsPixmapItem):
                 self.__clicks += 1
             else:
                 return
-            if(self.countClicks >= 2):
+            if(self.__clicks >= 2):
                 self.hideCards()
-                self.stackAccepted.emit(self.number)
+                self.signals.stackAccepted.emit(self.number)
     def add_card(self, card):
         card.location = "STACK"
         self.cards.append(card)
