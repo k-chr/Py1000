@@ -14,8 +14,8 @@ from random import randint
 from statusgame import StatusGame
 class Server(QObject):
     __lock = Lock()
-    opponnentScoreChanged = pyqtSignal(int)
-    opponnentConnected = pyqtSignal()
+    opponentScoreChanged = pyqtSignal(int)
+    opponentConnected = pyqtSignal()
     gameEnded = pyqtSignal()
     initPlayerChoosen = pyqtSignal(int)
     connectionFailed = pyqtSignal()
@@ -54,7 +54,7 @@ class Server(QObject):
         print(dictionary)
         event = dictionary.get('EVENT',"")
         if (event == 'INIT'):
-            self.opponnentConnected.emit()
+            self.opponentConnected.emit()
         elif (event == 'NEW_BID'):
             self.new_bid.emit(dictionary['BID_VALUE'])
         elif (event== 'STACK_CHANGED'):
@@ -66,7 +66,7 @@ class Server(QObject):
         elif (event == 'CARD_PLAYED'):
             self.cardPlayed.emit(dictionary['CARD'])
         elif(event == 'SCORE'):
-            self.opponnentScoreChanged.emit(dictionary['VALUE'])
+            self.opponentScoreChanged.emit(dictionary['VALUE'])
     def randomizeStartingPlayer(self):
         val = randint(0,1)
         self.startingPlayer = val

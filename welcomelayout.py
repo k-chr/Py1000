@@ -43,7 +43,7 @@ class WelcomeLayout(QHBoxLayout):
     def handleMenu(self, button):
         if button.name == 'host':
             print('I\'m a host button')
-            StatusGame.getInstance().set_status_name("WAITING_FOR_OPPONNENT")
+            StatusGame.getInstance().set_status_name("WAITING_FOR_OPPONENT")
             self.playerInstance.playAsHost()
         elif button.name == 'peer':
             print('I\'m a peer button')

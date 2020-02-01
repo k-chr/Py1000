@@ -21,7 +21,7 @@ class Peer(QObject):
     __handler = None
     __curr_reconnection = 0
     __max_reconnection = 5
-    opponnentScoreChanged = pyqtSignal(int)
+    opponentScoreChanged = pyqtSignal(int)
     who_takes = pyqtSignal(str)
     gotCards = pyqtSignal(list,list,list,list)
     trumpChanged = pyqtSignal(str)
@@ -79,7 +79,7 @@ class Peer(QObject):
         elif (event == 'WHO_TAKES'):
             self.who_takes.emit(dictionary['WHO'])
         elif(event == 'SCORE'):
-            self.opponnentScoreChanged.emit(dictionary['VALUE'])
+            self.opponentScoreChanged.emit(dictionary['VALUE'])
     def sendCmd(self, cmd):
         self.__handler.send_message(dumps(cmd))
     def initCommunication(self):

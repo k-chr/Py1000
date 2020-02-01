@@ -150,7 +150,7 @@ class NetworkDialog(QDialog):
         if receiver != None:
             print("HERES")
             receiver.connectionFailed.connect(dialog.error)
-            receiver.opponnentConnected.connect(dialog.finishHostDialog)
+            receiver.opponentConnected.connect(dialog.finishHostDialog)
             dialog.ipFound.connect(receiver.receiveIp)
             dialog.ipFound.emit(dialog.getIp())
 

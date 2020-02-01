@@ -14,7 +14,7 @@ class InitDialog(QDialog):
         layout.setHorizontalSpacing(3)
         layout.setVerticalSpacing(3)
         
-        layout.addWidget(QLabel('Click value or cancel, if you have no opportunity to make a bid, or you want to say \"PASS\":'), 0, 0,1, 13)
+        layout.addWidget(QLabel('Click value or cancel, if you have no opportunity to make a bid, or you want to say \"PASS\":'), 0, 0,1, 14)
         self.buttonGroup = QButtonGroup()
         cols = 13
         i = 0
