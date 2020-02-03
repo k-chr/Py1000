@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QSize, QRect, QObject, pyqtSignal, QRectF, QPointF, pyqtProperty, QVariantAnimation
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QTransform
 from PyQt5.QtWidgets import *
 from PyQt5.Qt import *
 import os
@@ -35,12 +35,10 @@ class Card(QGraphicsPixmapItem):
         if isinstance(obj, Card) == False:
             return False
         if self.suit == obj.suit:
-            if (self.value == 12 and obj.value == 13) or (self.value == 13 and obj.value == 12):
+            if (int(self.value) == 12 and int(obj.value) == 13) or (int(self.value) == 13 and int(obj.value) == 12):
                 return True
         return False
     def __hash__(self):
-        print("CARD hashed with value: ")
-        print(hash(self.value) + hash(self.suit))
         return hash(self.value) + hash(self.suit)
     def __repr__(self):
         return str(self.suit) + str(self.value)
@@ -51,15 +49,15 @@ class Card(QGraphicsPixmapItem):
     def __eq__(self, obj):
         return isinstance(obj, Card) == True and obj.suit == self.suit and self.value == obj.value
     def __gt__(self, obj):
-        return isinstance(obj, Card) and obj.suit == self.suit and obj.value < self.value
+        return isinstance(obj, Card) and obj.suit == self.suit and POINTS[obj.value] < POINTS[self.value]
     def __lt__(self, obj):
-        return isinstance(obj, Card) and obj.suit == self.suit and obj.value > self.value
+        return isinstance(obj, Card) and obj.suit == self.suit and POINTS[obj.value] > POINTS[self.value]
     def __init__(self, suit, value, location=None):
         super(Card, self).__init__()
         self.signals = Signals()
         self.setTransformationMode(Qt.SmoothTransformation)
         self.suit = suit
-        self.value = value
+        self.value = str(value)
         self.side = None
         self.face = None
         self.back = None
@@ -71,10 +69,8 @@ class Card(QGraphicsPixmapItem):
         self.setZValue(-1)
         self.load_images()
     def rotate180H(self):
-        coord = self.boundingRect().center()
-        self.setTransformOriginPoint(coord)
-        self.setRotation(180)
-        
+        self.back = self.back.transformed(QTransform().scale(-1, -1))
+        self.face = self.face.transformed(QTransform().scale(-1, -1))
     def getTuple(self):
         return (self.suit, self.value)
     def load_images(self):
@@ -137,7 +133,6 @@ class CardStack(QGraphicsPixmapItem):
     current_selection = -1
     def __init__(self, number):
         super(CardStack, self).__init__()
-        print("STACK CONSTRUCTOR")
         self.signals = Signals()
         self.number = number
         self.pixmap = QPixmap(os.path.join('images', '%s.png' % (number)))
@@ -152,11 +147,10 @@ class CardStack(QGraphicsPixmapItem):
     def onCardToExchange(self, cardID):
         if(StatusGame.getInstance().get_status_name() != "STACK_CARD_TAKING"):
             return
-        if(cardID == self.current_selection):
+        if(int(cardID) == int(self.current_selection)):
             self.current_selection = -1
         else:
             self.current_selection = cardID
-        
     def get_one_card(self):
         if self.current_selection == -1:
             return None
@@ -188,11 +182,18 @@ class CardStack(QGraphicsPixmapItem):
     def add_card(self, card):
         card.location = "STACK"
         self.cards.append(card)
-
+    def exchange_card(self, card):
+        card.location = "STACK"
+        self.cards[self.current_selection] = card
+        val = self.current_selection
+        card.signals.clicked.disconnect()
+        card.signals.clicked.connect(lambda cardID=val: self.onCardToExchange(cardID))
     def remove_card(self, card, location):
         card.location = location.__str__()
         self.cards.remove(card)
-
+    def remove_card_in_situ(self,card, location):
+        card.location = location.__str__()
+        self.cards[self.cards.index(card)] = None
     def showCards(self):
         for card in self.cards[:]:
             card.turn_face_up()

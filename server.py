@@ -14,6 +14,8 @@ from random import randint
 from statusgame import StatusGame
 class Server(QObject):
     __lock = Lock()
+    peerReady = pyqtSignal()
+    deckTaken = pyqtSignal()
     opponentScoreChanged = pyqtSignal(int)
     opponentConnected = pyqtSignal()
     gameEnded = pyqtSignal()
@@ -59,14 +61,21 @@ class Server(QObject):
             self.new_bid.emit(dictionary['BID_VALUE'])
         elif (event== 'STACK_CHANGED'):
             self.stackChanged.emit(dictionary['CARDS'], dictionary['STACK_INDEX'])
-        elif (event == 'TRUMP_CHANGED'):
-            self.trumpChanged.emit(dictionary['NEW_SUIT'])
+        elif (event == 'MULTI_EVENT'):
+            if(dictionary['FIRST'] == 'TRUMP_CHANGED'):    
+                self.trumpChanged.emit(dictionary['FIRST_ARG'])
+            if(dictionary["SECOND"] == 'CARD_PLAYED'):
+                self.cardPlayed.emit(dictionary['SECOND_ARG'])
         elif (event == 'VALUE_DECLARED'):
             self.value_declared.emit(dictionary['GAME_VALUE'])
         elif (event == 'CARD_PLAYED'):
             self.cardPlayed.emit(dictionary['CARD'])
         elif(event == 'SCORE'):
             self.opponentScoreChanged.emit(dictionary['VALUE'])
+        elif(event == 'DECK_TAKEN'):
+            self.deckTaken.emit()
+        elif(event == 'READY'):
+            self.peerReady.emit()
     def randomizeStartingPlayer(self):
         val = randint(0,1)
         self.startingPlayer = val
@@ -78,6 +87,54 @@ class Server(QObject):
         self.__client.send_message(dumps(cmd))
     def cleanUp(self):
         print("closing connection")
+        try:
+            self.deckTaken.disconnect()
+        except:
+            pass
+        try:
+            self.opponentScoreChanged.disconnect()
+        except:
+            pass
+        try:
+            self.opponentConnected.disconnect()
+        except:
+            pass
+        try:
+            self.gameEnded.disconnect()
+        except:
+            pass
+        try:
+            self.initPlayerChoosen.disconnect()
+        except:
+            pass
+        try:
+            self.connectionFailed.disconnect()
+        except:
+            pass
+        try:
+            self.trumpChanged.disconnect()
+        except:
+            pass
+        try:
+            self.cardPlayed.disconnect()
+        except:
+            pass
+        try:
+            self.stackChanged.disconnect()
+        except:
+            pass
+        try:
+            self.new_bid.disconnect()
+        except:
+            pass
+        try:
+            self.value_declared.disconnect()
+        except:
+            pass
+        try:
+            self.peerReady.disconnect()
+        except:
+            pass
         self.__client.cleanUp()
         self.__server.close()
         self.__client = None
@@ -85,12 +142,17 @@ class Server(QObject):
     def prepareServerMessage(self, eventType, **kwargs):
         def switch(x):
             return {
+                'RESULT':{'EVENT':'RESULT', 'WHO':kwargs.get('WHO', '')},
                 'SCORE':{'EVENT':'SCORE', 'VALUE':kwargs.get('VALUE',0)},
                 'CARD_PLAYED': {'EVENT':'CARD_PLAYED', 'CARD':kwargs.get('CARD', ())},
                 'NEW_BID':{'EVENT':'NEW_BID', 'BID_VALUE':kwargs.get('BID_VALUE', 0)},
                 'STACK_CHANGED':{'EVENT':'STACK_CHANGED', 'CARDS':kwargs.get('CARDS', [(),()]), 'STACK_INDEX':kwargs.get('STACK_INDEX', 0)},
                 'VALUE_DECLARED':{'EVENT':'VALUE_DECLARED', 'GAME_VALUE':kwargs.get('GAME_VALUE',0)},
-                'TRUMP_CHANGED':{'EVENT':'TRUMP_CHANGED','NEW_SUIT':kwargs.get('NEW_SUIT','')},
+                'MULTI_EVENT':{"EVENT":'MULTI_EVENT',
+                               'FIRST':kwargs.get('FIRST',''), 
+                               'SECOND':kwargs.get('SECOND',''),
+                               'FIRST_ARG':kwargs.get('FIRST_ARG',None), 
+                               'SECOND_ARG':kwargs.get('SECOND_ARG',None)},
                 'CARDS_HANDIN':{'EVENT':'CARDS_HANDIN','SERVER_CARDS':kwargs.get('SERVER_CARDS', []),
                                 'PLAYER_CARDS':kwargs.get('PLAYER_CARDS', []),
                                 'FIRST_STACK':kwargs.get('STACKS',[[],[]])[1],
@@ -109,6 +171,7 @@ class Server(QObject):
                 )
             )
         else:
+            
             print("Server couldn't start")
             StatusGame.getInstance().set_status_name("CONNECTION_FAILED")
             QTimer.singleShot(3000, lambda:StatusGame.getInstance().set_status_name("APP_START") )

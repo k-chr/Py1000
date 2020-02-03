@@ -13,7 +13,6 @@ from initdialog import InitDialog
 from config import Config
 from randomcardgenerator import RandomCardGenerator
 PLAY_SCENE_SIZE = 1200, 900
-
 class Suit(QLabel):
     __size =[50,50]
     __suit = ""
@@ -108,6 +107,7 @@ class TestLayout(QHBoxLayout):
             value = round(value/10) * 10
             self.addToScore(value)
         self.played_left = []
+        self.opponent_left = []
         self.declared_value = 0
         self.forbidden = 130
         self.currentBid = 0
@@ -124,10 +124,20 @@ class TestLayout(QHBoxLayout):
         self.hand_cards.append(card)
     
     def remove_card_from_hand(self, card):
-        self.hand_cards.remove(card)
+        print(self.hand_cards)
+        for c in self.hand_cards:
+            if c == card:
+                self.hand_cards.remove (c)
+                break;
+        #self.hand_cards.remove(card)
     #OPPONENT's CARDS
     def remove_card_from_opponent_hand(self, card):
-        self.opponent_cards.remove(card)
+        print(self.opponent_cards)
+        for c in self.opponent_cards:
+            if c == card:
+                self.opponent_cards.remove (c)
+                break;
+        #self.opponent_cards.remove(card)
     def add_card_to_opponent_hand(self,card):
         self.opponent_cards.append(card)
     #LEFT CARDS
@@ -146,24 +156,22 @@ class TestLayout(QHBoxLayout):
         print(Card('D', 12) in self.hand_cards, Card('D', 13) in self.hand_cards)
         print(Card('C', 12) in self.hand_cards, Card('C', 13) in self.hand_cards)
         print(Card('S', 12) in self.hand_cards, Card('S', 13) in self.hand_cards)
-        print(self.find_pair( (Card('H', 12), Card('H', 13))))
-        if self.find_pair( (Card('H', 12), Card('H', 13))):
+        print(self.find_pair( (Card('H', "12"), Card('H', "13"))))
+        if self.find_pair( (Card('H', "12"), Card('H', "13"))):
             val += 100
-        if self.find_pair( (Card('D', 12), Card('D', 13))):
+        if self.find_pair( (Card('D', "12"), Card('D', "13"))):
             val+=80
-        if self.find_pair( (Card('C', 12), Card('C', 13))):
+        if self.find_pair( (Card('C', "12"), Card('C', "13"))):
             val += 60
-        if self.find_pair( (Card('S', 12), Card('S', 13))):
+        if self.find_pair( (Card('S', "12"), Card('S', "13"))):
             val += 40
         self.forbidden = val
     def add_card_to_left(self, card):
         self.played_left.append(card)
+    def add_card_to_opponent_left(self, card):
+        self.opponent_left.append(card)
     def find_pair(self, tup):
-        val = 0
-        for card in self.hand_cards:
-            if str(card) == str(tup[0]) or str(card) == str(tup[1]):
-                val+=1
-        return val == 2  
+        return tup[0] in self.hand_cards and tup[1] in self.hand_cards  
     def add_to_declared_value(self, value):
         self.declared_value += value
     def __init__(self, windowSize=None, parent=None):
@@ -173,6 +181,9 @@ class TestLayout(QHBoxLayout):
         self.forbidden = 130
         self.declared_value = 0
         self.opponent_cards = []
+        self.opponent_left = []
+        self.played_left = []
+        self.reportedValues = []
         self.playscene = None
         self.view = None
         self.player_info_wg = None
@@ -183,7 +194,7 @@ class TestLayout(QHBoxLayout):
         self.declared = None
         self.cardsToHandInReady.connect(self.initCards)
         self.updateDeclaredValue.connect(self.setDeclaredValue)
-
+        self.__currentTrump = None
         self.move_card.connect(self.drop_card_from_opponent_hand)
         self.move_stack.connect(self.change_opponent_cards_with_stack)
         self.updateDeck.connect(self.collectFromDeck)
@@ -233,18 +244,19 @@ class TestLayout(QHBoxLayout):
         print("Im initiating stack cards")
         self.init_card_stacks(stacks[0], stacks[1], CARD_DIMENSIONS)
 
-        print("Opponents cards pos: ",[card.pos() for card in self.opponent_cards])
-        print("Opponents cards scene pos: ",[card.scenePos() for card in self.opponent_cards])
-        print("Opponents cards offset: ",[card.offset() for card in self.opponent_cards])
-        print("Stack no 1 pos: ", [card.pos() for card in self.cardstacks[0].cards] )
-        print("Stack no 1 scene pos: ", [card.scenePos() for card in self.cardstacks[0].cards] )
-        print("Stack no 1 offset: ", [card.offset() for card in self.cardstacks[0].cards] )
-        print("Stack no 2 pos: ", [card.pos() for card in self.cardstacks[1].cards] )
-        print("Stack no 2 scene pos: ", [card.scenePos() for card in self.cardstacks[1].cards] )
-        print("Stack no 2 offset: ", [card.offset() for card in self.cardstacks[1].cards] )
-        print("Player cards pos: ",[card.pos() for card in self.player.hand_cards])
-        print("Player cards scene pos: ",[card.scenePos() for card in self.hand_cards])
-        print("Player cards offset: ",[card.offset() for card in self.hand_cards])
+        print("Opponents cards pos: ",[card1.pos() for card1 in self.opponent_cards])
+        print("Opponents cards scene pos: ",[card1.scenePos() for card1 in self.opponent_cards])
+        print("Opponents cards offset: ",[card1.offset() for card1 in self.opponent_cards])
+        print("Stack no 1 pos: ", [card1.pos() for card1 in self.cardstacks[0].cards] )
+        print("Stack no 1 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[0].cards] )
+        print("Stack no 1 offset: ", [card1.offset() for card1 in self.cardstacks[0].cards] )
+        print("Stack no 2 pos: ", [card1.pos() for card1 in self.cardstacks[1].cards] )
+        print("Stack no 2 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[1].cards] )
+        print("Stack no 2 offset: ", [card1.offset() for card1 in self.cardstacks[1].cards] )
+        print("Player cards pos: ",[card1.pos() for card1 in self.hand_cards])
+        print("Player cards scene pos: ",[card1.scenePos() for card1 in self.hand_cards])
+        print("Player cards offset: ",[card1.offset() for card1 in self.hand_cards])
+        self.computeForbiddenVal()
     def create_player_info(self):
         self.player_info_wg = PlayerInfoWidget()
         self.player_info_wg.setFixedWidth(200)
@@ -318,6 +330,7 @@ class TestLayout(QHBoxLayout):
         x_temp = spacing_x / 2
         for i, card in enumerate(cards):
             card.turn_back_up()
+            self.opponent_cards.append(card)
             card.setOffset(x_temp, y_temp)
             card.rotate180H()
             card.location = "OPPONENT_HAND"
@@ -332,6 +345,7 @@ class TestLayout(QHBoxLayout):
             card.turn_face_up()
             card.setOffset(x_temp, y_temp)
             card.location = "HAND"
+            self.hand_cards.append(card)
             self.playscene.addItem(card)
             x_temp += CARD_DIMENSIONS.width() + spacing_x
             card.signals.clicked.connect(lambda card=card: self.change_card_location(card))
@@ -387,28 +401,31 @@ class TestLayout(QHBoxLayout):
             self.add_card_to_left(card)
 
     def drop_card_from_opponent_hand(self, card):
-        print("dropping card")
-        print("Opponents cards pos: ",[card1.pos() for card1 in self.opponent_cards])
-        print("Opponents cards scene pos: ",[card1.scenePos() for card1 in self.opponent_cards])
-        print("Opponents cards offset: ",[card1.offset() for card1 in self.opponent_cards])
-        print("Stack no 1 pos: ", [card1.pos() for card in self.cardstacks[0].cards] )
-        print("Stack no 1 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[0].cards] )
-        print("Stack no 1 offset: ", [card1.offset() for card1 in self.cardstacks[0].cards] )
-        print("Stack no 2 pos: ", [card1.pos() for card in self.cardstacks[1].cards] )
-        print("Stack no 2 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[1].cards] )
-        print("Stack no 2 offset: ", [card1.offset() for card1 in self.cardstacks[1].cards] )
-        print("Player cards pos: ",[card1.pos() for card in self.hand_cards])
-        print("Player cards scene pos: ",[card1.scenePos() for card1 in self.hand_cards])
-        print("Player cards offset: ",[card1.offset() for card1 in self.hand_cards])
+        # print("dropping card")
+        # print("Opponents cards pos: ",[card1.pos() for card1 in self.opponent_cards])
+        # print("Opponents cards scene pos: ",[card1.scenePos() for card1 in self.opponent_cards])
+        # print("Opponents cards offset: ",[card1.offset() for card1 in self.opponent_cards])
+        # print("Stack no 1 pos: ", [card1.pos() for card1 in self.cardstacks[0].cards] )
+        # print("Stack no 1 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[0].cards] )
+        # print("Stack no 1 offset: ", [card1.offset() for card1 in self.cardstacks[0].cards] )
+        # print("Stack no 2 pos: ", [card1.pos() for card1 in self.cardstacks[1].cards] )
+        # print("Stack no 2 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[1].cards] )
+        # print("Stack no 2 offset: ", [card1.offset() for card1 in self.cardstacks[1].cards] )
+        # print("Player cards pos: ",[card1.pos() for card1 in self.hand_cards])
+        # print("Player cards scene pos: ",[card1.scenePos() for card1 in self.hand_cards])
+        # print("Player cards offset: ",[card1.offset() for card1 in self.hand_cards])
         
         if self.carddecks[1].card is None:
             card_to_remove = None
+            print(card, self.opponent_cards)
             for c in self.opponent_cards:
                 if c == card:
                     card_to_remove = c
             print("to remove ", card_to_remove)
             self.remove_card_from_opponent_hand(card_to_remove)
             anime = QVariantAnimation(self)
+            card_to_remove.rotate180H()
+            card_to_remove.turn_face_up()
             anime.valueChanged.connect(card_to_remove.setOffset)
             anime.setDuration(500)
             anime.setStartValue(card_to_remove.offset())
@@ -418,7 +435,7 @@ class TestLayout(QHBoxLayout):
             self.carddecks[1].add_card(card_to_remove)
         if self.carddecks[0].card is not None:
             who = ""
-            if self.carddecks[0].card > self.carddecks[1].card or (self.carddecks[0].card.suit != self.carddecks[1].card.suit and self.carddecks[0].card.suit == self.reported.get_suit()):
+            if self.carddecks[0].card > self.carddecks[1].card or (self.carddecks[0].card.suit != self.carddecks[1].card.suit and self.carddecks[1].card.suit != self.reported.get_suit()):
                 who = "SERVER"
             else:
                 who = "PEER"
@@ -429,18 +446,18 @@ class TestLayout(QHBoxLayout):
         print("opponent cards size: ", len(self.opponent_cards))
     def change_opponent_cards_with_stack(self, tup, index):
         print("changing stack")
-        print("Opponents cards pos: ",[card1.pos() for card1 in self.opponent_cards])
-        print("Opponents cards scene pos: ",[card1.scenePos() for card1 in self.opponent_cards])
-        print("Opponents cards offset: ",[card1.offset() for card1 in self.opponent_cards])
-        print("Stack no 1 pos: ", [card1.pos() for card1 in self.cardstacks[0].cards] )
-        print("Stack no 1 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[0].cards] )
-        print("Stack no 1 offset: ", [card1.offset() for card1 in self.cardstacks[0].cards] )
-        print("Stack no 2 pos: ", [card1.pos() for card1 in self.cardstacks[1].cards] )
-        print("Stack no 2 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[1].cards] )
-        print("Stack no 2 offset: ", [card1.offset() for card1 in self.cardstacks[1].cards] )
-        print("Player cards pos: ",[card1.pos() for card1 in self.hand_cards])
-        print("Player cards scene pos: ",[card1.scenePos() for card1 in self.hand_cards])
-        print("Player cards offset: ",[card1.offset() for card1 in self.hand_cards])
+        # print("Opponents cards pos: ",[card1.pos() for card1 in self.opponent_cards])
+        # print("Opponents cards scene pos: ",[card1.scenePos() for card1 in self.opponent_cards])
+        # print("Opponents cards offset: ",[card1.offset() for card1 in self.opponent_cards])
+        # print("Stack no 1 pos: ", [card1.pos() for card1 in self.cardstacks[0].cards] )
+        # print("Stack no 1 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[0].cards] )
+        # print("Stack no 1 offset: ", [card1.offset() for card1 in self.cardstacks[0].cards] )
+        # print("Stack no 2 pos: ", [card1.pos() for card1 in self.cardstacks[1].cards] )
+        # print("Stack no 2 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[1].cards] )
+        # print("Stack no 2 offset: ", [card1.offset() for card1 in self.cardstacks[1].cards] )
+        # print("Player cards pos: ",[card1.pos() for card1 in self.hand_cards])
+        # print("Player cards scene pos: ",[card1.scenePos() for card1 in self.hand_cards])
+        # print("Player cards offset: ",[card1.offset() for card1 in self.hand_cards])
         
         list_ = [Card(*c) for c in tup]
         val = False
@@ -531,6 +548,7 @@ class TestLayout(QHBoxLayout):
             if card > card1:
                 val = True
                 break
+        return val
     def isTrumpPresent(self):
         val = False
         suit = self.reported.get_suit()
@@ -539,43 +557,50 @@ class TestLayout(QHBoxLayout):
                 val = True
                 break
         return val
+    def on_trumpChanged(self, trump):
+        self.__currentTrump = trump
+        self.updateTrump.emit(self.__currentTrump)
     def drop_card_from_hand(self, card):
-        print("Opponents cards pos: ",[card1.pos() for card1 in self.opponent_cards])
-        print("Opponents cards scene pos: ",[card1.scenePos() for card1 in self.opponent_cards])
-        print("Opponents cards offset: ",[card1.offset() for card1 in self.opponent_cards])
-        print("Stack no 1 pos: ", [card1pos() for card1 in self.cardstacks[0].cards] )
-        print("Stack no 1 scene pos: ", [card.scenePos() for card1 in self.cardstacks[0].cards] )
-        print("Stack no 1 offset: ", [card.offset() for card1 in self.cardstacks[0].cards] )
-        print("Stack no 2 pos: ", [card.pos() for card1 in self.cardstacks[1].cards] )
-        print("Stack no 2 scene pos: ", [card.scenePos() for card1 in self.cardstacks[1].cards] )
-        print("Stack no 2 offset: ", [card.offset() for card1 in self.cardstacks[1].cards] )
-        print("Player cards pos: ",[card1.pos() for card in self.hand_cards])
-        print("Player cards scene pos: ",[card1.scenePos() for card1 in self.hand_cards])
-        print("Player cards offset: ",[card1.offset() for card1 in self.hand_cards])
+        # print("Opponents cards pos: ",[card1.pos() for card1 in self.opponent_cards])
+        # print("Opponents cards scene pos: ",[card1.scenePos() for card1 in self.opponent_cards])
+        # print("Opponents cards offset: ",[card1.offset() for card1 in self.opponent_cards])
+        # print("Stack no 1 pos: ", [card1.pos() for card1 in self.cardstacks[0].cards] )
+        # print("Stack no 1 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[0].cards] )
+        # print("Stack no 1 offset: ", [card1.offset() for card1 in self.cardstacks[0].cards] )
+        # print("Stack no 2 pos: ", [card1.pos() for card1 in self.cardstacks[1].cards] )
+        # print("Stack no 2 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[1].cards] )
+        # print("Stack no 2 offset: ", [card1.offset() for card1 in self.cardstacks[1].cards] )
+        # print("Player cards pos: ",[card1.pos() for card1 in self.hand_cards])
+        # print("Player cards scene pos: ",[card1.scenePos() for card1 in self.hand_cards])
+        # print("Player cards offset: ",[card1.offset() for card1 in self.hand_cards])
         if self.carddecks[1].card is not None:
             suit = self.carddecks[1].card.suit
             if self.isSuitPresent(suit) == True:
-                if card.suit != suit or self.isGreaterPresent(card) == True:
+                print("We have such suit in hand")
+                if card.suit != suit or (card > self.carddecks[1].card and self.isGreaterPresent(card) == True):
                     return
             else:
                 if(self.isTrumpPresent() and card.suit != self.reported.get_suit()):
                     return
                     
         if self.carddecks[0].card is None:
-           
+            print("Checking if new card is trump")
             StatusGame.getInstance().set_status_name("OPPONENT_MOVE")
             self.remove_card_from_hand(card)
             if self.carddecks[1].card is None:
+                print("Checking if new card is trump")
+                print("size of hand_cards: " + len(self.hand_cards).__str__())
+                print(card,self.hand_cards)
                 for c in self.hand_cards:
+                    print(card.isPair(c))
                     if card.isPair(c):
-                        
-                        self.reportedValues.add(BIDDING[card.suit])
+                        print(self.reportedValues)
+                        self.reportedValues.append(BIDDING[card.suit])
                         self.on_trumpChanged(card.suit)
                         
                         break
             anime = QVariantAnimation(self)
             anime.valueChanged.connect(card.setOffset)
-            
             anime.setDuration(500)
             anime.setStartValue(card.offset())
             anime.setEndValue(self.carddecks[0].pos())
@@ -583,26 +608,32 @@ class TestLayout(QHBoxLayout):
             self.carddecks[0].add_card(card)
             if self.carddecks[1].card is not None:
                 who = ""
-                if self.carddecks[0].card > self.carddecks[1].card or (self.carddecks[0].card.suit != self.carddecks[1].card.suit and self.carddecks[0].card.suit == self.reported.get_suit()):
+                if self.carddecks[1].card < self.carddecks[0].card or (self.carddecks[0].card.suit != self.carddecks[1].card.suit and self.carddecks[0].card.suit == self.reported.get_suit()):
                     who = "SERVER"
                 else:
                     who = "PEER"
                 QTimer.singleShot(1500,lambda person = who :self.collectFromDeck(person))
                 
         print("cards size: ", len(self.hand_cards))
+    def add_to_opponent_left(self):
+        for carddeck in self.carddecks:
+            card = carddeck.remove_card()
+            self.playscene.removeItem(card)
+            card.location = "PLAYED_LEFT"
+            self.add_card_to_opponent_left(card)
     def change_card_with_stack(self, card):
-        print("Opponents cards pos: ",[card1.pos() for card1 in self.opponent_cards])
-        print("Opponents cards scene pos: ",[card1.scenePos() for card1 in self.opponent_cards])
-        print("Opponents cards offset: ",[card1.offset() for card1 in self.opponent_cards])
-        print("Stack no 1 pos: ", [card1.pos() for card1 in self.cardstacks[0].cards] )
-        print("Stack no 1 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[0].cards] )
-        print("Stack no 1 offset: ", [card1.offset() for card1 in self.cardstacks[0].cards] )
-        print("Stack no 2 pos: ", [card1.pos() for card1 in self.cardstacks[1].cards] )
-        print("Stack no 2 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[1].cards] )
-        print("Stack no 2 offset: ", [card1.offset() for card1 in self.cardstacks[1].cards] )
-        print("Player cards pos: ",[card1.pos() for card1 in self.hand_cards])
-        print("Player cards scene pos: ",[card1.scenePos() for card1 in self.hand_cards])
-        print("Player cards offset: ",[card1.offset() for card1 in self.hand_cards])
+        # print("Opponents cards pos: ",[card1.pos() for card1 in self.opponent_cards])
+        # print("Opponents cards scene pos: ",[card1.scenePos() for card1 in self.opponent_cards])
+        # print("Opponents cards offset: ",[card1.offset() for card1 in self.opponent_cards])
+        # print("Stack no 1 pos: ", [card1.pos() for card1 in self.cardstacks[0].cards] )
+        # print("Stack no 1 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[0].cards] )
+        # print("Stack no 1 offset: ", [card1.offset() for card1 in self.cardstacks[0].cards] )
+        # print("Stack no 2 pos: ", [card1.pos() for card1 in self.cardstacks[1].cards] )
+        # print("Stack no 2 scene pos: ", [card1.scenePos() for card1 in self.cardstacks[1].cards] )
+        # print("Stack no 2 offset: ", [card1.offset() for card1 in self.cardstacks[1].cards] )
+        # print("Player cards pos: ",[card1.pos() for card1 in self.hand_cards])
+        # print("Player cards scene pos: ",[card1.scenePos() for card1 in self.hand_cards])
+        # print("Player cards offset: ",[card1.offset() for card1 in self.hand_cards])
         if(self.stack_choice < 0 or self.cardstacks[self.stack_choice].current_selection  < 0 ):
             return
         anime1 = QVariantAnimation(self)

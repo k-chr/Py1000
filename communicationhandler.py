@@ -6,6 +6,7 @@ Created on Thu Jan 16 10:27:21 2020
 """
 import sys
 from functionalrunnable import FunctionalRunnable
+from pickle import loads
 from PyQt5.Qt import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -37,14 +38,16 @@ class CommunicationHandler(QObject):
             if self.__should_exit == False:
                 if self.__socket.bytesAvailable()>0:
                     msg = self.__socket.readAll()
-                    print(type(msg), msg.count())
+                    print("Message length: ", msg.count())
                     message = msg.data()
-                    print(f"Received message: {message}")
+                    print(f"Received message: {loads(message)}")
                     self.messageReceived.emit(message)       
         self.__receiving_service.start(FunctionalRunnable(wrapper))
     def send_message(self,message):
         print(f"message to send {message}")
         def wrapper(cmd):
+            while(self.__socket.bytesAvailable()> 0):
+                a = 1
             self.__socket.write(cmd)
             self.__socket.flush()
             print("I'm outta the sending")

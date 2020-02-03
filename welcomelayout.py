@@ -14,7 +14,6 @@ from statusgame import StatusGame
 from config import ConfigDialog
 class WelcomeLayout(QHBoxLayout):
     quitSignal = pyqtSignal()
-    
     def __init__(self,windowSize,bannerHeight, bannerPixmap,buttonNames,backgroundPixmap,player, parent=None):
         super(WelcomeLayout, self).__init__(parent)
         self.setAlignment(Qt.AlignCenter)
@@ -59,6 +58,3 @@ class WelcomeLayout(QHBoxLayout):
         elif button.name == 'quit':
             print('I\'m a quit button')
             QCoreApplication.quit()
-            
-    
-            

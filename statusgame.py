@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QObject, pyqtSignal
 
-STATUS_GAME = { "VALUE_DECLARATION": "Choose value to declare. ",
+STATUS_GAME = { "PEER_CLEANING":"Waiting for peer...",
+                "VALUE_DECLARATION": "Choose value to declare. ",
                 "STACK_CHOOSING": "Choose number of card stack. ",
                 "CARDS_HANDIN":"Wait until server gives you cards to play.",
                 "WAITING_FOR_OPPONENT" : "Waiting for opponent to connect...",
@@ -11,8 +12,11 @@ STATUS_GAME = { "VALUE_DECLARATION": "Choose value to declare. ",
                 "APP_START":"Choose game mode or adjust settings or get some help with game rules",
                 "OPPONENT_MOVE":"Waiting for opponent move...",
                 "YOUR_MOVE":"It\'s your turn...",
+                "NEXT_GAME":"Next hand incoming",
                 "TRUMP_CHANGE":"Trump suit changed!",
-                "CONNECTION_FAILED":"Failed to connect, check if you have connection to LAN"}
+                "CONNECTION_FAILED":"Failed to connect, check if you have connection to LAN",
+                "PEER_DECK_CLEANING":"Waiting until peer will collect cards from deck.",
+                "BACK_TO_MENU":"Back to menu."}
 class Signals(QObject):
     statusChanged = pyqtSignal()
 

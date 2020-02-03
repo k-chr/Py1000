@@ -5,14 +5,19 @@ from threading import *
 from time import sleep
 from statusgame import StatusGame
 from networkdialog import NetworkDialog
+from farewelldialog import FarewellDialog
 from peer import Peer
 from initdialog import InitDialog
 from PyQt5.QtCore import QObject, pyqtSignal
 from randomcardgenerator import RandomCardGenerator
+RULE = 900
 class Player(QObject):
     __server = None
     __client = None
+    winnerSignal = pyqtSignal(str)
+    opponentScore = pyqtSignal(int)
     updateScore = pyqtSignal(int)
+    cardsFromDeckTaken = pyqtSignal()
     cardsToHandInReady = pyqtSignal(list,list,tuple)
     updateDeclaredValue = pyqtSignal(int)
     updateTrump = pyqtSignal(str)
@@ -26,33 +31,62 @@ class Player(QObject):
         self.bidding_initiator = False
         self.hand_cards = []
         self.score = 0
+        self.prevStat = ""
         self.declared_value = 100
         self.is_main_player = False
         self.is_FirstPlayer = False
         self.reportedSuits = []
         self.__currentTrump = ""
         self.opponent_cards = []
+        self.opponent_left = []
+        self.signalsNotConnected = True
+        self.clientSignalsNotConnected = True
         self.played_left = [] #cards gained during play time
         self.is_HOST = False
+        self.cardsFromDeckTaken.connect(self.clientReady)
     #declared
-     
+    def on_peerReady(self):
+        self.__server.setNewPlayer()
+    def onGameEnd(self, who):
+        initStr = "YOU WON!" if (who == "SERVER" and self.is_HOST == True) or (who == 'PEER' and self.is_HOST == False) else "YOU LOST!" if who != "DRAW" else "It\'s a draw!"
+        res = FarewellDialog.getDialog(title = initStr)
+        self.cleanUp()
+        StatusGame.getInstance().set_status_name('BACK_TO_MENU')
+    def clientReady(self):
+        msg = self.__client.prepareClientMessage("DECK_TAKEN")
+        self.__client.sendCmd(msg)
     def on_opponentScoreUpdate(self, value):
-        pass
+        self.opponent_score = value
+        self.opponentScore.emit(value)
     def on_whoTakes(self, who):
         self.updateDeck.emit(who)
     def on_cardPlayed(self, card):
         self.move_card.emit(card)
-        
+    def initNewHand(self):
+        if(self.is_Done() == True or self.opponent_score >= 1000):
+            if(self.is_HOST and self.__server is not None):
+                who = "SERVER" if self.is_Done() and self.opponent_score < 1000 else "DRAW" if self.is_Done() and self.opponent_score >= 1000 else "PEER"
+                msg = self.__server.prepareServerMessage("RESULT", WHO=who)
+                self.__server.sendCmd(msg)
+                self.onGameEnd(who)
+        else:
+            StatusGame.getInstance().set_status_name("NEXT_GAME")
     def on_stackChanged(self, stack, index):
         self.move_stack.emit(stack, index)
     def on_trumpChanged(self, trump):
         self.__currentTrump = trump
         self.updateTrump.emit(self.__currentTrump)
     def on_valueDeclared(self,val):
-        pass
+        print(val)
     def on_whoStarts(self, who):
+        print("who starts?", who)
+        print("I'm a ", "PEER" if self.is_HOST == False else "SERVER")
+        print(self.is_HOST == True and who == 'SERVER')
+        print(self.is_HOST == False and who == "PEER")
         if (self.is_HOST == True and who == 'SERVER') or (self.is_HOST == False and who == "PEER"):
             self.is_FirstPlayer = True
+        else:
+            self.is_FirstPlayer = False
     def on_newBid(self, value):
         if(value == 0):
             StatusGame.getInstance().set_status_name("STACK_CHOOSING")
@@ -83,20 +117,9 @@ class Player(QObject):
         else:
             self.__server = None
     def find_pair(self, tup):
-        val = 0
-        for card in self.hand_cards:
-            if str(card) == str(tup[0]) or str(card) == str(tup[1]):
-                val+=1
-        return val == 2        
+        return tup[0] in self.hand_cards and tup[1] in self.hand_cards     
     def computeForbiddenVal(self):
         val = 130
-        print("Cards in hand",self.hand_cards)
-        print(Card('D', 13) == Card('D', 13, "HAND"))
-        print(Card('H', 12) in self.hand_cards, Card('H', 13) in self.hand_cards)
-        print(Card('D', 12) in self.hand_cards, Card('D', 13) in self.hand_cards)
-        print(Card('C', 12) in self.hand_cards, Card('C', 13) in self.hand_cards)
-        print(Card('S', 12) in self.hand_cards, Card('S', 13) in self.hand_cards)
-        print(self.find_pair( (Card('H', 12), Card('H', 13))))
         if self.find_pair( (Card('H', 12), Card('H', 13))):
             val += 100
         if self.find_pair( (Card('D', 12), Card('D', 13))):
@@ -115,18 +138,31 @@ class Player(QObject):
         s2 = [Card(tup[0], tup[1]) for tup in stack2]
         self.cardsToHandInReady.emit(self.hand_cards, self.opponent_cards,(tuple(s1), tuple(s2)))
     def on_player_choosen(self, val):
+        print("I'm here again")
+        print(val)
         if(val == 0):
             self.is_FirstPlayer = True
+        else:
+            self.is_FirstPlayer = False
         self.value_rand = val
         msg_dict = self.__server.prepareServerMessage('WHO_STARTS', WHO='SERVER' if val == 0 else 'PEER')
+        if(self.signalsNotConnected == True):
+            self.__server.peerReady.connect(self.on_peerReady)
+            self.__server.sendCmd(msg_dict)
+            self.__server.deckTaken.connect(self.on_deckTaken)
+            self.__server.new_bid.connect(self.on_newBid)
+            self.__server.cardPlayed.connect(self.on_cardPlayed)
+            self.__server.stackChanged.connect(self.on_stackChanged)
+            self.__server.trumpChanged.connect(self.on_trumpChanged)
+            self.__server.value_declared.connect(self.on_valueDeclared)
+            self.__server.opponentScoreChanged.connect(self.on_opponentScoreUpdate)
+            self.signalsNotConnected = False
         self.__server.sendCmd(msg_dict)
-        self.__server.new_bid.connect(self.on_newBid)
-        self.__server.cardPlayed.connect(self.on_cardPlayed)
-        self.__server.stackChanged.connect(self.on_stackChanged)
-        self.__server.trumpChanged.connect(self.on_trumpChanged)
-        self.__server.value_declared.connect(self.on_valueDeclared)
-        self.__server.opponentScoreChanged.connect(self.on_opponentScoreUpdate)
+        self.on_whoStarts('SERVER' if val == 0 else 'PEER')
         StatusGame.getInstance().set_status_name('CARDS_HANDIN')
+    def on_deckTaken(self):
+        if(self.prevStat != "SCORING"):
+            StatusGame.getInstance().set_status_name(self.prevStat)
     def get_client(self):
         return self.__client
     def get_server(self):
@@ -135,11 +171,69 @@ class Player(QObject):
         print(self.__client is None == False)
         return self.__client is None == False
     def cleanUp(self):
+        try:
+            self.winnerSignal.disconnect()
+        except:
+            pass
+        try:
+            self.opponentScore.disconnect()
+        except:
+            pass
+        try:
+            self.updateScore.disconnect()
+        except:
+            pass
+        try:
+            self.cardsFromDeckTaken.disconnect()
+        except:
+            pass
+        try:
+            self.cardsToHandInReady.disconnect()
+        except:
+            pass
+        try:
+            self.updateDeclaredValue.disconnect()
+        except:
+            pass
+        try:
+            self.updateTrump.disconnect()
+        except:
+            pass
+        try:
+            self.move_card.disconnect()
+        except:
+            pass
+        try:
+            self.move_stack.disconnect()
+        except:
+            pass
+        try:
+            self.updateDeck.disconnect()
+        except:
+            pass
+        self.opponent_score = 0
+        self.bidding_initiator = False
+        self.hand_cards = []
+        self.score = 0
+        self.prevStat = ""
+        self.declared_value = 100
+        self.is_main_player = False
+        self.is_FirstPlayer = False
+        self.reportedSuits = []
+        self.__currentTrump = ""
+        self.opponent_cards = []
+        self.opponent_left = []
+
+        self.played_left = [] #cards gained during play time
+        self.signalsNotConnected = True
+        self.clientSignalsNotConnected = True
+        self.is_HOST = False
         if(self.__server is not None):
             self.__server.cleanUp()
         if(self.__client is not None):
             self.__client.cleanUp()
     def on_status_changed(self, status):
+        print("STATUS CHANGED: ", status)
         if status == "GAME":
             print("before")
             if self.__server is not None and self.is_HOST != False:
@@ -147,21 +241,35 @@ class Player(QObject):
                 self.__server.randomizeStartingPlayer()
             else:
                 StatusGame.getInstance().set_status_name('CARDS_HANDIN')
-        elif status == "CARDS_HANDIN":
-            print('I\'m in')
+        elif status == "NEXT_GAME":
+            self.bidding_initiator = False
+            self.hand_cards = []
+            self.prevStat = ""
+            self.declared_value = 100
+            self.is_main_player = False
+            self.is_FirstPlayer = False
+            self.reportedSuits = []
+            self.__currentTrump = ""
+            self.opponent_cards = []
+            self.opponent_left = []
+            self.played_left = []
             if self.__server is not None and self.is_HOST != False:
-                print('I\'m in2')
+                StatusGame.getInstance().set_status_name("PEER_CLEANING")
+            else:
+                msg = self.__client.prepareClientMessage('READY')
+                self.__client.sendCmd(msg)
+                StatusGame.getInstance().set_status_name('CARDS_HANDIN')       
+        elif status == "CARDS_HANDIN":
+            
+            if self.__server is not None and self.is_HOST != False:
+                print("I\'m gonna randomize cards")
                 generator = RandomCardGenerator(self.value_rand) 
-                print('I\'m in3')
                 stack1,stack2, player,server = generator.generate_stack_and_players_cards()
-                print('I\'m in4')
                 self.hand_cards = server
                 self.computeForbiddenVal()
                 print("forbidden Value", self.forbidden)
-                print('I\'m in cards generated and forbidden value computed')
                 self.opponent_cards = player
-                QTimer.singleShot(200, lambda hand_cards = self.hand_cards, opponent_cards=self.opponent_cards, s1 = tuple(stack1), s2 = tuple(stack2):self.cardsToHandInReady.emit(hand_cards, opponent_cards,(s1, s2)))
-                print('I\'m in cards generated and forbidden value computed and probably cards should be placed on table')
+                QTimer.singleShot(400, lambda hand_cards = self.hand_cards, opponent_cards=self.opponent_cards, s1 = tuple(stack1), s2 = tuple(stack2):self.cardsToHandInReady.emit(hand_cards, opponent_cards,(s1, s2)))
                 op_stacks = [[stack[0].getTuple(), stack[1].getTuple()] for stack in [stack1, stack2]]
                 op_server = [card.getTuple() for card in reversed(server)]
                 op = [card.getTuple() for card in reversed(player)]
@@ -170,20 +278,25 @@ class Player(QObject):
                                                               SERVER_CARDS=op_server, PLAYER_CARDS=op)
                 QTimer.singleShot(1000, lambda msg = msg_dict:self.__server.sendCmd(msg))
             else:
-                self.__client.gotCards.connect(self.on_got_cards)
-                self.__client.who_starts.connect(self.on_whoStarts)
-                self.__client.cardPlayed.connect(self.on_cardPlayed)
-                self.__client.new_bid.connect(self.on_newBid)
-                self.__client.stackChanged.connect(self.on_stackChanged)
-                self.__client.trumpChanged.connect(self.on_trumpChanged)
-                self.__client.who_takes.connect(self.on_whoTakes)
-                self.__client.opponentScoreChanged.connect(self.on_opponentScoreUpdate)
+                if(self.clientSignalsNotConnected == True):
+                    self.__client.gameEnded.connect(self.onGameEnd)
+                    self.__client.gotCards.connect(self.on_got_cards)
+                    self.__client.who_starts.connect(self.on_whoStarts)
+                    self.__client.cardPlayed.connect(self.on_cardPlayed)
+                    self.__client.new_bid.connect(self.on_newBid)
+                    self.__client.stackChanged.connect(self.on_stackChanged)
+                    self.__client.trumpChanged.connect(self.on_trumpChanged)
+                    self.__client.who_takes.connect(self.on_whoTakes)
+                    self.__client.opponentScoreChanged.connect(self.on_opponentScoreUpdate)
+                    self.clientSignalsNotConnected = False
         elif status == "STACK_CHOOSING":
             print("stack choosing")
         elif status == "VALUE_DECLARATION":
+            self.computeForbiddenVal()
             ret, val = InitDialog.getDialog(min=self.currentBid if self.is_main_player == False else self.declared_value, max=self.forbidden)
-            self.declared_value = ret
+            
             if self.is_main_player == False:
+                self.declared_value = ret
                 StatusGame.getInstance().set_status_name("OPPONENT_MOVE")
                 if self.__server is not None and self.is_HOST != False:
                     msg_dict = self.__server.prepareServerMessage('NEW_BID', BID_VALUE=self.declared_value+10 if self.declared_value > 0 else self.declared_value)
@@ -192,6 +305,7 @@ class Player(QObject):
                     msg_dict = self.__client.prepareClientMessage('NEW_BID', BID_VALUE=self.declared_value+10 if self.declared_value > 0 else self.declared_value)
                     QTimer.singleShot(300, lambda msg = msg_dict:self.__client.sendCmd(msg))   
             else:
+                self.declared_value = ret if ret > 100 else self.declared_value
                 self.updateDeclaredValue.emit(self.declared_value)
                 StatusGame.getInstance().set_status_name("YOUR_MOVE")
                 if self.__server is not None and self.is_HOST != False:
@@ -210,9 +324,12 @@ class Player(QObject):
             if self.__server is not None and self.is_HOST != False:
                msg_dict = self.__server.prepareServerMessage('SCORE',VALUE = self.score)
                QTimer.singleShot(300, lambda msg = msg_dict:self.__server.sendCmd(msg))
+               
             else:
                msg_dict = self.__client.prepareClientMessage('SCORE',VALUE = self.score)
                QTimer.singleShot(300, lambda msg = msg_dict:self.__client.sendCmd(msg))
+            QTimer.singleShot(3000, lambda: self.initNewHand())
+            
         elif status == "OPPONENT_MOVE":
             print("waiting for opponent move")
         elif status == "YOUR_MOVE":
@@ -238,7 +355,12 @@ class Player(QObject):
                 is_card = True
         return is_card
 
+    def add_card_to_opponent_left(self,card):
+        self.opponent_left.append(card)
     def calculate_score(self):
+        print(self.played_left)
+        print(self.opponent_left)
+        print(len(self.opponent_left) + len(self.played_left))
         value = 0
         #tu też muszą znajdować się z musików
         for card in self.played_left[:]:
@@ -248,14 +370,17 @@ class Player(QObject):
                 value += rep
         if self.is_main_player:
             if value >= self.declared_value:
-                self.addToScore(self.declared_value)
+                self.add_to_score(self.declared_value)
             else:
-                self.subFromScore(self.declared_value)
+                self.sub_from_score(self.declared_value)
                 value = value * (-1)
         else:
             value = round(value/10) * 10
-            self.addToScore(value)
+            if self.score < RULE:
+                self.add_to_score(value)
         self.played_left = []
+        self.opponent_left = []
+        self.reportedSuits = []
         self.declared_value = 0
         self.forbidden = 130
         self.currentBid = 0
@@ -273,8 +398,9 @@ class Player(QObject):
         return cards
 
     def add_card_to_hand(self, card):
+        card.location = "HAND"
         self.hand_cards.append(card)
-    
+        
     def remove_card_from_hand(self, card):
         self.hand_cards.remove(card)
     #OPPONENT's CARDS

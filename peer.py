@@ -14,7 +14,7 @@ from statusgame import StatusGame
 class Peer(QObject):
     
     __lock = Lock()
-    gameEnded = pyqtSignal()
+    gameEnded = pyqtSignal(str)
     __socket = None
     __ip = ""
     __port = 7312
@@ -54,6 +54,46 @@ class Peer(QObject):
     def tryToConnect(self):
         self.__socket.connectToHost(self.__ip, self.__port)
     def cleanUp(self):
+        try:
+            self.gotCards.disconnect()
+        except:
+            pass
+        try:
+            self.who_starts.disconnect()
+        except:
+            pass
+        try:
+            self.who_takes.disconnect()
+        except:
+            pass
+        try:
+            self.opponentScoreChanged.disconnect()
+        except:
+            pass
+        try:
+            self.gameEnded.disconnect()
+        except:
+            pass
+        try:
+            self.trumpChanged.disconnect()
+        except:
+            pass
+        try:
+            self.cardPlayed.disconnect()
+        except:
+            pass
+        try:
+            self.stackChanged.disconnect()
+        except:
+            pass
+        try:
+            self.new_bid.disconnect()
+        except:
+            pass
+        try:
+            self.value_declared.disconnect()    
+        except:
+            pass
         self.__handler.cleanUp()
     def __rcvCmd(self, command):
         dictionary = loads(command)
@@ -65,8 +105,11 @@ class Peer(QObject):
             self.new_bid.emit(dictionary['BID_VALUE'])
         elif (event== 'STACK_CHANGED'):
             self.stackChanged.emit(dictionary['CARDS'], dictionary['STACK_INDEX'])
-        elif (event == 'TRUMP_CHANGED'):
-            self.trumpChanged.emit(dictionary['NEW_SUIT'])
+        elif (event == 'MULTI_EVENT'):
+            if(dictionary['FIRST'] == 'TRUMP_CHANGED'):    
+                self.trumpChanged.emit(dictionary['FIRST_ARG'])
+            if(dictionary["SECOND"] == 'CARD_PLAYED'):
+                self.cardPlayed.emit(dictionary['SECOND_ARG'])
         elif (event == 'VALUE_DECLARED'):
             self.value_declared.emit(dictionary['GAME_VALUE'])
         elif (event == 'CARD_PLAYED'):
@@ -80,6 +123,8 @@ class Peer(QObject):
             self.who_takes.emit(dictionary['WHO'])
         elif(event == 'SCORE'):
             self.opponentScoreChanged.emit(dictionary['VALUE'])
+        elif(event == 'RESULT'):
+            self.gameEnded.emit(dictionary['WHO'])
     def sendCmd(self, cmd):
         self.__handler.send_message(dumps(cmd))
     def initCommunication(self):
@@ -97,13 +142,19 @@ class Peer(QObject):
     def prepareClientMessage(self, eventType, **kwargs):
         def switch(x):
             return {
+                'READY':{'EVENT':'READY'},
                 'SCORE':{'EVENT':'SCORE', 'VALUE':kwargs.get('VALUE',0)},
                 'CARD_PLAYED': {'EVENT':'CARD_PLAYED', 'CARD':kwargs.get('CARD', ())},
                 'NEW_BID':{'EVENT':'NEW_BID', 'BID_VALUE':kwargs.get('BID_VALUE', 0)},
                 'STACK_CHANGED':{'EVENT':'STACK_CHANGED', 'STACK_INDEX':kwargs.get('STACK_INDEX', 0),
                                  'CARDS':kwargs.get('CARDS', [(),()])},
                 'VALUE_DECLARED':{'EVENT':'VALUE_DECLARED', 'GAME_VALUE':kwargs.get('GAME_VALUE',0)},
-                'TRUMP_CHANGED':{'EVENT':'TRUMP_CHANGED','NEW_SUIT':kwargs.get('NEW_SUIT','')},
-                'INIT':{'EVENT':'INIT'}
+                'INIT':{'EVENT':'INIT'},
+                'DECK_TAKEN':{'EVENT':'DECK_TAKEN'},
+                'MULTI_EVENT':{"EVENT":'MULTI_EVENT',
+                               'FIRST':kwargs.get('FIRST',''), 
+                               'SECOND':kwargs.get('SECOND',''),
+                               'FIRST_ARG':kwargs.get('FIRST_ARG',None), 
+                               'SECOND_ARG':kwargs.get('SECOND_ARG',None)}
             }.get(x, {}) 
         return switch(eventType)
