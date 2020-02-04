@@ -30,7 +30,7 @@ class Player(QObject):
         super(Player, self).__init__()
         self.bidding_initiator = False
         self.hand_cards = []
-        self.score = 0
+        self.score = 900
         self.prevStat = ""
         self.declared_value = 100
         self.is_main_player = False
@@ -49,6 +49,7 @@ class Player(QObject):
         self.__server.setNewPlayer()
     def onGameEnd(self, who):
         initStr = "YOU WON!" if (who == "SERVER" and self.is_HOST == True) or (who == 'PEER' and self.is_HOST == False) else "YOU LOST!" if who != "DRAW" else "It\'s a draw!"
+        QSound.play(os.path.join('sounds', 'win.wav' if "WIN" in initStr else 'lose.mp3'))
         res = FarewellDialog.getDialog(title = initStr)
         self.cleanUp()
         StatusGame.getInstance().set_status_name('BACK_TO_MENU')

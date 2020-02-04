@@ -1,16 +1,19 @@
 from initdialog import *
 from player import *
 from statusgame import *
+from PyQt5.QtMultimedia import QSound, QSoundEffect
 from PyQt5.QtCore import *
 from welcomelayout import WelcomeLayout
 from gamelayout import GameLayout
 from testlayout import TestLayout
 from card import CARD_DIMENSIONS
+import os
 #window constants
 WINDOW_SIZE = 1000, 700
 OFFSET_X = 5
 OFFSET_Y = 500
 DEBUG = False
+bgSound=None
 class MainWindow(QMainWindow):
     def create_game_layout(self):
         if(self.player is None):
@@ -21,6 +24,7 @@ class MainWindow(QMainWindow):
     def closeEvent(self,event):
         if(self.player is not None):
             self.player.cleanUp()
+        self.bgSound.stop()
         event.accept()
     def create_welcome_game_layout(self):
         self.welcomeLayout = None
@@ -41,14 +45,20 @@ class MainWindow(QMainWindow):
         #PLAYER CONTENT
         self.player = None
         self.setWindowIcon(QIcon(QPixmap(os.path.join('images', 'ico.png'))))
+        self.bgSound = QSoundEffect(self)
 
+        self.bgSound.setSource(QUrl.fromLocalFile(os.path.join('sounds', 'background.wav')))
+        self.bgSound.setLoopCount(QSoundEffect.Infinite)
+        self.bgSound.setVolume(0.005)
+        self.bgSound.play()
         #IZA DO TESTÓW:
         if DEBUG == False:
             self.initPlayer()
         self.cursor_pix = QPixmap(os.path.join('images', 'gondola_coursor.png'))
         self.cursor_scaled_pix = self.cursor_pix.scaled(QSize(25, 25), Qt.KeepAspectRatio)
         self.current_cursor = QCursor(self.cursor_scaled_pix, -1, -1)
-        
+
+        print(self.bgSound.isPlaying())
         # MERGING GUI ELEMENTS
         self.w = QWidget()
         self.w.setCursor(self.current_cursor)

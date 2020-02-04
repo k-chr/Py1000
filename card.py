@@ -18,7 +18,10 @@ POINTS = {"9": 0, "10": 10, "11": 2, "12": 3, "13": 4, "14": 11}
 BIDDING = {'H': 100, 'C': 60, 'S': 40, 'D': 80}
 WHERE = ["HAND", "HAND_STACK", "CARD_DECK", "STACK", "PLAYED_LEFT"]
 
-
+def playRandomCardSound(parent):
+    num = randint(1,8)
+    QSound.play(os.path.join('sounds','c'+str(num) + '.wav'))
+    
 def getCardList():
     cardlist = []
     for suit in SUITS:

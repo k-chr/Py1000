@@ -135,7 +135,8 @@ class Server(QObject):
             self.peerReady.disconnect()
         except:
             pass
-        self.__client.cleanUp()
+        if self.__client is not None:
+            self.__client.cleanUp()
         self.__server.close()
         self.__client = None
         self.__ip = None

@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from card import *
 from initdialog import InitDialog
 from config import Config
-
+from PyQt5.QtMultimedia import QSound, QSoundEffect
 PLAY_SCENE_SIZE = 1200, 900
 
 class Suit(QLabel):
@@ -319,12 +319,14 @@ class GameLayout(QHBoxLayout):
             for c in self.player.opponent_cards:
                 if c == card1:
                     card_to_remove = c
+            playRandomCardSound(self)
             print("to remove ", card_to_remove)
             card_to_remove.setZValue(1)
             self.player.remove_card_from_opponent_hand(card_to_remove)
             anime = QVariantAnimation(self)
             anime.valueChanged.connect(card_to_remove.setOffset)
             anime.setDuration(500)
+            
             anime.setStartValue(card_to_remove.offset())
             anime.setEndValue(self.carddecks[1].pos())
             anime.start()
@@ -401,6 +403,7 @@ class GameLayout(QHBoxLayout):
             c2.turn_back_up()
             anime1.valueChanged.connect(stack_card.setOffset)
             anime1.setDuration(500)
+            playRandomCardSound(self)
             anime1.setStartValue(stack_card.offset())
             anime1.setEndValue(temp_pos_card)
             stack_card.rotate180H()
@@ -411,6 +414,7 @@ class GameLayout(QHBoxLayout):
             stack_card.setZValue(1)
             anime2.valueChanged.connect(c2.setOffset)
             anime2.setDuration(500)
+            playRandomCardSound(self)
             anime2.setStartValue(c2.offset())
             anime2.setEndValue(temp_pos_stack)
             anime2.start()
@@ -485,6 +489,8 @@ class GameLayout(QHBoxLayout):
             anime = QVariantAnimation(self)
             anime.valueChanged.connect(card.setOffset)
             anime.setDuration(500)
+            
+            playRandomCardSound(self)
             anime.setStartValue(card.offset())
             anime.setEndValue(self.carddecks[0].pos())
             anime.start()
@@ -515,6 +521,7 @@ class GameLayout(QHBoxLayout):
 
         anime1.valueChanged.connect(stack_card.setOffset)
         anime1.setDuration(500)
+        playRandomCardSound(self)
         anime1.setStartValue(stack_card.offset())
         anime1.setEndValue(temp_pos_card)
         anime1.start()
@@ -524,6 +531,7 @@ class GameLayout(QHBoxLayout):
         stack_card.signals.clicked.connect(lambda card=stack_card: self.change_card_location(card))
         anime2.valueChanged.connect(card.setOffset)
         anime2.setDuration(500)
+        playRandomCardSound(self)
         anime2.setStartValue(card.offset())
         anime2.setEndValue(temp_pos_stack)
         anime2.start()

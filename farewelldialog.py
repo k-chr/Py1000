@@ -6,9 +6,10 @@ Created on Mon Feb  3 00:25:20 2020
 """
 from PyQt5.Qt import *
 import os
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QSizePolicy
 from configbutton import ConfigButton
-
+from PyQt5.QtMultimedia import QSound
 class FarewellDialog(QDialog):
     
     def closeEvent(self, event):
@@ -32,6 +33,7 @@ class FarewellDialog(QDialog):
         vbox.addWidget(self.button, 0, Qt.AlignBottom|Qt.AlignCenter)
         self.setLayout(vbox)
         self.button.clicked.connect(lambda: self.accept())
+        
     def paintEvent(self, event):
         painter = QPainter()
         painter.begin(self)
