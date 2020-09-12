@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
 
         self.bgSound.setSource(QUrl.fromLocalFile(os.path.join('sounds', 'background.wav')))
         self.bgSound.setLoopCount(QSoundEffect.Infinite)
-        self.bgSound.setVolume(0.005)
+        self.bgSound.setVolume(0.009)
         self.bgSound.play()
         #IZA DO TESTÓW:
         if DEBUG == False:

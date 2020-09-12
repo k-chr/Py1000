@@ -49,7 +49,9 @@ class Player(QObject):
         self.__server.setNewPlayer()
     def onGameEnd(self, who):
         initStr = "YOU WON!" if (who == "SERVER" and self.is_HOST == True) or (who == 'PEER' and self.is_HOST == False) else "YOU LOST!" if who != "DRAW" else "It\'s a draw!"
-        QSound.play(os.path.join('sounds', 'win.wav' if "WIN" in initStr else 'lose.mp3'))
+        sound = QSound(os.path.join('sounds', 'win.wav' if "WIN" in initStr else 'lose.mp3'), self)
+        sound.setLoops(4)
+        sound.play()
         res = FarewellDialog.getDialog(title = initStr)
         self.cleanUp()
         StatusGame.getInstance().set_status_name('BACK_TO_MENU')

@@ -6,7 +6,6 @@ Created on Tue Jan 14 00:10:57 2020
 """
 import os
 from concurrent.futures import *
-from threading import Thread
 from PyQt5.Qt import *
 from PyQt5.QtWidgets import * 
 from PyQt5.QtCore import *
