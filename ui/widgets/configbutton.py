@@ -6,9 +6,9 @@ Created on Sun Feb  2 18:39:22 2020
 """
 
 import os
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt5.QtCore import Qt, QEvent, QSize
+from PyQt5.QtGui import QPainter, QPixmap, QFont
+from PyQt5.QtWidgets import QPushButton, QSizePolicy
 class ConfigButton(QPushButton):
     def __init__(self, parent=None, text=None):
         super(ConfigButton, self).__init__(parent)

@@ -5,13 +5,15 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{872832d1-3520-4eb9-9535-f19abfbbf956}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>banner.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterId />
+    <TestFramework>Pytest</TestFramework>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -19,7 +21,7 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
-	<Content Include="icon.ico" />
+    <Content Include="icon.ico" />
     <Content Include="images\1.png" />
     <Content Include="images\2.png" />
     <Content Include="images\backgrounds\bg1.png" />
@@ -74,34 +76,54 @@
     <Content Include="installer_icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="banner.py" />
+    <Compile Include="ui\dialogs\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\layouts\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\widgets\banner.py" />
     <Compile Include="card.py" />
     <Compile Include="communicationhandler.py" />
     <Compile Include="config.py" />
-    <Compile Include="configbutton.py" />
-    <Compile Include="farewelldialog.py" />
+    <Compile Include="ui\widgets\configbutton.py" />
+    <Compile Include="ui\dialogs\farewelldialog.py" />
     <Compile Include="functionalrunnable.py" />
     <Compile Include="functionalthread.py" />
-    <Compile Include="gamebutton.py" />
-    <Compile Include="gamelayout.py" />
-    <Compile Include="initdialog.py" />
+    <Compile Include="ui\widgets\gamebutton.py" />
+    <Compile Include="ui\layouts\gamelayout.py" />
+    <Compile Include="ui\dialogs\initdialog.py" />
     <Compile Include="main.py" />
-    <Compile Include="mainwindow.py" />
-    <Compile Include="networkdialog.py" />
+    <Compile Include="ui\windows\mainwindow.py" />
+    <Compile Include="ui\dialogs\networkdialog.py" />
     <Compile Include="peer.py" />
     <Compile Include="player.py" />
     <Compile Include="randomcardgenerator.py" />
     <Compile Include="server.py" />
     <Compile Include="setup.py" />
     <Compile Include="statusgame.py" />
-    <Compile Include="testlayout.py" />
-    <Compile Include="welcomelayout.py" />
+    <Compile Include="ui\layouts\testlayout.py" />
+    <Compile Include="ui\widgets\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\windows\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\layouts\welcomelayout.py" />
   </ItemGroup>
   <ItemGroup>
-	  <Folder Include="images" />
+    <Folder Include="images" />
     <Folder Include="images\backgrounds" />
     <Folder Include="images\buttons" />
     <Folder Include="images\cards" />
+    <Folder Include="ui\" />
+    <Folder Include="ui\dialogs\" />
+    <Folder Include="ui\layouts\" />
+    <Folder Include="ui\widgets\" />
+    <Folder Include="ui\windows\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
 </Project>

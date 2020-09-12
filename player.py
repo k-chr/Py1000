@@ -4,10 +4,10 @@ from server import *
 from threading import *
 from time import sleep
 from statusgame import StatusGame
-from networkdialog import NetworkDialog
-from farewelldialog import FarewellDialog
+from ui.dialogs.networkdialog import NetworkDialog
+from ui.dialogs.farewelldialog import FarewellDialog
 from peer import Peer
-from initdialog import InitDialog
+from ui.dialogs.initdialog import InitDialog
 from PyQt5.QtCore import QObject, pyqtSignal
 from randomcardgenerator import RandomCardGenerator
 RULE = 900

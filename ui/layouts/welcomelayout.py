@@ -8,8 +8,8 @@ from os import path
 from PyQt5.QtCore import pyqtSignal, Qt, QCoreApplication 
 from PyQt5.QtGui import QBrush, QPalette, QPixmap
 from PyQt5.QtWidgets import QHBoxLayout,QVBoxLayout, QButtonGroup,QWidget, QApplication, QSizePolicy
-from banner import Banner
-from gamebutton import GameButton
+from ui.widgets.banner import Banner
+from ui.widgets.gamebutton import GameButton
 from statusgame import StatusGame
 from config import ConfigDialog
 class WelcomeLayout(QHBoxLayout):

@@ -4,11 +4,11 @@ Created on Mon Feb  3 00:25:20 2020
 
 @author: Kamil Chrustowski
 """
-from PyQt5.Qt import *
+from PyQt5.QtGui import QFont, QPainter
 import os
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QSizePolicy
-from configbutton import ConfigButton
+from ui.widgets.configbutton import ConfigButton
 from PyQt5.QtMultimedia import QSound
 class FarewellDialog(QDialog):
     

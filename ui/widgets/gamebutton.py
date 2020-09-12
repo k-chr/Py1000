@@ -4,9 +4,9 @@ Created on Tue Jan 14 18:55:15 2020
 
 @author: Kamil Chrustowski
 """
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt5.QtCore import Qt, QEvent
+from PyQt5.QtGui import QPainter, QFontMetrics, QFont, QTransform, QColor
+from PyQt5.QtWidgets import QPushButton, QGraphicsDropShadowEffect
 
 class GameButton(QPushButton):
     def __init__(self, pixmap, name, parent=None, text=None):

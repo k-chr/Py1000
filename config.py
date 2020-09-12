@@ -8,7 +8,7 @@ import os
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from configbutton import ConfigButton
+from ui.widgets.configbutton import ConfigButton
 OPTIONS = {'Gondola full of stars':'bg1.png',
            'Gondola swimming in the lake of tears':'bg2.png',
            'Gondola on the Moon':'bg3.png',
