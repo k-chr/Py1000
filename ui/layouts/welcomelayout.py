@@ -6,13 +6,12 @@ Created on Wed Jan 15 18:55:35 2020
 """
 
 from os import path
-from PyQt5.QtCore import pyqtSignal, Qt, QCoreApplication 
-from PyQt5.QtGui import QBrush, QPalette, QPixmap
-from PyQt5.QtWidgets import QHBoxLayout,QVBoxLayout, QButtonGroup,QWidget, QApplication, QSizePolicy
-from ui.widgets.banner import Banner
-from ui.widgets.gamebutton import GameButton
+from .. import *
+from ..widgets.banner import Banner
+from ..widgets.gamebutton import GameButton
 from statusgame import StatusGame
 from config import ConfigDialog
+
 class WelcomeLayout(QHBoxLayout):
     quitSignal = pyqtSignal()
     def __init__(self,windowSize,bannerHeight, bannerPixmap,buttonNames,backgroundPixmap,player, parent=None):
@@ -40,6 +39,7 @@ class WelcomeLayout(QHBoxLayout):
         self.setContentsMargins(0,0,0,0)
         self.buttonGroup.buttonClicked.connect(self.handleMenu)
         self.playerInstance = player
+
     def handleMenu(self, button):
         if button.name == 'host':
             print('I\'m a host button')

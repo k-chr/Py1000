@@ -9,7 +9,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from card import *
-from ui.dialogs.initdialog import InitDialog
+from ui.dialogs.biddialog import BidDialog
 from config import Config
 from randomcardgenerator import RandomCardGenerator
 PLAY_SCENE_SIZE = 1200, 900

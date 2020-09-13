@@ -89,10 +89,13 @@
     <Content Include="sounds\win.wav" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ai\__init__.py">
+    <Compile Include="game\ai\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="app.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="game\envs\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="game\__init__.py">
@@ -117,7 +120,7 @@
     <Compile Include="functionalthread.py" />
     <Compile Include="ui\widgets\gamebutton.py" />
     <Compile Include="ui\layouts\gamelayout.py" />
-    <Compile Include="ui\dialogs\initdialog.py" />
+    <Compile Include="ui\dialogs\biddialog.py" />
     <Compile Include="main.py" />
     <Compile Include="ui\widgets\pulsingprogressbar.py">
       <SubType>Code</SubType>
@@ -143,8 +146,9 @@
     <Compile Include="ui\layouts\welcomelayout.py" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ai\" />
+    <Folder Include="game\ai\" />
     <Folder Include="game\" />
+    <Folder Include="game\envs\" />
     <Folder Include="images" />
     <Folder Include="images\backgrounds" />
     <Folder Include="images\buttons" />

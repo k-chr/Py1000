@@ -7,11 +7,8 @@ Created on Thu Jan 16 10:27:21 2020
 import sys
 from functionalrunnable import FunctionalRunnable
 from pickle import loads
-from PyQt5.Qt import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtNetwork import *
-from PyQt5.QtWidgets import *
+from PyQt5.QtCore import QObject, pyqtSignal, QThreadPool
+
 class CommunicationHandler(QObject):
     messageReceived = pyqtSignal(bytes)
     __socket = None
@@ -20,6 +17,7 @@ class CommunicationHandler(QObject):
     __sending_service = QThreadPool()
     __receiving_service.setMaxThreadCount(1)
     __sending_service.setMaxThreadCount(1)
+
     def __init__(self, socket):
         print("into constructor {self}")
         super(CommunicationHandler, self).__init__()
@@ -31,6 +29,7 @@ class CommunicationHandler(QObject):
         self.__sending_service.waitForDone()
         self.__receiving_service.waitForDone()
         self.__socket.disconnectFromHost()
+
     def get_message(self):
         print("I\'m before wrapper")
         def wrapper():
@@ -43,6 +42,7 @@ class CommunicationHandler(QObject):
                     print(f"Received message: {loads(message)}")
                     self.messageReceived.emit(message)       
         self.__receiving_service.start(FunctionalRunnable(wrapper))
+
     def send_message(self,message):
         print(f"message to send {message}")
         def wrapper(cmd):

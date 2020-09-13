@@ -1,16 +1,16 @@
-from PyQt5.QtCore import Qt, QSize 
 import os
-from PyQt5.QtGui import QPixmap, QFont, QPalette, QColor, QPainter
-from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QSizePolicy, QGraphicsDropShadowEffect, QButtonGroup, QGroupBox, QHBoxLayout
-from ui.widgets.configbutton import ConfigButton
-class InitDialog(QDialog):
+from ..widgets.configbutton import ConfigButton
+from .. import *
+
+class BidDialog(QDialog):
     __values = [110,120,130,140,150,160,170,180,190,200,210,220,230,
                 240,250,260,270,280,290,300,310,320,330,340,350,360]
     __value = 0
     def closeEvent(self, event):
         event.ignore()   
+
     def __init__(self, parent=None, minimum=110, forbidden=130):
-        super(InitDialog, self).__init__(parent)     
+        super(BidDialog, self).__init__(parent)     
         layout = QGridLayout()
         self.setAutoFillBackground(True)
         sh = QGraphicsDropShadowEffect(self)
@@ -61,20 +61,24 @@ class InitDialog(QDialog):
         layout.addWidget(group, 3,0, 3,13)
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setFixedSize(600, 200)
+
     def paintEvent(self, event):
         painter = QPainter()
         painter.begin(self)
         painter.save()
         painter.drawPixmap(0,0, self.pixmap.scaled(QSize(self.width(), self.height())))
         painter.restore()
+
     def __setValue(self, button):
         self.__value = int(button.text())
         self.done(QDialog.Accepted)
+
     def getValue(self):
         return self.__value
+
     @staticmethod
     def getDialog(parent=None, title="Bidding", min=110, max=130):
-        dialog = InitDialog(parent, min, max)
+        dialog = BidDialog(parent, min, max)
         dialog.setWindowTitle(title)
         result = dialog.exec_()
         value = dialog.getValue()
