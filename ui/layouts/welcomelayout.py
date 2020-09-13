@@ -4,6 +4,7 @@ Created on Wed Jan 15 18:55:35 2020
 
 @author: Kamil Chrustowski
 """
+
 from os import path
 from PyQt5.QtCore import pyqtSignal, Qt, QCoreApplication 
 from PyQt5.QtGui import QBrush, QPalette, QPixmap

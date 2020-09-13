@@ -67,6 +67,8 @@
     <Content Include="images\club.png" />
     <Content Include="images\default.png" />
     <Content Include="images\diamond.png" />
+    <Content Include="images\font\install_font.bat" />
+    <Content Include="images\font\Kbreindeergames-ra2O.ttf" />
     <Content Include="images\gondola_coursor.png" />
     <Content Include="images\heart.png" />
     <Content Include="images\ico.png" />
@@ -74,8 +76,31 @@
     <Content Include="images\main.jpg" />
     <Content Include="images\spade.png" />
     <Content Include="installer_icon.ico" />
+    <Content Include="sounds\background.wav" />
+    <Content Include="sounds\c1.wav" />
+    <Content Include="sounds\c2.wav" />
+    <Content Include="sounds\c3.wav" />
+    <Content Include="sounds\c4.wav" />
+    <Content Include="sounds\c5.wav" />
+    <Content Include="sounds\c6.wav" />
+    <Content Include="sounds\c7.wav" />
+    <Content Include="sounds\c8.wav" />
+    <Content Include="sounds\lose.mp3" />
+    <Content Include="sounds\win.wav" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ai\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="app.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="game\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="net\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ui\dialogs\__init__.py">
       <SubType>Code</SubType>
     </Compile>
@@ -94,6 +119,9 @@
     <Compile Include="ui\layouts\gamelayout.py" />
     <Compile Include="ui\dialogs\initdialog.py" />
     <Compile Include="main.py" />
+    <Compile Include="ui\widgets\pulsingprogressbar.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ui\windows\mainwindow.py" />
     <Compile Include="ui\dialogs\networkdialog.py" />
     <Compile Include="peer.py" />
@@ -115,10 +143,15 @@
     <Compile Include="ui\layouts\welcomelayout.py" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="ai\" />
+    <Folder Include="game\" />
     <Folder Include="images" />
     <Folder Include="images\backgrounds" />
     <Folder Include="images\buttons" />
     <Folder Include="images\cards" />
+    <Folder Include="images\font\" />
+    <Folder Include="net\" />
+    <Folder Include="sounds\" />
     <Folder Include="ui\" />
     <Folder Include="ui\dialogs\" />
     <Folder Include="ui\layouts\" />

@@ -4,11 +4,7 @@ Created on Wed Jan 15 18:00:21 2020
 
 @author: Kamil Chrustowski
 """
-
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QPainter
-from PyQt5.QtWidgets import QWidget
-
+from .. import *
 class Banner(QWidget):
     def __init__(self, pixmap,height, parent=None):
         super(Banner, self).__init__(parent)

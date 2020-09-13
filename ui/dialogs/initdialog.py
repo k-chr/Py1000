@@ -1,6 +1,7 @@
-from PyQt5.Qt import *
+from PyQt5.QtCore import Qt, QSize 
 import os
-from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QSizePolicy
+from PyQt5.QtGui import QPixmap, QFont, QPalette, QColor, QPainter
+from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QSizePolicy, QGraphicsDropShadowEffect, QButtonGroup, QGroupBox, QHBoxLayout
 from ui.widgets.configbutton import ConfigButton
 class InitDialog(QDialog):
     __values = [110,120,130,140,150,160,170,180,190,200,210,220,230,
