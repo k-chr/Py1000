@@ -4,12 +4,31 @@ Created on Sat Sep  12 20:41:42 2020
 @author: Kamil Chrustowski
 """
 
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QPainter
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import Qt, QEvent
-from PyQt5.QtGui import QPainter, QFontMetrics, QFont, QTransform, QColor
-from PyQt5.QtWidgets import QPushButton, QGraphicsDropShadowEffect
-from PyQt5.QtWidgets import QProgressBar,QGraphicsDropShadowEffect, QStyleFactory
-from PyQt5.QtCore import QSize, Qt, QPropertyAnimation
-from PyQt5.QtGui import QColor
+from PyQt5.QtCore import Qt, QSize, QEvent, QPropertyAnimation, QTimer, QCoreApplication, pyqtSignal 
+from PyQt5.QtGui import QBrush, QPalette, QPainter, QFontMetrics, QFont, QTransform, QColor, QPixmap
+from PyQt5.QtWidgets import  (QGroupBox, QApplication,
+                             QButtonGroup, QHBoxLayout,
+                            QWidget, QPushButton,
+                           QGraphicsDropShadowEffect, QStyleFactory,
+                          QProgressBar, QDialog,
+                         QVBoxLayout, QLabel, 
+                         QSizePolicy, QGridLayout, QGraphicsPixmapItem)
+from PyQt5.QtMultimedia import QSound
+from enum import Enum
+class Defaults(object):
+    
+    CARD_DIMENSIONS = QSize(120, 174)
+    CARD_RECT = QRect(0, 0, 120, 174)
+    CARD_SPACING_X = 10
+
+class CardSide(Enum):
+    FRONT = 0
+    BACK = 1
+
+class CardLocation(Enum):
+    HAND = 0x1
+    HAND_STACK = 0x2
+    CARD_DECK = 0x3
+    STACK = 0x4
+    PLAYED_LEFT = 0x5
+

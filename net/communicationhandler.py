@@ -5,9 +5,10 @@ Created on Thu Jan 16 10:27:21 2020
 @author: Kamil Chrustowski
 """
 import sys
-from functionalrunnable import FunctionalRunnable
+from fun_threading.functionalrunnable import FunctionalRunnable
 from pickle import loads
 from PyQt5.QtCore import QObject, pyqtSignal, QThreadPool
+from PyQt5.QtNetwork import QTcpSocket
 
 class CommunicationHandler(QObject):
     messageReceived = pyqtSignal(bytes)
@@ -18,7 +19,7 @@ class CommunicationHandler(QObject):
     __receiving_service.setMaxThreadCount(1)
     __sending_service.setMaxThreadCount(1)
 
-    def __init__(self, socket):
+    def __init__(self, socket:QTcpSocket):
         print("into constructor {self}")
         super(CommunicationHandler, self).__init__()
         self.__socket = socket
@@ -46,7 +47,7 @@ class CommunicationHandler(QObject):
     def send_message(self,message):
         print(f"message to send {message}")
         def wrapper(cmd):
-            while(self.__socket.bytesAvailable()> 0):
+            while(self.__socket.bytesAvailable() > 0):
                 a = 1
             self.__socket.write(cmd)
             self.__socket.flush()

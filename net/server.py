@@ -5,13 +5,14 @@ Created on Thu Jan 16 12:02:26 2020
 @author: Kamil Chrustowski
 """
 from threading import Lock
-from communicationhandler import CommunicationHandler
+from .communicationhandler import CommunicationHandler
 from PyQt5.QtCore import *
 from PyQt5.QtNetwork import *
 from PyQt5.Qt import *
 from pickle import loads, dumps
 from random import randint
 from statusgame import StatusGame
+
 class Server(QObject):
     __lock = Lock()
     peerReady = pyqtSignal()

@@ -5,8 +5,8 @@ Created on Sat Jan 18 01:03:49 2020
 @author: Kamil Chrustowski
 """
 from threading import Lock
-from communicationhandler import CommunicationHandler
-from functionalrunnable import FunctionalRunnable
+from net.communicationhandler import CommunicationHandler
+from fun_threading.functionalrunnable import FunctionalRunnable
 from PyQt5.QtCore import *
 from PyQt5.QtNetwork import *
 from pickle import loads, dumps

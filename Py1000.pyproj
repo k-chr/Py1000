@@ -95,6 +95,12 @@
     <Compile Include="app.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="game\card.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="game\enums.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="game\envs\__init__.py">
       <SubType>Code</SubType>
     </Compile>
@@ -102,6 +108,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="net\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="fun_threading\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ui\dialogs\__init__.py">
@@ -112,12 +121,15 @@
     </Compile>
     <Compile Include="ui\widgets\banner.py" />
     <Compile Include="card.py" />
-    <Compile Include="communicationhandler.py" />
+    <Compile Include="net\communicationhandler.py" />
     <Compile Include="config.py" />
+    <Compile Include="ui\widgets\cardview.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ui\widgets\configbutton.py" />
     <Compile Include="ui\dialogs\farewelldialog.py" />
-    <Compile Include="functionalrunnable.py" />
-    <Compile Include="functionalthread.py" />
+    <Compile Include="fun_threading\functionalrunnable.py" />
+    <Compile Include="fun_threading\functionalthread.py" />
     <Compile Include="ui\widgets\gamebutton.py" />
     <Compile Include="ui\layouts\gamelayout.py" />
     <Compile Include="ui\dialogs\biddialog.py" />
@@ -130,7 +142,7 @@
     <Compile Include="peer.py" />
     <Compile Include="player.py" />
     <Compile Include="randomcardgenerator.py" />
-    <Compile Include="server.py" />
+    <Compile Include="net\server.py" />
     <Compile Include="setup.py" />
     <Compile Include="statusgame.py" />
     <Compile Include="ui\layouts\testlayout.py" />
@@ -156,6 +168,7 @@
     <Folder Include="images\font\" />
     <Folder Include="net\" />
     <Folder Include="sounds\" />
+    <Folder Include="fun_threading\" />
     <Folder Include="ui\" />
     <Folder Include="ui\dialogs\" />
     <Folder Include="ui\layouts\" />

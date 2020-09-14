@@ -1,4 +1,4 @@
-from ui.dialogs.initdialog import *
+from ui.dialogs.biddialog import *
 from player import *
 from statusgame import *
 from PyQt5.QtMultimedia import QSound, QSoundEffect

@@ -4,8 +4,9 @@ Created on Fri Jan 17 16:27:03 2020
 
 @author: Kamil Chrustowski
 """
-from PyQt5.Qt import QRunnable
-from PyQt5.QtCore import pyqtSlot
+
+from . import QRunnable, pyqtSlot
+
 class FunctionalRunnable(QRunnable):
     def __init__(self, fn, *args, **kwargs):
         super(FunctionalRunnable, self).__init__()
@@ -13,6 +14,7 @@ class FunctionalRunnable(QRunnable):
         self.fn = fn
         self.kwargs = kwargs
         self.setAutoDelete(True)
+
     @pyqtSlot()
     def run(self):
         '''
