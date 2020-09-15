@@ -15,6 +15,9 @@ class RandomCardGenerator:
             for value in list(Cards):
                 self.__cards.append(Card(suit, value))
 
+    def get_cards(self):
+        return deepcopy(self.__cards)
+
     def generate_stack_and_players_cards(self):
         end_value = randint(10,30)
         cards = deepcopy(self.__cards)

@@ -4,17 +4,21 @@ Created on Sat Sep  12 20:41:42 2020
 @author: Kamil Chrustowski
 """
 
-from PyQt5.QtCore import Qt, QSize, QEvent, QPropertyAnimation, QTimer, QCoreApplication, pyqtSignal 
+from PyQt5.QtCore import Qt, QSize, QEvent, QPropertyAnimation, QTimer, QCoreApplication, pyqtSignal, QRectF 
 from PyQt5.QtGui import QBrush, QPalette, QPainter, QFontMetrics, QFont, QTransform, QColor, QPixmap
 from PyQt5.QtWidgets import  (QGroupBox, QApplication,
-                             QButtonGroup, QHBoxLayout,
-                            QWidget, QPushButton,
-                           QGraphicsDropShadowEffect, QStyleFactory,
-                          QProgressBar, QDialog,
-                         QVBoxLayout, QLabel, 
-                         QSizePolicy, QGridLayout, QGraphicsPixmapItem)
+                              QButtonGroup, QHBoxLayout,
+                              QWidget, QPushButton,
+                              QGraphicsDropShadowEffect, QStyleFactory,
+                              QProgressBar, QDialog,
+                              QVBoxLayout, QLabel, 
+                              QSizePolicy, QGridLayout, 
+                              QGraphicsPixmapItem, QGraphicsView)
 from PyQt5.QtMultimedia import QSound
+from game.card import *
 from enum import Enum
+import os
+
 class Defaults(object):
     
     CARD_DIMENSIONS = QSize(120, 174)
