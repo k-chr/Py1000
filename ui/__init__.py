@@ -13,7 +13,8 @@ from PyQt5.QtWidgets import  (QGroupBox, QApplication,
                               QProgressBar, QDialog,
                               QVBoxLayout, QLabel, 
                               QSizePolicy, QGridLayout, 
-                              QGraphicsPixmapItem, QGraphicsView)
+                              QGraphicsPixmapItem, QGraphicsView,
+                              QGraphicsScene, QGraphicsItem)
 from PyQt5.QtMultimedia import QSound
 from game.card import *
 from enum import Enum
@@ -31,7 +32,7 @@ class CardSide(Enum):
 
 class CardLocation(Enum):
     HAND = 0x1
-    HAND_STACK = 0x2
+    OPPONENT_HAND = 0x2
     CARD_DECK = 0x3
     STACK = 0x4
     PLAYED_LEFT = 0x5
