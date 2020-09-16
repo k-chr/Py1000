@@ -104,6 +104,12 @@
     <Compile Include="game\envs\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="game\utils\gamerules.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="game\utils\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="game\__init__.py">
       <SubType>Code</SubType>
     </Compile>
@@ -116,6 +122,18 @@
     <Compile Include="ui\dialogs\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ui\game\carddesk.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\game\cardgraphicsview.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\game\gameplayscene.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\game\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ui\layouts\__init__.py">
       <SubType>Code</SubType>
     </Compile>
@@ -123,7 +141,7 @@
     <Compile Include="card.py" />
     <Compile Include="net\communicationhandler.py" />
     <Compile Include="config.py" />
-    <Compile Include="ui\widgets\cardview.py">
+    <Compile Include="ui\game\cardview.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ui\widgets\configbutton.py" />
@@ -137,11 +155,14 @@
     <Compile Include="ui\widgets\pulsingprogressbar.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ui\game\suitlabel.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ui\windows\mainwindow.py" />
     <Compile Include="ui\dialogs\networkdialog.py" />
     <Compile Include="peer.py" />
     <Compile Include="player.py" />
-    <Compile Include="randomcardgenerator.py" />
+    <Compile Include="game\utils\randomcardgenerator.py" />
     <Compile Include="net\server.py" />
     <Compile Include="setup.py" />
     <Compile Include="statusgame.py" />
@@ -161,6 +182,7 @@
     <Folder Include="game\ai\" />
     <Folder Include="game\" />
     <Folder Include="game\envs\" />
+    <Folder Include="game\utils\" />
     <Folder Include="images" />
     <Folder Include="images\backgrounds" />
     <Folder Include="images\buttons" />
@@ -171,6 +193,7 @@
     <Folder Include="fun_threading\" />
     <Folder Include="ui\" />
     <Folder Include="ui\dialogs\" />
+    <Folder Include="ui\game\" />
     <Folder Include="ui\layouts\" />
     <Folder Include="ui\widgets\" />
     <Folder Include="ui\windows\" />
