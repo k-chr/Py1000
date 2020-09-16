@@ -1,4 +1,4 @@
-from .. import *
+from . import *
 
 class CardView(QGraphicsPixmapItem):
     def __init__(self, dataContext:Card, location:CardLocation=None):

@@ -14,9 +14,10 @@ from PyQt5.QtWidgets import  (QGroupBox, QApplication,
                               QVBoxLayout, QLabel, 
                               QSizePolicy, QGridLayout, 
                               QGraphicsPixmapItem, QGraphicsView,
-                              QGraphicsScene, QGraphicsItem)
+                              QGraphicsScene, QGraphicsItem, QLabel)
 from PyQt5.QtMultimedia import QSound
 from game.card import *
+from game.enums import Suits
 from enum import Enum
 import os
 
