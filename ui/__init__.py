@@ -19,7 +19,7 @@ from PyQt5.QtWidgets import  (QGroupBox, QApplication,
 from game.card import *
 from game.enums import Suits
 from enum import Enum
-import os
+from os import path
 
 class Defaults(object):
     

@@ -1,4 +1,4 @@
-from . import *
+from . import QGraphicsPixmapItem, Card, CardLocation, CardSide, QGraphicsItem, Qt, QPropertyAnimation, pyqtSignal, QPixmap, path, Defaults, QTransform
 
 class CardView(QGraphicsPixmapItem):
     def __init__(self, dataContext: Card, location: CardLocation =None):
@@ -19,11 +19,11 @@ class CardView(QGraphicsPixmapItem):
 
     def __load_images(self):
         self.face = QPixmap(
-            os.path.join('images\\cards', '%s_%s.png' % (self.data_context.suit.name, self.data_context.value.name))
+            path.join('images\\cards', '%s_%s.png' % (self.data_context.suit.name, self.data_context.value.name))
         )
         self.face = self.face.scaled(Defaults.CARD_DIMENSIONS.width(), Defaults.CARD_DIMENSIONS.height())
         self.back = QPixmap(
-            os.path.join('images\\cards', 'back.png')
+            path.join('images\\cards', 'back.png')
         )
         self.back = self.back.scaled(Defaults.CARD_DIMENSIONS.width(), Defaults.CARD_DIMENSIONS.height())
 

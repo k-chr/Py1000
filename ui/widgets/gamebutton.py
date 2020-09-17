@@ -1,29 +1,32 @@
-# -*- coding: utf-8 -*-
 """
 Created on Tue Jan 14 18:55:15 2020
 
 @author: Kamil Chrustowski
 """
-from .. import *
+
+from . import (QPushButton, Qt, QEvent, QFont, QWidget,
+              QFontMetrics, QPainter, QTransform, QColor,
+              QGraphicsDropShadowEffect, QPixmap)
 
 class GameButton(QPushButton):
-    def __init__(self, pixmap, name, parent=None, text=None):
+
+    def __init__(self, pixmap: QPixmap, name: str, parent: QWidget =None, text: str =None):
         super(GameButton, self).__init__(text if text is not None else "",parent)
         self.name = name
-        self.__text=text
+        self.__text = text
         self.pixmap = pixmap
         #self.setAttribute(Qt.WA_NoSystemBackground, True)
-        self.setStyleSheet("color: white;background-color: transparent;background: none; background-repeat: none; border: 10px;")
+        self.setStyleSheet("color: white;background-color:"+
+                           " transparent;background: none; background-repeat: none; border: 10px;")
         self.setAttribute(Qt.WA_Hover)
-        self.setContentsMargins(0,0,0,0)
+        self.setContentsMargins(0, 0, 0, 0)
         self.setAutoFillBackground(True)
+
     def paintEvent(self, event):
-        if(self.__text is not None):
-            print("Imehere")
         painter = QPainter()
         painter.begin(self)
         painter.save()  
-        painter.drawPixmap(0,0, self.pixmap.scaled(self.size()))
+        painter.drawPixmap(0, 0, self.pixmap.scaled(self.size()))
         painter.restore()
         painter.save()
         f = QFontMetrics(QFont('KBREINDEERGAMES', 18))
@@ -33,6 +36,7 @@ class GameButton(QPushButton):
         painter.drawText(b, Qt.AlignCenter, self.__text)
         painter.restore()
         painter.end()
+
     def enterEvent(self, event):
         if event.type() == QEvent.Enter:
             shadow = QGraphicsDropShadowEffect(self)

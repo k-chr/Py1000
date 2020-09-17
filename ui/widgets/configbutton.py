@@ -5,28 +5,32 @@ Created on Sun Feb  2 18:39:22 2020
 @author: Kamil Chrustowski
 """
 
-import os
-from PyQt5.QtCore import Qt, QEvent, QSize
-from PyQt5.QtGui import QPainter, QPixmap, QFont
-from PyQt5.QtWidgets import QPushButton, QSizePolicy
+from . import (QPushButton, QPixmap, QWidget,
+               Qt, QEvent, path, QFont, QSizePolicy,
+               QPainter, QSize)
+
 class ConfigButton(QPushButton):
-    def __init__(self, parent=None, text=None):
+
+    def __init__(self, parent: QWidget =None, text: str =None):
         super(ConfigButton, self).__init__(parent)
         self.setText(text)
         self.setFont(QFont('KBREINDEERGAMES', 18))
-        self.setStyleSheet("color: white; background-repeat: none; padding-left: 6px; padding-right: 6px; padding-top: 6px; padding-bottom: 6px;")
+        self.setStyleSheet("color: white; background-repeat: none; padding-left: 6px;" +
+                           " padding-right: 6px; padding-top: 6px; padding-bottom: 6px;")
         self.setAttribute(Qt.WA_Hover)
-        self.pixmap = self.pixmap = QPixmap(os.path.join('images/backgrounds', 'blank2.png'))
-        self.disbledPixmap = QPixmap(os.path.join('images/backgrounds', 'blank3.png'))
+        self.pixmap = self.pixmap = QPixmap(path.join('images/backgrounds', 'blank2.png'))
+        self.disbledPixmap = QPixmap(path.join('images/backgrounds', 'blank3.png'))
         self.setAutoFillBackground(True)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
     def enterEvent(self, event):
         if event.type() == QEvent.Enter:
             if self.isEnabled():
-                self.pixmap = QPixmap(os.path.join('images/backgrounds', 'blank.png'))
+                self.pixmap = QPixmap(path.join('images/backgrounds', 'blank.png'))
                 self.update()
         else:
             super(ConfigButton, self).enterEvent(event)
+
     def paintEvent(self, event):
         painter = QPainter()
         painter.save()
@@ -43,10 +47,11 @@ class ConfigButton(QPushButton):
         painter.drawText(self.rect(), Qt.AlignCenter, self.text())
         painter.restore()
         #super(ConfigButton, self).paintEvent(event)
+
     def leaveEvent(self, event):
         if event.type() == QEvent.Leave:
             if self.isEnabled():
-                self.pixmap = QPixmap(os.path.join('images/backgrounds', 'blank2.png'))
+                self.pixmap = QPixmap(path.join('images/backgrounds', 'blank2.png'))
                 self.update()
         else:
             super(ConfigButton, self).leaveEvent(event)

@@ -1,8 +1,9 @@
-from game.enums import Cards, Suits
 
-class Card(object):
+from .enums import Cards, Suits
 
-    def __init__(self, suit: Suits, value: Cards):
+class Card:
+    
+    def __init__(self, suit: Cards, value: Suits):
         self.suit = suit
         self.value = value
 
@@ -31,7 +32,8 @@ class Card(object):
         return (isinstance(obj, Card) and obj.suit is self.suit
                 and obj.value.value > self.value.value)
 
-    def is_pair(self, obj: Card):
+    def is_pair(self, obj):
         return (self.suit is obj.suit and
                 (self.value is Cards.KING and obj.value is Cards.QUEEN or
                  self.value is Cards.QUEEN and obj.value is Cards.KING))
+
