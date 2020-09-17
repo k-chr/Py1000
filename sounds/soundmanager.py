@@ -8,7 +8,6 @@ class SoundManager(QObject):
 
     def play_background_sound(self):
         self.bg_sound = QSoundEffect(self.parent)
-
         self.bg_sound.setSource(QUrl.fromLocalFile(path.join('sounds', 'background.wav')))
         self.bg_sound.setLoopCount(QSoundEffect.Infinite)
         self.bg_sound.setVolume(0.009)

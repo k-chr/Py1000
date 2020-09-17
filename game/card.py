@@ -12,22 +12,22 @@ class Card(object):
     def __repr__(self):
         return f"{self.suit.name}_{self.value.name}"
 
-    def __cmp__(self, obj: Card):
+    def __cmp__(self, obj):
         return (0 if isinstance(obj, Card) and obj.suit is self.suit
                 and self.value is obj.value else 1 if self < obj else -1)
 
-    def __ne__(self,obj: Card):
+    def __ne__(self, obj):
         return (not isinstance(obj, Card) or obj.suit is not self.suit
                 or self.value is not obj.value)
 
-    def __eq__(self, obj: Card):
+    def __eq__(self, obj):
         return isinstance(obj, Card) and obj.suit is self.suit and self.value is obj.value
 
-    def __gt__(self, obj: Card):
+    def __gt__(self, obj):
         return (isinstance(obj, Card) and obj.suit is self.suit
                 and obj.value.value < self.value.value)
 
-    def __lt__(self, obj: Card):
+    def __lt__(self, obj):
         return (isinstance(obj, Card) and obj.suit is self.suit
                 and obj.value.value > self.value.value)
 

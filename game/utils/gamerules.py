@@ -19,4 +19,3 @@ class GameRules(object):
 
     def is_greater_present(self, card: Card):
         return any([c > card for c in self.cards])
-
