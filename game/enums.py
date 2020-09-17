@@ -14,5 +14,3 @@ class Cards(Enum):
     QUEEN = 3
     KING = 4
     ACE = 11
-
-

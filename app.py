@@ -8,8 +8,8 @@ from PyQt5.QtWidgets import QApplication
 from ui.windows.mainwindow import MainWindow
 
 class App(QApplication):
+
     def __init__(self, args):
         super(App, self).__init__(args)
-        self.mainWindow = MainWindow()
-        self.exec_()    
-
+        self.main_window = MainWindow()
+        self.exec_()

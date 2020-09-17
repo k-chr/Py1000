@@ -119,6 +119,12 @@
     <Compile Include="fun_threading\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="sounds\soundmanager.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="sounds\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ui\dialogs\__init__.py">
       <SubType>Code</SubType>
     </Compile>
