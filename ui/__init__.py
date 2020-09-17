@@ -3,7 +3,7 @@ Created on Sat Sep  12 20:41:42 2020
 
 @author: Kamil Chrustowski
 """
-
+from __future__ import annotations
 from PyQt5.QtCore import Qt, QSize, QEvent, QPropertyAnimation, QTimer, QCoreApplication, pyqtSignal, QRectF 
 from PyQt5.QtGui import QBrush, QPalette, QPainter, QFontMetrics, QFont, QTransform, QColor, QPixmap
 from PyQt5.QtWidgets import  (QGroupBox, QApplication,

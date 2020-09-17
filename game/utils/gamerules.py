@@ -1,5 +1,4 @@
-from typing import List
-from ..card import Card, Suits, Cards
+from . import Card, Suits, Cards, List
 
 class GameRules(object):
 
@@ -19,3 +18,8 @@ class GameRules(object):
 
     def is_greater_present(self, card: Card):
         return any([c > card for c in self.cards])
+
+    def compute_forbidden_value(self):
+        return 130 + sum([suit.value if any([card.suit is suit and card.value is Cards.KING for card in self.cards])
+                         and any([card.suit is suit and card.value is Cards.QUEEN for card in self.cards]) 
+                         else 0 for suit in list(Suits)])

@@ -20,3 +20,8 @@ class SoundManager(QObject):
     def play_random_card_sound(self):
         num = randint(1,8)
         QSound(path.join('sounds', 'c' + str(num) + '.wav'), self.parent).play()
+
+    def play_end_sound(self, win=False):
+        sound = QSound(path.join('sounds', 'win.wav' if win else 'lose.mp3'), self.parent)
+        sound.setLoops(4)
+        sound.play()

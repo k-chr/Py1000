@@ -1,6 +1,4 @@
-from ..card import Card, Suits, Cards
-from random import randint, shuffle
-from copy import deepcopy
+from . import Card, Suits, Cards, randint, shuffle, deepcopy
 
 class RandomCardGenerator:
 
