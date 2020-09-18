@@ -4,21 +4,21 @@ Created on Mon Feb  3 00:25:20 2020
 
 @author: Kamil Chrustowski
 """
-import os
-from .. import *
-from ..widgets.configbutton import ConfigButton
+from . import (path, Qt, QSize, QFont, QLabel, QVBoxLayout,
+               QDialog, QPixmap, QPainter, QPalette,
+               ConfigButton, QSizePolicy, QWidget)
 
 class FarewellDialog(QDialog):
     
     def closeEvent(self, event):
         event.ignore()  
         
-    def __init__(self, txt, parent=None):
+    def __init__(self, txt: str, parent: QWidget =None):
         super(FarewellDialog, self).__init__(parent)
         self.setFixedSize(600, 200)
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_OpaquePaintEvent)
-        self.pixmap = QPixmap(os.path.join('images\\backgrounds', 'blank4.png'))
+        self.pixmap = QPixmap(path.join('images\\backgrounds', 'blank4.png'))
         self.setAttribute(Qt.WA_TranslucentBackground)
         lab = QLabel(txt)
         lab.setStyleSheet("QLabel{padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px;}")
@@ -40,7 +40,7 @@ class FarewellDialog(QDialog):
         painter.restore()
         
     @staticmethod
-    def getDialog(parent=None, title="Bidding"):
+    def getDialog(parent: QWidget =None, title: str ="Bidding"):
         dialog = FarewellDialog(title, parent)
         dialog.setWindowTitle("It\'s the end of the game")
         result = dialog.exec_()
