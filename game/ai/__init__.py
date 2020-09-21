@@ -1,7 +1,12 @@
 from keras.models import Sequential 
 from keras.layers.core import Dense, Activation
+from keras.layers import Input
 from keras.layers.core.activations import relu, softmax
-from datetime import datetime
 from keras.optimizers import SGD
 from keras.losses import categorical_crossentropy
-from os import path
+from keras.backend import sum, log
+from .. import path, datetime, zeros, choice, List, array
+from ..states.biddingstate import BiddingState
+from ..states.giveawaystate import GiveawayState
+from ..states.takingtrickstate import TakingTrickState
+from ..states.state import State

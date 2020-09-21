@@ -1,3 +1,4 @@
+from __future__ import annotations
 from os import path
 from random import randint
 from PyQt5.QtCore import QObject, QUrl
