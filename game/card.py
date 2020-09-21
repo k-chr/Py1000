@@ -32,6 +32,9 @@ class Card:
         return (isinstance(obj, Card) and obj.suit is self.suit
                 and obj.value.value > self.value.value)
 
+    def id(self):
+        return (self.suit.value - 40) // 20 + self.value.order_bias()
+
     def is_pair(self, obj):
         return (self.suit is obj.suit and
                 (self.value is Cards.KING and obj.value is Cards.QUEEN or
