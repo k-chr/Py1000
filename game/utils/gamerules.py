@@ -13,6 +13,10 @@ class GameRules(object):
                     (card.suit is not opponent_card.suit or self.is_greater_present(card))) or
                    (self.is_suit_present(trump) and card.suit is not trump))
 
+    def has_pair(self, card: Card):
+        marriage_missing_memeber = Cards.KING if card.value is Cards.QUEEN else Cards.QUEEN
+        return any([card.suit is c.suit and c.value is marriage_missing_memeber for c in self.cards])
+
     def is_suit_present(self, suit: Suits):
         return any([card.suit is suit for card in self.cards])
 

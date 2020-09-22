@@ -31,4 +31,4 @@ class TakingTrickState(State):
         if not self.trump is Suits.NO_SUIT:
             trump[(self.trump.value - 40)//20] = 1
 
-        return concatenate((z, stock, tricks, played_card, trump))
+        return concatenate((hand, stock, tricks, played_card, trump))

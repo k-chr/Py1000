@@ -38,11 +38,17 @@ class QPolicyNetwork(Sequential):
     def load_weights_from_date(self):
         if not self.init_date is None:
             date = self.init_date.strftime("%b_%d_%Y_%H_%M_%S")
+            if not (path.isdir(path.join("previous_memories", f"{self.memories_directory}"))):
+                from os import mkdir
+                mkdir(path.join("previous_memories", f"{self.memories_directory}"))
             self.load_weights(path.join("previous_memories",
                                         f"{self.memories_directory}", f"{self.network_name}_{date}.h5"))
 
     def save_weights_to_date(self):
         date = datetime.now().strftime("%b_%d_%Y_%H_%M_%S")
+        if not (path.isdir(path.join("previous_memories", f"{self.memories_directory}"))):
+                from os import mkdir
+                mkdir(path.join("previous_memories", f"{self.memories_directory}"))
         self.save_weights(path.join("previous_memories",
                                    f"{self.memories_directory}", f"{self.network_name}_{date}.h5"))
 
