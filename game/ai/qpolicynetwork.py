@@ -11,7 +11,6 @@ class QPolicyNetwork(Sequential):
         self.states_one_hot_len = n_one_hot
         self.action_output_size = n_actions
         self.network_name = fname
-        self.loss_function = loss
         self.alpha = alpha
         self.init_date = start_from
         self.memories_directory = mem_dir
