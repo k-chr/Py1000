@@ -10,6 +10,7 @@ class RandomCardGenerator:
         if len(self.__cards) > 0:
             self.__cards = []
         for suit in list(Suits):
+            if suit is Suits.NO_SUIT: continue
             for value in list(Cards):
                 self.__cards.append(Card(suit, value))
 

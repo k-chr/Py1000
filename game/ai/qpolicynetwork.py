@@ -1,5 +1,5 @@
 from . import (Activation, Input, Dense, Sequential,InputLayer,
-               relu, softmax, datetime, SGD, Model,
+               relu, softmax, datetime, Adam, Model, print_tensor,
                categorical_crossentropy, path, sum, log)
 
 class QPolicyNetwork(object):
@@ -34,7 +34,7 @@ class QPolicyNetwork(object):
 
         trainer_layers = self.policy_predictor(state)
         model = Model([state, discounted_reward_placeholder], trainer_layers)
-        model.compile(optimizer=SGD(learning_rate=self.alpha), 
+        model.compile(optimizer=Adam(learning_rate=self.alpha), 
                      loss=self.loss_function_generator(discounted_reward_placeholder))
         self.policy_trainer = model
         
@@ -57,7 +57,7 @@ class QPolicyNetwork(object):
 
     def loss_function_generator(self, discounted_reward):
         def gradient_loss(pi, pi_prediction):
-            loss = -sum(discounted_reward * log(
-                     sum(pi * pi_prediction, axis=1)))
+            loss = sum(discounted_reward * log(
+                     sum(pi * pi_prediction)))
             return loss
         return gradient_loss

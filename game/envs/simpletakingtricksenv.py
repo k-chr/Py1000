@@ -1,7 +1,7 @@
 from . import Card, Suits, Cards, TakingTrickState, RandomCardGenerator, randint, GameRules, datetime
 from ..utils.gamelogger import GameLogger
 
-INVALID_MOVE_REWARD = -50
+INVALID_MOVE_REWARD = -0.5
 
 class SimpleTakingTricksEnv(object):
     
@@ -18,6 +18,8 @@ class SimpleTakingTricksEnv(object):
         self.player2_tricks = []
         self.p1_score = 0
         self.p2_score = 0
+        self.p1_invalid_actions = 0
+        self.p2_invalid_actions = 0
         self.file_name = f"simpletakingtricksenv_session_{datetime.now().strftime('%b_%d_%Y_%H_%M_%S')}.log"
         self.logger = GameLogger(self.file_name)
 
@@ -36,6 +38,9 @@ class SimpleTakingTricksEnv(object):
         self.is_player1_turn = player1
         self.p1_score = 0
         self.p2_score = 0
+        self.p1_invalid_actions = 0
+        self.p2_invalid_actions = 0
+
         self.played_cards = []
         self.player1_tricks = []
         self.player2_tricks = []
@@ -51,13 +56,17 @@ class SimpleTakingTricksEnv(object):
         return self.current_observation
 
     def step(self, action: int): 
-        player, tricks, op_tricks = self.player1,  self.player1_tricks, self.player2_tricks if self.is_player1_turn else self.player2, self.player2_tricks, self.player1_tricks
+        player, tricks, op_tricks = (self.player1,  self.player1_tricks, self.player2_tricks) if self.is_player1_turn else (self.player2, self.player2_tricks, self.player1_tricks)
         reward = 0
         done = False
         self.rules.set_card_collection(player)
 
-        if not any([card.id() == action for card in self.player]):
+        if not any([card.id() == action for card in player]):
             reward = INVALID_MOVE_REWARD
+            if self.is_player1_turn:
+                self.p1_invalid_actions += 1
+            else:
+                self.p2_invalid_actions += 1
             return self.current_observation, [reward], done
 
         card = [card for card in player if card.id() == action][0]
@@ -65,6 +74,10 @@ class SimpleTakingTricksEnv(object):
         if opponent_card is not None:
             if not self.rules.is_card_valid(card, opponent_card, self.current_observation["data"].trump):
                 reward = INVALID_MOVE_REWARD
+                if self.is_player1_turn:
+                    self.p1_invalid_actions += 1
+                else:
+                    self.p2_invalid_actions += 1
                 return self.current_observation, [reward], done
             player.remove(card)
             self.played_cards.append(card)
@@ -74,14 +87,16 @@ class SimpleTakingTricksEnv(object):
             if card > opponent_card or card.suit is self.current_observation["data"].trump and not (card.suit is opponent_card.suit):
                 tricks.append(trick)
                 reward = card.value.value + opponent_card.value.value
+                reward *= 10
                 op_reward = 0
-                self.logger.append_to_log(("player1" if self.is_player1_turn else "player2") + " won trick " + trick + f"and got: {reward} points")
+                self.logger.append_to_log(("player1" if self.is_player1_turn else "player2") + " won trick " + trick.__str__() + f"and got: {reward} points")
             else:
                 op_tricks.append(trick)
                 reward = 0
                 op_reward = card.value.value + opponent_card.value.value
-                self.logger.append_to_log(("player2" if self.is_player1_turn else "player1") + " won trick " + trick + f"and got: {op_reward} points")
-            done = len(self.played_cards) == 24
+                op_reward *= 10
+                self.logger.append_to_log(("player2" if self.is_player1_turn else "player1") + " won trick " + trick.__str__() + f"and got: {op_reward} points")
+            done = len(self.played_cards) == 20
             
             self.is_player1_turn = not self.is_player1_turn if op_reward > 0 else self.is_player1_turn
 
@@ -93,9 +108,11 @@ class SimpleTakingTricksEnv(object):
 
         player.remove(card)
         self.played_cards.append(card)
+        self.logger.append_to_log(("player1" if self.is_player1_turn else "player2") + " played card " + card.__str__())
+
         trump = Suits.NO_SUIT
         if(self.rules.has_pair(card)):
-            reward = card.suit.value
+            reward = card.suit.value * 10
             trump = card.suit
             self.logger.append_to_log(("player1" if self.is_player1_turn else "player2") + f" meld {trump.name} and got {trump.value} points")
 
@@ -104,6 +121,6 @@ class SimpleTakingTricksEnv(object):
 
         self.current_observation = {'is_player1_turn':self.is_player1_turn,
                                     'data':TakingTrickState(hand_cards=self.player1 if self.is_player1_turn else self.player2,
-                                                            tricks_taken_by_both_players=self.played_cards, trump=trump,
+                                                            tricks_taken_by_both_players=self.played_cards, trump=trump, played_card=card,
                                                             known_stock=self.left_stock if self.is_player1_turn else self.right_stock)}
         return self.current_observation, [reward], done

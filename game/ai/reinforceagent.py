@@ -1,6 +1,5 @@
 from .qpolicynetwork import QPolicyNetwork
-from . import zeros, State, array, List
-
+from . import zeros, State, array, List, choice
 class ReinforceAgent(object):
     
     def __init__(self, state_size: int, action_size: int, 
@@ -21,15 +20,14 @@ class ReinforceAgent(object):
 
     def get_action(self, state: State):
         vec = state.to_one_hot_vec()[None]
-        print(vec.shape)
-        print(vec)
         probs = self.model.predict(vec)
-        action = choice(range(self.action_size), 1, p=probs)[0]
+        action = choice(range(self.action_size), 1, p=probs[0])[0]
+
         return action
 
     def replay(self):
         state_batch = array([state.to_one_hot_vec() for state in self.states_memory])
-        action_batch = array([sample(action) for action in self.actions_memory])
+        action_batch = array([self.sample(action) for action in self.actions_memory])
         discounted_rewards_batch = self.get_cumulative_rewards()
         self.model.policy_trainer.train_on_batch([state_batch, discounted_rewards_batch], action_batch)
         self.states_memory = []
@@ -51,3 +49,4 @@ class ReinforceAgent(object):
         for t, r_t in zip(T, self.rewards_memory[::-1]):
             r_t_1 = r_t_1 * self.gamma + r_t
             G[t] = r_t_1
+        return G

@@ -42,7 +42,7 @@ class Sim(QObject):
                     op.rewards_memory[len(op.rewards_memory) - 1] += rewards[1]
             
             print(f"[{episode}/{EPISODES}] player1 total reward: {sum(self.player1.rewards_memory)} | player2 total reward: {sum(self.player2.rewards_memory)}")
-            
+            print(f"\t player1 invalid actions: {self.env.p1_invalid_actions} | player2 invalid actions: {self.env.p2_invalid_actions}")
             self.player1.replay()
             self.player2.replay()
             if (episode + 1) % DUMP_PERIOD == 0:
