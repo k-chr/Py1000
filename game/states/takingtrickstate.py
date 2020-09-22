@@ -12,23 +12,24 @@ class TakingTrickState(State):
         self.trump = trump
 
     def to_one_hot_vec(self):
-        hand = zeros([24,])
+        hand = zeros(24)
         for card in self.hand_cards:
             hand[card.id()] = 1
 
-        stock = zeros([24,])
+        stock = zeros(24)
         for card in self.known_stock:
             stock[card.id()] = 1
 
-        tricks = zeros([24,])
+        tricks = zeros(24)
         for card in self.tricks:
             tricks[card.id()] = 1
 
-        played_card = zeros([24,])
-        played_card[self.played_card.id()] = 1
+        played_card = zeros(24)
+        if self.played_card is not None:
+            played_card[self.played_card.id()] = 1
 
-        trump = zeros([4,])
+        trump = zeros(4)
         if not self.trump is Suits.NO_SUIT:
             trump[(self.trump.value - 40)//20] = 1
 
-        return concatenate((hand, stock, tricks, played_card, trump))
+        return concatenate((hand, stock, tricks, played_card, trump), axis=0)

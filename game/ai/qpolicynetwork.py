@@ -1,8 +1,8 @@
-from . import (Activation, Input, Dense, Sequential,
-               relu, softmax, datetime, SGD,
+from . import (Activation, Input, Dense, Sequential,InputLayer,
+               relu, softmax, datetime, SGD, Model,
                categorical_crossentropy, path, sum, log)
 
-class QPolicyNetwork(Sequential):
+class QPolicyNetwork(object):
 
     def __init__(self, fname: str, n_actions: int, batch_size: int, alpha: float, 
                  mem_dir: str, n_one_hot: int, start_from: datetime,):
@@ -14,22 +14,26 @@ class QPolicyNetwork(Sequential):
         self.alpha = alpha
         self.init_date = start_from
         self.memories_directory = mem_dir
-        self.policy_trainer = None
+        self.policy_predictor: Model =None
+        self.policy_trainer: Model =None
+
+    def predict(self, vec):
+        return self.policy_predictor.predict(vec)
 
     def build_network(self):
-        self.add(Input(shape=(self.states_one_hot_len,)))
-        self.add(Dense(self.states_one_hot_len))
-        self.add(Activation(relu))
-        self.add(Dense(2*self.action_output_size))
-        self.add(Activation(relu))
-        self.add(Dense(self.action_output_size))
-        self.add(Activation(softmax))
-
+        state_input = Input(shape=(self.states_one_hot_len,))
+        wrapped = Dense(self.states_one_hot_len)(state_input)
+        wrapped = Activation(relu)(wrapped)
+        wrapped = Dense(2*self.action_output_size)(wrapped)
+        wrapped = Activation(relu)(wrapped)
+        wrapped = Dense(self.action_output_size)(wrapped)
+        layers = Activation(softmax)(wrapped)
+        self.policy_predictor = Model(state_input, layers)
         state = Input(shape=(self.states_one_hot_len,))
         discounted_reward_placeholder = Input(shape=(1,))
 
-        layers = self(state)
-        model = Sequential([state, discounted_reward_placeholder], layers)
+        trainer_layers = self.policy_predictor(state)
+        model = Model([state, discounted_reward_placeholder], trainer_layers)
         model.compile(optimizer=SGD(learning_rate=self.alpha), 
                      loss=self.loss_function_generator(discounted_reward_placeholder))
         self.policy_trainer = model
@@ -40,7 +44,7 @@ class QPolicyNetwork(Sequential):
             if not (path.isdir(path.join("previous_memories", f"{self.memories_directory}"))):
                 from os import mkdir
                 mkdir(path.join("previous_memories", f"{self.memories_directory}"))
-            self.load_weights(path.join("previous_memories",
+            self.policy_predictor.load_weights(path.join("previous_memories",
                                         f"{self.memories_directory}", f"{self.network_name}_{date}.h5"))
 
     def save_weights_to_date(self):
@@ -48,7 +52,7 @@ class QPolicyNetwork(Sequential):
         if not (path.isdir(path.join("previous_memories", f"{self.memories_directory}"))):
                 from os import mkdir
                 mkdir(path.join("previous_memories", f"{self.memories_directory}"))
-        self.save_weights(path.join("previous_memories",
+        self.policy_predictor.save_weights(path.join("previous_memories",
                                    f"{self.memories_directory}", f"{self.network_name}_{date}.h5"))
 
     def loss_function_generator(self, discounted_reward):

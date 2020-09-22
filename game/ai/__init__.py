@@ -1,5 +1,5 @@
-from keras.models import Sequential 
-from keras.layers.core import Dense, Activation
+from keras import Sequential, Model 
+from keras.layers import Dense, Activation, InputLayer
 from keras import Input
 from keras.activations import relu, softmax
 from keras.optimizers import SGD

@@ -20,7 +20,10 @@ class ReinforceAgent(object):
         self.rewards_memory.append(reward)
 
     def get_action(self, state: State):
-        probs = self.model.predict(state.to_one_hot_vec())
+        vec = state.to_one_hot_vec()[None]
+        print(vec.shape)
+        print(vec)
+        probs = self.model.predict(vec)
         action = choice(range(self.action_size), 1, p=probs)[0]
         return action
 

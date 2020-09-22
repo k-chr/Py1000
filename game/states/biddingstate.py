@@ -10,12 +10,12 @@ class BiddingState(State):
 
     def to_one_hot_vec(self):
         
-        z = zeros([24,])
+        z = zeros(24)
 
         for card in self.hand_cards:
             z[card.id()] = 1
 
-        bids = zeros([27,])
+        bids = zeros(27)
         bids[(self.current_bid-100)//10] = 1
 
         return concatenate((z, bids))

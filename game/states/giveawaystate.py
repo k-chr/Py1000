@@ -7,7 +7,7 @@ class GiveawayState(State):
         self.hand_cards = hand_cards
 
     def to_one_hot_vec(self):
-        hand = zeros([24,])
+        hand = zeros(24)
         for card in self.hand_cards:
             hand[card.id()] = 1
 
