@@ -3,7 +3,7 @@ from .enums import Cards, Suits
 
 class Card:
     
-    def __init__(self, suit: Cards, value: Suits):
+    def __init__(self, suit: Suits, value: Cards):
         self.suit = suit
         self.value = value
 

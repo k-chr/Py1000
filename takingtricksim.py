@@ -1,5 +1,6 @@
 from game.envs.simpletakingtricksenv import SimpleTakingTricksEnv
 from game.ai.takingtricksagent import TakingTricksAgent
+from game.enums import TrainingEnum
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal, QTimer, QCoreApplication
 import sys
 from datetime import datetime
@@ -8,7 +9,7 @@ import signal
 sys.setrecursionlimit(10000)
 EPISODES = 100_000
 DUMP_PERIOD = 500
-
+TRAINING_FLAG = TrainingEnum.PRETRAINING_OWN_CARDS
 class Sim(QObject):
     finished = pyqtSignal()
     def __init__(self, args: List[str], parent=None):
@@ -18,10 +19,9 @@ class Sim(QObject):
         date2 = None
         if len(args) == 3:
             date1 = datetime.strptime(args[1], "%b_%d_%Y_%H_%M_%S")
-            date2 = datetime.strptime(args[2], "%b_%d_%Y_%H_%M_%S")
-        self.player1 = TakingTricksAgent(40, "player1", last_weights=date1)
-        self.player2 = TakingTricksAgent(40, "player2", last_weights=date2)
-        self.env = SimpleTakingTricksEnv()
+        self.player1 = TakingTricksAgent(40, "player1", last_weights=date1, flag=TRAINING_FLAG)
+        self.player2 = TakingTricksAgent(40, "player1", last_weights=date1, flag=TRAINING_FLAG)
+        self.env = SimpleTakingTricksEnv(TRAINING_FLAG)
 
     @pyqtSlot()
     def run(self):
@@ -37,11 +37,17 @@ class Sim(QObject):
                 action = player.get_action(state)
 
                 obs, rewards, done = self.env.step(action)
-                player.remember_S_A_R(state, action, rewards[0])
+                if TRAINING_FLAG is TrainingEnum.FULL_TRAINING or TRAINING_FLAG is TrainingEnum.PRETRAINING_OWN_CARDS:
+                    player.remember_S_A_R(state, action, rewards[0])
+                elif TRAINING_FLAG is TrainingEnum.PRETRAINING_VALID_CARDS:
+                    if(rewards[0] > 0):
+                        player.remember_S_A_R(state, action, rewards[0])
+               
 
                 #delayed reward
-                if(len(rewards) > 1):
-                    op.rewards_memory[len(op.rewards_memory) - 1] += rewards[1]
+                if TRAINING_FLAG is TrainingEnum.FULL_TRAINING:
+                    if(len(rewards) > 1):
+                        op.rewards_memory[len(op.rewards_memory) - 1] += rewards[1]
             
             print(f"[{episode + 1}/{EPISODES}]")
             self.player1.replay()
