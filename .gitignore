@@ -16,3 +16,6 @@ build
 dist
 *.spec
 *.vs
+*.log
+*.csv
+*.h5

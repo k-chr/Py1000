@@ -4,9 +4,11 @@ from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal, QTimer, QCoreApplication
 import sys
 from datetime import datetime
 from typing import List
+import signal
 sys.setrecursionlimit(10000)
 EPISODES = 100_000
 DUMP_PERIOD = 500
+
 class Sim(QObject):
     finished = pyqtSignal()
     def __init__(self, args: List[str], parent=None):
@@ -41,8 +43,7 @@ class Sim(QObject):
                 if(len(rewards) > 1):
                     op.rewards_memory[len(op.rewards_memory) - 1] += rewards[1]
             
-            print(f"[{episode}/{EPISODES}] player1 total reward: {sum(self.player1.rewards_memory)} | player2 total reward: {sum(self.player2.rewards_memory)}")
-            print(f"\t player1 invalid actions: {self.env.p1_invalid_actions} | player2 invalid actions: {self.env.p2_invalid_actions}")
+            print(f"[{episode + 1}/{EPISODES}]")
             self.player1.replay()
             self.player2.replay()
             if (episode + 1) % DUMP_PERIOD == 0:
@@ -52,11 +53,17 @@ class Sim(QObject):
             episode += 1
         self.env.logger.end_logging()
         self.finished.emit()
-
+        
+    def sigint_handler(self, *args):
+        self.env.logger.end_logging()
+        self.env.csv_inv_log.save()
+        self.env.csv_rew_log.save()
+        QCoreApplication.exit()
 
 def main(args: List[str]):
     app = QCoreApplication(args)
     sim = Sim(args, app)
+    signal.signal(signal.SIGINT, sim.sigint_handler)
     sim.finished.connect(QCoreApplication.exit)
     QTimer.singleShot(0, sim.run)
     app.exec_()
