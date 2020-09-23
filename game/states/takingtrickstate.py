@@ -1,14 +1,14 @@
 from .state import State
-from . import zeros, concatenate, List, Card, Suits
+from . import zeros, concatenate, List, Card, Suits, deepcopy
 
 class TakingTrickState(State):
 
     def __init__(self, hand_cards: List[Card], known_stock: List[Card],
                  tricks_taken_by_both_players: List[Card], played_card: Card =None, trump: Suits =Suits.NO_SUIT):
-        self.hand_cards = hand_cards
-        self.known_stock = known_stock
-        self.tricks = tricks_taken_by_both_players
-        self.played_card = played_card
+        self.hand_cards = deepcopy(hand_cards)
+        self.known_stock = deepcopy(known_stock)
+        self.tricks = deepcopy(tricks_taken_by_both_players)
+        self.played_card = deepcopy(played_card) if played_card is not None else None
         self.trump = trump
 
     def to_one_hot_vec(self):
