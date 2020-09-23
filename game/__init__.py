@@ -6,3 +6,4 @@ from numpy import zeros, concatenate, array
 from numpy.random import choice
 from datetime import datetime
 from os import path
+from enum import Enum

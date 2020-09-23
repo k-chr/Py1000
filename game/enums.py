@@ -1,4 +1,4 @@
-from enum import Enum
+from . import Enum
 
 class Suits(Enum):
     S = 40
@@ -6,6 +6,11 @@ class Suits(Enum):
     D = 80
     H = 100
     NO_SUIT = 0
+
+class TrainingEnum(Enum):
+    FULL_TRAINING = 0x0
+    PRETRAINING_OWN_CARDS = 0x1
+    PRETRAINING_VALID_CARDS = 0x2
 
 class Cards(Enum):
     NINE = 0

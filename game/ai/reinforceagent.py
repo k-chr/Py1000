@@ -1,9 +1,9 @@
 from .qpolicynetwork import QPolicyNetwork
-from . import zeros, State, array, List, choice
+from . import zeros, State, array, List, choice, TrainingEnum
 class ReinforceAgent(object):
     
     def __init__(self, state_size: int, action_size: int, 
-                 gamma: float =0.99, alpha: float =0.001):
+                 gamma: float =0.99, alpha: float =0.001, flag: TrainingEnum =TrainingEnum.FULL_TRAINING):
         self.state_size = state_size
         self.action_size = action_size
         self.gamma = gamma
@@ -12,6 +12,7 @@ class ReinforceAgent(object):
         self.actions_memory = []
         self.rewards_memory = []
         self.model: QPolicyNetwork =None
+        self.flag = flag
         
     def remember_S_A_R(self, state: State, action: int, reward: float):
         self.states_memory.append(state)
@@ -28,8 +29,8 @@ class ReinforceAgent(object):
     def replay(self):
         state_batch = array([state.to_one_hot_vec() for state in self.states_memory])
         action_batch = array([self.sample(action) for action in self.actions_memory])
-        discounted_rewards_batch = self.get_cumulative_rewards()
-        self.model.policy_trainer.train_on_batch([state_batch, discounted_rewards_batch], action_batch)
+        discounted_rewards_batch = self.get_cumulative_rewards() if self.flag is not TrainingEnum.PRETRAINING_OWN_CARDS else array(self.rewards_memory)
+        self.model.policy_trainer.fit([state_batch, discounted_rewards_batch], action_batch, epochs=1)
         self.states_memory = []
         self.actions_memory = []
         self.rewards_memory = []
