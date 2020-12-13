@@ -3,7 +3,7 @@ from . import QAbstractSocket, QNetworkInterface, QHostAddress
 def first_or_none(iterable: list):
     return (iterable or [None])[0]
 
-def get_interfaces_that_are_up():
+def get_address_of_interfaces_that_are_up():
     localhost = QHostAddress(QHostAddress.LocalHost)
     return [first_or_none([entry.ip().toString()
                       for entry in interface.addressEntries() 

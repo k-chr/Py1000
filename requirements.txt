@@ -1,0 +1,4 @@
+PyQt5
+Keras
+cx-Freeze
+numpy==1.19.3

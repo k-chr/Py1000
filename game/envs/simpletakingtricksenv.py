@@ -1,10 +1,10 @@
 from . import Card, Suits, Cards, TakingTrickState, RandomCardGenerator, randint, GameRules, datetime, TrainingEnum
 from ..utils.gamelogger import GameLogger
 from ..utils.csvlogger import CSVLogger
-INVALID_MOVE_REWARD = -0.5
+INVALID_MOVE_REWARD = -0.01
 MY_CARD_REWARD = 0.1
 NOT_MY_CARD_REWARD = -MY_CARD_REWARD
-VALID_MOVE_REWARD = -INVALID_MOVE_REWARD
+VALID_MOVE_REWARD = -INVALID_MOVE_REWARD * 50  
 
 class SimpleTakingTricksEnv(object):
     
@@ -132,11 +132,14 @@ class SimpleTakingTricksEnv(object):
         else:
             card = l[0]
             player.remove(card)
-            self.played_cards.append(card)
+            
             self.logger.append_to_log(("player1" if self.is_player1_turn else "player2") + " played card " + card.__str__())
             
             if opponent_card is not None:
                 op_reward = 0
+                self.played_cards.append(card)
+                self.played_cards.append(opponent_card)
+
                 trick = [card, opponent_card]
                 if card > opponent_card or card.suit is self.current_observation["data"].trump and not (card.suit is opponent_card.suit):
                     tricks.append(trick)
@@ -188,17 +191,18 @@ class SimpleTakingTricksEnv(object):
             reward = VALID_MOVE_REWARD
             card = l[0]
             player.remove(card)
-            self.played_cards.append(card)
             self.logger.append_to_log(("player1" if self.is_player1_turn else "player2") + " played card " + card.__str__())
             
             if opponent_card is not None:
+                op_reward = 0
                 trick = [card, opponent_card]
                 if card > opponent_card or card.suit is self.current_observation["data"].trump and not (card.suit is opponent_card.suit):
                     tricks.append(trick)
                 else:
                     op_tricks.append(trick)
-                done = len(self.played_cards) == 20
-            
+                    op_reward = 1
+                self.played_cards.append(card)
+                self.played_cards.append(opponent_card)
                 self.is_player1_turn = not self.is_player1_turn if op_reward > 0 else self.is_player1_turn
 
                 self.current_observation = {'is_player1_turn':self.is_player1_turn,
@@ -217,6 +221,7 @@ class SimpleTakingTricksEnv(object):
                                                             tricks_taken_by_both_players=self.played_cards, trump=trump, played_card=card,
                                                             known_stock=self.left_stock if self.is_player1_turn else self.right_stock)}
         rewards = [reward]
+        done = len(self.played_cards) == 20
 
         self.__update_rewards(reward)
         return self.current_observation, rewards, done

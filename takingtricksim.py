@@ -9,7 +9,7 @@ import signal
 sys.setrecursionlimit(10000)
 EPISODES = 100_000
 DUMP_PERIOD = 500
-TRAINING_FLAG = TrainingEnum.PRETRAINING_OWN_CARDS
+TRAINING_FLAG = TrainingEnum.PRETRAINING_VALID_CARDS
 class Sim(QObject):
     finished = pyqtSignal()
     def __init__(self, args: List[str], parent=None):
@@ -17,7 +17,7 @@ class Sim(QObject):
        
         date1 = None
         date2 = None
-        if len(args) == 3:
+        if len(args) > 1:
             date1 = datetime.strptime(args[1], "%b_%d_%Y_%H_%M_%S")
         self.player1 = TakingTricksAgent(40, "player1", last_weights=date1, flag=TRAINING_FLAG)
         self.player2 = TakingTricksAgent(40, "player1", last_weights=date1, flag=TRAINING_FLAG)
@@ -40,7 +40,7 @@ class Sim(QObject):
                 if TRAINING_FLAG is TrainingEnum.FULL_TRAINING or TRAINING_FLAG is TrainingEnum.PRETRAINING_OWN_CARDS:
                     player.remember_S_A_R(state, action, rewards[0])
                 elif TRAINING_FLAG is TrainingEnum.PRETRAINING_VALID_CARDS:
-                    if(rewards[0] > 0):
+                    if(state.played_card is not None):
                         player.remember_S_A_R(state, action, rewards[0])
                
 

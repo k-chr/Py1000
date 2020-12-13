@@ -38,6 +38,7 @@ class QPolicyNetwork(object):
 
         trainer_layers = self.policy_predictor(state)
         model = Model([state, discounted_reward_placeholder], trainer_layers)
+        self.load_weights_from_date()
         model.compile(optimizer=Adam(learning_rate=self.alpha), 
                      loss=self.loss_function_generator(discounted_reward_placeholder))
         self.policy_trainer = model
@@ -48,6 +49,8 @@ class QPolicyNetwork(object):
             if not (path.isdir(path.join("previous_memories", f"{self.memories_directory}"))):
                 from os import mkdir
                 mkdir(path.join("previous_memories", f"{self.memories_directory}"))
+            
+
             self.policy_predictor.load_weights(path.join("previous_memories",
                                         f"{self.memories_directory}", f"{self.network_name}_{date}.h5"))
 
@@ -79,7 +82,7 @@ class QPolicyNetwork(object):
             __instance = QPolicyNetwork(name, n_actions, batch_size, alpha, mem_dir, n_one_hot, start_from, flag)
             QPolicyNetwork.__instances.append(__instance)
             __instance.build_network()
-            __instance.load_weights_from_date()
+
 
         else:
             __instance = l[0]
