@@ -33,7 +33,7 @@ class ConfigButton(QPushButton):
 
     def paintEvent(self, event):
         painter = QPainter()
-        painter.save()
+        
         painter.begin(self)
         if self.isEnabled():
             painter.drawPixmap(0,0, self.pixmap.scaled(QSize(self.width(), self.height())))
@@ -45,7 +45,8 @@ class ConfigButton(QPushButton):
         else:
             painter.setPen(Qt.gray)
         painter.drawText(self.rect(), Qt.AlignCenter, self.text())
-        painter.restore()
+        
+        painter.end()
         #super(ConfigButton, self).paintEvent(event)
 
     def leaveEvent(self, event):
