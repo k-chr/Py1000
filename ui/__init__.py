@@ -5,7 +5,7 @@ Created on Sat Sep  12 20:41:42 2020
 """
 from __future__ import annotations
 from PyQt5.QtCore import Qt, QSize, QEvent, QPropertyAnimation, QTimer, QCoreApplication, pyqtSignal, QRectF, QRect
-from PyQt5.QtGui import QBrush, QPalette, QPainter, QFontMetrics, QFont, QTransform, QColor, QPixmap
+from PyQt5.QtGui import QBrush, QPalette, QPainter, QFontMetrics, QFont, QTransform, QColor, QPixmap, QPaintEvent
 from PyQt5.QtWidgets import  (QGroupBox, QApplication,
                               QButtonGroup, QHBoxLayout,
                               QWidget, QPushButton,
@@ -20,6 +20,7 @@ from game.card import *
 from game.enums import Suits
 from enum import Enum
 from os import path
+from config import Config
 
 class Defaults(object):
     

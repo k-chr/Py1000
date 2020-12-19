@@ -1,9 +1,10 @@
 from . import Card, Suits, Cards, List
 
+
 class GameRules(object):
 
-    MAX_SCORE = 1000;
-    THE_BARREL = 900;
+    MAX_SCORE = 1000
+    THE_BARREL = 900
 
 
     def __init__(self, cards: List[Card] = None):
