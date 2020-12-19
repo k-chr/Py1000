@@ -1,3 +1,5 @@
+from PyQt5.QtGui import QCursor, QIcon
+from PyQt5.QtWidgets import QMainWindow, QStatusBar
 from ui.dialogs.biddialog import *
 from player import *
 from statusgame import *
@@ -5,15 +7,15 @@ from PyQt5.QtMultimedia import QSound, QSoundEffect
 from PyQt5.QtCore import *
 from ui.layouts.welcomelayout import WelcomeLayout
 from ui.layouts.gamelayout import GameLayout
-from ui.layouts.testlayout import TestLayout
-from card import CARD_DIMENSIONS
+#from ui.layouts.testlayout import TestLayout
+# from ui.game import CARD_DIMENSIONS
 import os
 #window constants
 WINDOW_SIZE = 1000, 700
 OFFSET_X = 5
 OFFSET_Y = 500
 DEBUG = False
-bgSound=None
+
 class MainWindow(QMainWindow):
     def create_game_layout(self):
         if(self.player is None):
@@ -24,7 +26,6 @@ class MainWindow(QMainWindow):
     def closeEvent(self,event):
         if(self.player is not None):
             self.player.cleanUp()
-        self.bgSound.stop()
         event.accept()
     def create_welcome_game_layout(self):
         self.welcomeLayout = None
@@ -45,12 +46,7 @@ class MainWindow(QMainWindow):
         #PLAYER CONTENT
         self.player = None
         self.setWindowIcon(QIcon(QPixmap(os.path.join('images', 'ico.png'))))
-        self.bgSound = QSoundEffect(self)
-
-        self.bgSound.setSource(QUrl.fromLocalFile(os.path.join('sounds', 'background.wav')))
-        self.bgSound.setLoopCount(QSoundEffect.Infinite)
-        self.bgSound.setVolume(0.009)
-        self.bgSound.play()
+        
         #IZA DO TESTÓW:
         if DEBUG == False:
             self.initPlayer()
@@ -58,15 +54,13 @@ class MainWindow(QMainWindow):
         self.cursor_scaled_pix = self.cursor_pix.scaled(QSize(25, 25), Qt.KeepAspectRatio)
         self.current_cursor = QCursor(self.cursor_scaled_pix, -1, -1)
 
-        print(self.bgSound.isPlaying())
+        # print(self.bgSound.isPlaying())
         # MERGING GUI ELEMENTS
         self.w = QWidget()
         self.w.setCursor(self.current_cursor)
         self.setCentralWidget(self.w)
-        if DEBUG == False:
-            self.w.setLayout(self.create_welcome_game_layout())
-        else:
-            self.w.setLayout(TestLayout(WINDOW_SIZE))
+        self.w.setLayout(self.create_welcome_game_layout())
+        
 
         #STATUS HELP STATUS GAME
         self.statusBar = QStatusBar()

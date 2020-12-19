@@ -10,7 +10,7 @@ from .. import *
 from ..widgets.banner import Banner
 from ..widgets.gamebutton import GameButton
 from statusgame import StatusGame
-from config import ConfigDialog
+from ..dialogs.configdialog import ConfigDialog
 
 class WelcomeLayout(QHBoxLayout):
     quitSignal = pyqtSignal()

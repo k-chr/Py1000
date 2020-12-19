@@ -23,3 +23,5 @@ class Banner(QWidget):
         painter.begin(self)
         painter.drawPixmap((self.width() - self.height() * self.ratio) // 2 ,0, 
                             self.pixmap.scaled(QSize(self.height() * self.ratio , self.height())))
+        painter.save()
+        painter.restore()
