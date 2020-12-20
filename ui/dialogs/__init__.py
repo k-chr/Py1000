@@ -3,7 +3,7 @@ from .. import (
     QDialog, path, QGridLayout, QGraphicsDropShadowEffect,
     Qt, QFont, QPalette, QButtonGroup, QColor, QGroupBox,
     QHBoxLayout, QSizePolicy, QPainter, QSize, QWidget,
-    QVBoxLayout, Config, QEvent, QPaintEvent, QPushButton
+    QVBoxLayout, Config, BlankBg, QEvent, QPaintEvent, QPushButton
     )
 
 from ..widgets.configbutton import ConfigButton

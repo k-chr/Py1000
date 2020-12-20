@@ -9,7 +9,7 @@ from app import App
 from typing import List
 
 def main(args: List[str]):
-    app = App(args)
+    _ = App(args)
 
 if __name__ == '__main__':
     main(sys.argv)

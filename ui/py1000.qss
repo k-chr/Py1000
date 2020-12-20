@@ -30,3 +30,22 @@ ConfigComboBox:editable {
     image: url(/images/backgrounds/blank2.png);
 }
 
+ConfigDialog {
+    width:700px;
+    height: 600px;
+}
+
+#configDialogLabel {
+    padding-left: 2px;
+    padding-right: 2px; 
+    padding-top: 2px; 
+    padding-bottom: 2px;
+    height: 30px;
+    margin: 2px 2px 2px 2px;
+    background-color: rgba(255,255,255,128);
+}
+
+#configDialogButtonGroup {
+    border: 0;
+    margin: 0;
+}

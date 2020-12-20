@@ -5,8 +5,12 @@ Created on Wed Jan 15 18:55:35 2020
 @author: Kamil Chrustowski
 """
 
+from config import Config
 from os import path
-from .. import *
+
+from PyQt5.QtWidgets import QButtonGroup
+from .. import pyqtSignal, QHBoxLayout, QPixmap, QVBoxLayout, QSizePolicy, QApplication,\
+               QWidget, QButtonGroup,QPalette, QBrush, QCoreApplication, Qt
 from ..widgets.banner import Banner
 from ..widgets.gamebutton import GameButton
 from statusgame import StatusGame
@@ -14,10 +18,11 @@ from ..dialogs.configdialog import ConfigDialog
 
 class WelcomeLayout(QHBoxLayout):
     quitSignal = pyqtSignal()
-    def __init__(self,windowSize,bannerHeight, bannerPixmap,buttonNames,backgroundPixmap,player, parent=None):
+
+    def __init__(self,bannerHeight, buttonNames, parent=None):
         super(WelcomeLayout, self).__init__(parent)
         self.setAlignment(Qt.AlignCenter)
-        self.banner = Banner(bannerPixmap, bannerHeight)
+        self.banner = Banner(Config.get_instance().banner, bannerHeight)
         self.buttonList = [GameButton(QPixmap(path.join('images/buttons', name+'.png')), name) for name in buttonNames]
         self.buttonGroup = QButtonGroup()
         self.menu = QVBoxLayout()
@@ -29,7 +34,7 @@ class WelcomeLayout(QHBoxLayout):
         self.menu.setContentsMargins(200, 3, 200, 50)
         self.widget = QWidget()
         geometry = QApplication.desktop().geometry()
-        self.bg = backgroundPixmap.scaled(geometry.width(),geometry.height())
+        self.bg = Config.get_instance().welcome_bg.scaled(geometry.width(),geometry.height())
         self.bgPalette = QPalette()
         self.bgPalette.setBrush(QPalette.Background,QBrush(self.bg))
         self.widget.setPalette(self.bgPalette)
@@ -38,7 +43,6 @@ class WelcomeLayout(QHBoxLayout):
         self.addWidget(self.widget)
         self.setContentsMargins(0,0,0,0)
         self.buttonGroup.buttonClicked.connect(self.handleMenu)
-        self.playerInstance = player
 
     def handleMenu(self, button):
         if button.name == 'host':

@@ -1,6 +1,5 @@
-from config import BlankBg
 from . import (QDialog, QGraphicsDropShadowEffect,
-               QWidget, QPalette, Qt, ConfigButton, Config,
+               QWidget, QPalette, Qt, ConfigButton, Config, BlankBg,
                QEvent, QPainter, QPaintEvent, QPushButton,
                QVBoxLayout, QColor, QSize, QLabel, QBrush, 
                QFont, QButtonGroup, QGroupBox, QSizePolicy,
@@ -30,55 +29,45 @@ class ConfigDialog(QDialog):
 
     def __init__(self, parent: QWidget =None):
         super(ConfigDialog, self).__init__(parent)
-        self.setFixedSize(700, 600)
         config = Config.get_instance()
         self.combobox = ConfigComboBox()
         self.setAttribute(Qt.WA_OpaquePaintEvent)
         self.setAttribute(Qt.WA_TranslucentBackground)
+
         for key in Config.OPTIONS:
             self.combobox.addItem(key)
+
         self.setWindowFlags(Qt.FramelessWindowHint|Qt.Tool)
 
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setBlurRadius(10)
         shadow.setColor(QColor("Black"))
         shadow.setOffset(0,0)
-        
         self.setGraphicsEffect(shadow)
+
         self.combobox.setCurrentText(Config.get_option_key(config.get_name()))
         self.preview = Background(config.get_background_config(), ConfigDialog.__preview_size.height(), ConfigDialog.__preview_size.width())
         self.layout = QVBoxLayout()
         lab = QLabel('Choose background from comboBox')
-        lab.setFixedHeight(30)
+        lab.setObjectName('configDialogLabel')
         
-        lab.setStyleSheet("QLabel{padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px;}")
         lab.setFont(QFont('KBREINDEERGAMES', 18))
         lab.setAutoFillBackground(True)
-        palette = QPalette()
-        palette.setBrush(QPalette.Background, QBrush(QColor(255,255,255,128)))
-        lab.setPalette(palette)
-        lab.setContentsMargins(2,2,2,2)
         self.layout.addWidget(lab)
         self.layout.addWidget(self.combobox)
         lab2 = QLabel('Preview: ')
-        lab2.setFixedHeight(30)
-        lab2.setStyleSheet("QLabel{padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px;}")
         lab2.setAutoFillBackground(True)
-        pal = QPalette()
-        pal.setColor(QPalette.Window, QColor(255,255,255,128))
-        lab2.setPalette(pal)
-        lab2.setContentsMargins(2,2,2,2)
+        lab2.setObjectName('configDialogLabel')
         lab2.setFont(QFont('KBREINDEERGAMES', 18))
         self.layout.addWidget(lab2)
         self.layout.addWidget(self.preview, 0, Qt.AlignCenter)
         self.combobox.currentTextChanged.connect(self.updatePreview)
-        self.pixmap = config.get_blank_background(BlankBg.BG1)
+        self.pixmap = config.get_blank_background(BlankBg.BG4)
         self.buttons = QButtonGroup()
         self.ok_button = ConfigButton(text="OK")
         group = QGroupBox()
-        group.setContentsMargins(0,0,0,0)
+        group.setObjectName("configDialogButtonGroup")
         group.setFlat(True)
-        group.setStyleSheet("border:0;")
         self.cancel_button = ConfigButton(text="CANCEL")
         self.buttons.addButton(self.ok_button)
         self.buttons.addButton(self.cancel_button)
@@ -89,10 +78,8 @@ class ConfigDialog(QDialog):
         group.setLayout(hb)
         group.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.setLayout(self.layout)
-        self.layout.addWidget(group,0, Qt.AlignBottom|Qt.AlignRight)
-        
-        self.setCursor(config.get_cursor())
-        self.combobox.setCursor(config.get_cursor())
+        self.layout.addWidget(group, 0, Qt.AlignBottom|Qt.AlignRight)
+
 
     def paintEvent(self, event: QPaintEvent):
         super(ConfigDialog, self).paintEvent(event)

@@ -20,7 +20,7 @@ from game.card import *
 from game.enums import Suits
 from enum import Enum
 from os import path
-from config import Config
+from config import Config, BlankBg, FontWeight, MenuEnum
 
 class Defaults(object):
     

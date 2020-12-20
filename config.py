@@ -7,8 +7,9 @@ Created on Fri Jan 17 23:14:38 2020
 from __future__ import annotations
 import os
 from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtGui import QCursor, QFont, QPixmap
+from PyQt5.QtGui import QCursor, QFont, QIcon, QPixmap
 from enum import Enum
+
 
 class BlankBg(Enum):
     BG0 = 0
@@ -19,21 +20,36 @@ class BlankBg(Enum):
 
     @staticmethod
     def from_name(name: str ='blank.png') -> BlankBg: 
-            
         n = name.split('.')
+
         if(len(n) != 2 or n[1] == ''):
             return BlankBg.BG0
         else:
             name = n[0]
+
         import re
         n = re.split(r'(\d+)$', name)[0:2]
         if(len(n) != 2 or n[1] == ''): 
             return BlankBg.BG0
         
-        print(n)
-
         return BlankBg[f'BG{n[1]}']
 
+
+class FontWeight(Enum):
+    XS = 10
+    SM = 12
+    MD = 14
+    LG = 16
+    XL = 18
+    XXL = 40
+
+
+class MenuEnum(Enum):
+    HELP = 0
+    NETWORK = 1
+    QUIT = 2
+    CONFIG = 3
+    SINGLE_GAME = 4
 
         
 class Config:
@@ -58,6 +74,10 @@ class Config:
     STYLE_FILE = 'ui\\py1000.qss'
 
     DEFAULT_BG = 'bg2.png'
+
+    BANNER = 'banner.png'
+
+    WELCOME_BG = 'main.jpg'
 
     OPTIONS = {
            'Gondola full of stars':'bg1.png',
@@ -86,7 +106,8 @@ class Config:
     def get_background_by_name(self, name: str) -> QPixmap:
         return self.__game_bgs.get(Config.OPTIONS.get(name, ''), None)
 
-    def get_cursor(self) -> QCursor:
+    @property
+    def cursor(self) -> QCursor:
         return self.__game_cursor
 
     @staticmethod
@@ -125,7 +146,21 @@ class Config:
                     )
                 ).scaled(QSize(25, 25), Qt.KeepAspectRatio), -1, -1)
         self.__blank_bgs = {BlankBg.from_name(name):QPixmap(os.path.join(Config.BGS, name)) for name in Config.BLANKS}
+        self.__banner = QPixmap(os.path.join('images', Config.BANNER))
+        self.__welcome_bg = QPixmap(os.path.join('images', Config.WELCOME_BG))
+        self.__window_icon = QIcon(QPixmap(os.path.join('images', 'ico.png')))
 
+    @property
+    def window_icon(self) -> QIcon:
+        return self.__window_icon
+
+    @property
+    def banner(self) -> QPixmap:
+        return self.__banner
+
+    @property
+    def welcome_bg(self) -> QPixmap:
+        return self.__welcome_bg
 
     def get_shadow_config(self) -> str:
         return self.__shadow
@@ -146,4 +181,3 @@ class Config:
         self.__playing_background = self.__game_bgs[self.__name]
 
     
-            
