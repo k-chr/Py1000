@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.welcomeLayout = None
         self.gameLayout = None
-        self.resize(1500, 1100)
+        
         self.showMaximized()
         self.showFullScreen()
         #PLAYER CONTENT
@@ -67,7 +67,6 @@ class MainWindow(QMainWindow):
             StatusGame.getInstance().signals.statusChanged.connect(lambda: self.player.on_status_changed(StatusGame.getInstance().get_status_name()))
         self.set_status(StatusGame.getInstance().get_status_name())
         self.initUI()
-        self.setFixedSize(self.size())
 
     def set_status(self, status_name):
         self.statusBar().showMessage(STATUS_GAME[status_name])

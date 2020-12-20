@@ -1,3 +1,8 @@
+MainWindow {
+    min-width: 2112;
+    min-height: 1188;
+}
+
 ConfigComboBox:!editable, ConfigComboBox::drop-down:editable { 
     image: url(/images/backgrounds/blank.png);
 }
@@ -30,22 +35,34 @@ ConfigComboBox:editable {
     image: url(/images/backgrounds/blank2.png);
 }
 
-ConfigDialog {
-    width:700px;
-    height: 600px;
-}
-
 #configDialogLabel {
     padding-left: 2px;
     padding-right: 2px; 
     padding-top: 2px; 
     padding-bottom: 2px;
     height: 30px;
+    min-height:30px;
+    max-height: 30px;
     margin: 2px 2px 2px 2px;
     background-color: rgba(255,255,255,128);
+    font-size: 18px;
+    font-family: KBREINDEERGAMES;
 }
 
 #configDialogButtonGroup {
     border: 0;
     margin: 0;
+}
+
+Background#preview {
+    height:320;
+    width:540;
+    max-height:320;
+    max-width:540;
+    min-height:320;
+    min-width:540;
+    background-color: transparent;
+    background: none; 
+    background-repeat: none; 
+    border: 10px;
 }
