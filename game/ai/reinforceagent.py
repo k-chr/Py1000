@@ -33,11 +33,10 @@ class ReinforceAgent(object):
         action_batch = array([self.sample(action) for action in self.actions_memory])
         discounted_rewards_batch = self.get_cumulative_rewards() if self.flag is TrainingEnum.FULL_TRAINING else array(self.rewards_memory)
         try:
-            self.model.policy_trainer.fit([state_batch, discounted_rewards_batch], action_batch, epochs=1)        
-        except :
-            print(state_batch.shape)
-            print(action_batch.shape)
-            print(discounted_rewards_batch.shape)
+            self.model.policy_trainer.fit({'state':state_batch, 'discounted_reward':discounted_rewards_batch}, action_batch, epochs=100) 
+            print('Replayed successfully')       
+        except Exception as e:
+            print(f"type of exception {type(e)}")
         self.states_memory = []
         self.actions_memory = []
         self.rewards_memory = []
@@ -57,4 +56,4 @@ class ReinforceAgent(object):
         for t, r_t in zip(T, self.rewards_memory[::-1]):
             r_t_1 = r_t_1 * self.gamma + r_t
             G[t] = r_t_1
-        return G
+        return array([array(g) for g in G])

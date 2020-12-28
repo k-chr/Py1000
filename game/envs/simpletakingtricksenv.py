@@ -1,6 +1,8 @@
 from . import Card, Suits, Cards, TakingTrickState, RandomCardGenerator, randint, GameRules, datetime, TrainingEnum
 from ..utils.gamelogger import GameLogger
 from ..utils.csvlogger import CSVLogger
+
+
 INVALID_MOVE_REWARD = -0.01
 MY_CARD_REWARD = 0.1
 NOT_MY_CARD_REWARD = -MY_CARD_REWARD
@@ -82,7 +84,7 @@ class SimpleTakingTricksEnv(object):
             self.p1_score += reward
 
     def __own_card_estimator_step(self, action):
-        player, tricks, op_tricks = (self.player1,  self.player1_tricks, self.player2_tricks) if self.is_player1_turn else (self.player2, self.player2_tricks, self.player1_tricks)
+        player = (self.player1,  self.player1_tricks, self.player2_tricks) if self.is_player1_turn else (self.player2, self.player2_tricks, self.player1_tricks)
         reward = 0
         rewards = []
         done = False
@@ -115,7 +117,8 @@ class SimpleTakingTricksEnv(object):
         return self.current_observation, rewards, done
 
     def __full_training_step(self, action):
-        player, tricks, op_tricks = (self.player1,  self.player1_tricks, self.player2_tricks) if self.is_player1_turn else (self.player2, self.player2_tricks, self.player1_tricks)
+        player, tricks, op_tricks = (self.player1,  self.player1_tricks, self.player2_tricks) if self.is_player1_turn else (
+            self.player2, self.player2_tricks, self.player1_tricks)
         reward = 0
         rewards = []
         done = False
@@ -162,7 +165,7 @@ class SimpleTakingTricksEnv(object):
                 if(self.rules.has_pair(card)):
                     reward = card.suit.value
                     trump = card.suit
-                    self.logger.append_to_log(("player1" if self.is_player1_turn else "player2") + f" meld {trump.name} and got {trump.value} points")
+                    self.logger.append_to_log(("player1" if self.is_player1_turn else "player2") + f" meld {trump.name} by {card} and got {trump.value} points")
 
                 self.is_player1_turn = not self.is_player1_turn
                 rewards = [reward]
@@ -171,6 +174,8 @@ class SimpleTakingTricksEnv(object):
                                                             tricks_taken_by_both_players=self.played_cards, trump=trump, played_card=card,
                                                             known_stock=self.left_stock if self.is_player1_turn else self.right_stock)}
         self.__update_rewards(reward)
+        self.logger.append_to_log(f"player1_cards: {self.player1}")
+        self.logger.append_to_log(f"player2_cards: {self.player2}")
         return self.current_observation, rewards, done
 
     def __valid_card_estimator_step(self, action):

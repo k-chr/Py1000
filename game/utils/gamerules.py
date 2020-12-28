@@ -26,8 +26,8 @@ class GameRules(object):
 
 
     def has_pair(self, card: Card) -> bool:
-        marriage_missing_member = Cards.KING if card.value is Cards.QUEEN else Cards.QUEEN
-        return any([card.suit is c.suit and c.value is marriage_missing_member for c in self.cards])
+        
+        return any([card.is_pair(c) for c in self.cards])
 
     def is_suit_present(self, suit: Suits) -> bool:
         return any([card.suit is suit for card in self.cards])

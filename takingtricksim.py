@@ -6,22 +6,50 @@ import sys
 from datetime import datetime
 from typing import List
 import signal
+import argparse
+
 sys.setrecursionlimit(10000)
 EPISODES = 100_000
 DUMP_PERIOD = 500
-TRAINING_FLAG = TrainingEnum.PRETRAINING_VALID_CARDS
+TRAINING_FLAG = TrainingEnum.FULL_TRAINING
+
+
+def get_date(string: str) -> datetime:
+    try:
+        return datetime.strptime(string, "%b_%d_%Y_%H_%M_%S")
+    except:
+        raise argparse.ArgumentTypeError('provided date is not convertible')
+
+def get_flag(string: str) -> TrainingEnum:
+    try: 
+        return TrainingEnum[string]
+    except:
+        raise argparse.ArgumentTypeError(f'provided training flag: {string} is not availabe')
+
+def init_parser() -> argparse.ArgumentParser: 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--date', type=get_date, help='expected format: Mon_DD_YY_HH_MM_ss')
+    parser.add_argument('--training-flag', type=get_flag, default=TRAINING_FLAG, 
+                        help=f'available values: {TrainingEnum._member_names_}')
+
+    def handler(message: str):
+        print(message, file=sys.stderr)
+        parser.print_help(sys.stderr)
+        parser.exit(2)
+
+    setattr(parser, 'error', handler)
+    return parser
+
 class Sim(QObject):
     finished = pyqtSignal()
-    def __init__(self, args: List[str], parent=None):
+
+    def __init__(self, args: argparse.Namespace, parent=None):
         super(Sim, self).__init__(parent)
-       
-        date1 = None
-        date2 = None
-        if len(args) > 1:
-            date1 = datetime.strptime(args[1], "%b_%d_%Y_%H_%M_%S")
-        self.player1 = TakingTricksAgent(40, "player1", last_weights=date1, flag=TRAINING_FLAG)
-        self.player2 = TakingTricksAgent(40, "player1", last_weights=date1, flag=TRAINING_FLAG)
-        self.env = SimpleTakingTricksEnv(TRAINING_FLAG)
+        date = args.date
+        flag = args.training_flag
+        self.player1 = TakingTricksAgent(40, "player1", last_weights=date, flag=flag)
+        self.player2 = TakingTricksAgent(40, "player1", last_weights=date, flag=flag)
+        self.env = SimpleTakingTricksEnv(flag)
 
     @pyqtSlot()
     def run(self):
@@ -68,7 +96,8 @@ class Sim(QObject):
 
 def main(args: List[str]):
     app = QCoreApplication(args)
-    sim = Sim(args, app)
+    parser = init_parser()
+    sim = Sim(parser.parse_args(args), app)
     signal.signal(signal.SIGINT, sim.sigint_handler)
     sim.finished.connect(QCoreApplication.exit)
     QTimer.singleShot(0, sim.run)

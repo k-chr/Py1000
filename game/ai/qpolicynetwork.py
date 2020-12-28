@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from . import (Activation, Input, Dense, Sequential,InputLayer, TrainingEnum,
                relu, softmax, datetime, Adam, Model, print_tensor,
                categorical_crossentropy, path, k_sum, k_log, List)
@@ -33,11 +34,11 @@ class QPolicyNetwork(object):
         wrapped = Dense(self.action_output_size)(wrapped)
         layers = Activation(softmax)(wrapped)
         self.policy_predictor = Model(state_input, layers)
-        state = Input(shape=(self.states_one_hot_len,))
-        discounted_reward_placeholder = Input(shape=(1,))
+        state = Input(shape=(self.states_one_hot_len,), name='state')
+        discounted_reward_placeholder = Input(shape=(1,), name='discounted_reward')
 
         trainer_layers = self.policy_predictor(state)
-        model = Model([state, discounted_reward_placeholder], trainer_layers)
+        model = Model(inputs=[state, discounted_reward_placeholder], outputs=trainer_layers)
         self.load_weights_from_date()
         model.compile(optimizer=Adam(learning_rate=self.alpha), 
                      loss=self.loss_function_generator(discounted_reward_placeholder))
@@ -49,7 +50,6 @@ class QPolicyNetwork(object):
             if not (path.isdir(path.join("previous_memories", f"{self.memories_directory}"))):
                 from os import mkdir
                 mkdir(path.join("previous_memories", f"{self.memories_directory}"))
-            
 
             self.policy_predictor.load_weights(path.join("previous_memories",
                                         f"{self.memories_directory}", f"{self.network_name}_{date}.h5"))
@@ -63,6 +63,7 @@ class QPolicyNetwork(object):
                                    f"{self.memories_directory}", f"{self.network_name}_{date}.h5"))
 
     def loss_function_generator(self, discounted_reward):
+        print(f"type of tensor {discounted_reward}")
         def gradient_loss(pi, pi_prediction):
             loss = -k_sum(discounted_reward * k_log(
                      k_sum(pi * pi_prediction, axis=1)))
