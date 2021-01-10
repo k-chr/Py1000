@@ -6,36 +6,36 @@ class GameRules(object):
     MAX_SCORE = 1000
     THE_BARREL = 900
 
-
-    def __init__(self, cards: List[Card] = None):
-        self.cards = cards
-
-    def set_card_collection(self, cards: List[Card]) -> None:
-        self.cards = cards
-
-    def is_card_valid(self, card: Card, opponent_card: Card, trump: Suits =Suits.NO_SUIT) -> bool:
+    @classmethod
+    def is_card_valid(cls, cards: List[Card], card: Card, opponent_card: Card, trump: Suits =Suits.NO_SUIT) -> bool:
         if card.suit is not opponent_card.suit:
-            if self.is_suit_present(opponent_card.suit):
+            if cls.is_suit_present(cards, opponent_card.suit):
                 return False
-            elif card.suit is not trump and self.is_suit_present(trump):
+            elif card.suit is not trump and cls.is_suit_present(cards, trump):
                 return False
             else:
                 return True
         else:
-            return card > opponent_card or (card < opponent_card and not self.is_greater_present(card))
+            return card > opponent_card or (card < opponent_card and not cls.is_greater_present(cards, card))
 
+    @classmethod
+    def has_pair(cls, cards: List[Card], card: Card) -> bool:
+        return any([card.is_pair(c) for c in cards])
 
-    def has_pair(self, card: Card) -> bool:
-        
-        return any([card.is_pair(c) for c in self.cards])
+    @classmethod
+    def does_card_beat_opponents_one(card: Card, opponent_card: Card, trump: Suits):
+        return card > opponent_card or card.suit is trump and not (card.suit is opponent_card.suit)
 
-    def is_suit_present(self, suit: Suits) -> bool:
-        return any([card.suit is suit for card in self.cards])
+    @classmethod
+    def is_suit_present(cls, cards: List[Card], suit: Suits) -> bool:
+        return any([card.suit is suit for card in cards])
 
-    def is_greater_present(self, card: Card) -> bool:
-        return any([c > card for c in self.cards])
+    @classmethod
+    def is_greater_present(cls, cards: List[Card], card: Card) -> bool:
+        return any([c > card for c in cards])
 
-    def compute_forbidden_value(self) -> int:
-        return 130 + sum([suit.value if any([card.suit is suit and card.value is Cards.KING for card in self.cards])
-                         and any([card.suit is suit and card.value is Cards.QUEEN for card in self.cards]) 
+    @classmethod
+    def compute_forbidden_value(cls, cards: List[Card]) -> int:
+        return 130 + sum([suit.value if any([card.suit is suit and card.value is Cards.KING for card in cards])
+                         and any([card.suit is suit and card.value is Cards.QUEEN for card in cards]) 
                          else 0 for suit in list(Suits)])
