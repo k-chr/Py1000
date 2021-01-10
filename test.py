@@ -1,3 +1,4 @@
+from game.utils.randomcardgenerator import RandomCardGenerator
 from game.card import Card
 from game.enums import Cards, Suits
 from game.utils.gamerules import GameRules
@@ -8,7 +9,7 @@ def test():
                     Card(Suits.C, Cards.NINE),  Card(Suits.S, Cards.ACE)])
 
     assert rules.compute_forbidden_value() == 210
-
+    gen = RandomCardGenerator()
     print(get_address_of_interfaces_that_are_up())
     assert rules.is_card_valid(Card(Suits.S, Cards.TEN), Card(Suits.S, Cards.NINE) )
     assert not rules.is_card_valid(Card(Suits.D, Cards.NINE), Card(Suits.S, Cards.NINE) )
@@ -18,5 +19,7 @@ def test():
     #assert rules.is_card_valid(Card(Suits.S, Cards.TEN), Card(Suits.S, Cards.NINE) )
     #assert rules.is_card_valid(Card(Suits.S, Cards.TEN), Card(Suits.S, Cards.NINE) )
     #assert rules.is_card_valid(Card(Suits.S, Cards.TEN), Card(Suits.S, Cards.NINE) )
-
+    cards = gen.get_cards()
+    print(cards)
+    print([card.id() for card in cards])
 test()
