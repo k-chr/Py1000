@@ -1,8 +1,11 @@
 from __future__ import annotations
+from keras.losses import MSE
 
-from . import (Activation, Input, Dense, Sequential,InputLayer, TrainingEnum,
+from tensorflow.python.framework.ops import Tensor
+
+from . import (Activation, Input, Dense, n_sum, TrainingEnum,
                relu, softmax, datetime, Adam, Model, print_tensor,
-               categorical_crossentropy, path, k_sum, k_log, List)
+               nan_to_num, path, k_sum, k_log, List, SGD)
 
 class QPolicyNetwork(object):
 
@@ -22,8 +25,13 @@ class QPolicyNetwork(object):
         self.policy_trainer: Model =None
         self.flag = flag
         
-    def predict(self, vec):
-        return self.policy_predictor.predict(vec)
+    def predict_probs(self, vec):
+        probs = nan_to_num(self.policy_predictor.predict(vec))
+        return probs / n_sum(probs)
+
+    def predict_values(self, vec):
+        values = self.policy_predictor.predict(vec)
+        return values
 
     def build_network(self):
         state_input = Input(shape=(self.states_one_hot_len,))
@@ -32,15 +40,16 @@ class QPolicyNetwork(object):
         wrapped = Dense(2*self.action_output_size)(wrapped)
         wrapped = Activation(relu)(wrapped)
         wrapped = Dense(self.action_output_size)(wrapped)
-        layers = Activation(softmax)(wrapped)
+        layers = Activation(softmax)(wrapped) if self.flag is TrainingEnum.FULL_TRAINING else wrapped
         self.policy_predictor = Model(state_input, layers)
         state = Input(shape=(self.states_one_hot_len,), name='state')
         discounted_reward_placeholder = Input(shape=(1,), name='discounted_reward')
-
+        inputs = [state, discounted_reward_placeholder] if self.flag is TrainingEnum.FULL_TRAINING else [state]
         trainer_layers = self.policy_predictor(state)
-        model = Model(inputs=[state, discounted_reward_placeholder], outputs=trainer_layers)
+        model = Model(inputs=inputs, outputs=trainer_layers)
         self.load_weights_from_date()
-        model.compile(optimizer=Adam(learning_rate=self.alpha), 
+        model.compile(optimizer=Adam(learning_rate=self.alpha) if self.flag is TrainingEnum.FULL_TRAINING\
+                        else SGD(learning_rate=self.alpha), 
                      loss=self.loss_function_generator(discounted_reward_placeholder))
         self.policy_trainer = model
         
@@ -63,15 +72,20 @@ class QPolicyNetwork(object):
                                    f"{self.memories_directory}", f"{self.network_name}_{date}.h5"))
 
     def loss_function_generator(self, discounted_reward):
+
+        if self.flag is not TrainingEnum.FULL_TRAINING:
+            return MSE
+
         print(f"type of tensor {discounted_reward}")
-        def gradient_loss(pi, pi_prediction):
-            loss = -k_sum(discounted_reward * k_log(
-                     k_sum(pi * pi_prediction, axis=1)))
+        def gradient_loss(pi: Tensor, pi_prediction: Tensor):
+            pi_s_a = k_sum(pi * pi_prediction, axis=1)
+            loss = discounted_reward * k_log(
+                     pi_s_a)
             return loss
         return gradient_loss
 
     @staticmethod
-    def get_instance(  name: str, n_actions: int, batch_size: int, alpha: float, 
+    def get_instance(name: str, n_actions: int, batch_size: int, alpha: float, 
                  mem_dir: str, n_one_hot: int, start_from: datetime, flag: TrainingEnum):
         l = [__instance for __instance in  QPolicyNetwork.__instances if (
                 __instance.states_one_hot_len == n_one_hot and __instance.action_output_size == n_actions and __instance.alpha == alpha 
@@ -79,14 +93,13 @@ class QPolicyNetwork(object):
                 and flag is __instance.flag
             )]
         __instance = None
+
         if not any(l):
             __instance = QPolicyNetwork(name, n_actions, batch_size, alpha, mem_dir, n_one_hot, start_from, flag)
             QPolicyNetwork.__instances.append(__instance)
             __instance.build_network()
 
-
         else:
             __instance = l[0]
 
         return __instance
-
