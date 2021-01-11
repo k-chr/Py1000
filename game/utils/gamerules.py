@@ -23,7 +23,7 @@ class GameRules(object):
         return any([card.is_pair(c) for c in cards])
 
     @classmethod
-    def does_card_beat_opponents_one(card: Card, opponent_card: Card, trump: Suits):
+    def does_card_beat_opponents_one(cls, card: Card, opponent_card: Card, trump: Suits):
         return card > opponent_card or card.suit is trump and not (card.suit is opponent_card.suit)
 
     @classmethod
