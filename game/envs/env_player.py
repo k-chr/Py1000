@@ -11,7 +11,6 @@ class EnvPlayer(object):
         self.hand_cards = hand_cards
         self.known_stock = known_stock
 
-    @overload
     def __init__(self, name: str =""):
         self.name = name
         self.reset()
