@@ -1,6 +1,6 @@
 from .reinforceagent import ReinforceAgent
 from .qpolicynetwork import QPolicyNetwork
-from . import datetime, TakingTrickState, TrainingEnum, ndarray, array, zeros, GameRules
+from . import datetime, TakingTrickState, TrainingEnum, ndarray, array, zeros, GameRules, List
 
 def _get_own_cards_vec(state: TakingTrickState) -> ndarray:
     hand = zeros(24)
@@ -28,11 +28,11 @@ class TakingTricksAgent(ReinforceAgent):
         self.model = QPolicyNetwork.get_instance("TakingTricksAgent", action_size, batch_size,
                                    alpha, prefix, state_size, last_weights, flag)
 
-    def actions_batch(self) -> ndarray:
+    def actions_batch(self, actions: List[int]) -> ndarray:
 
         if self.flag is TrainingEnum.FULL_TRAINING:
-            return super().actions_batch()
+            return super().actions_batch(actions)
         elif self.flag is TrainingEnum.PRETRAINING_OWN_CARDS:
-            return array([_get_own_cards_vec(state) for state in self.states_memory])
+            return array([_get_own_cards_vec(state) for state in self.memory.states])
         else:
-            return array([_get_valid_cards_vec(state) for state in self.states_memory])
+            return array([_get_valid_cards_vec(state) for state in self.memory.states])

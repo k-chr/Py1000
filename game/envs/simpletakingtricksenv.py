@@ -28,8 +28,6 @@ class SimpleTakingTricksEnv(object):
         self.csv_rew_log = CSVLogger(self.csv_rewards)
         self.player1 = EnvPlayer("player1")
         self.player2 = EnvPlayer("player2")
-        self.player_handler: EnvPlayer =None
-
 
     def log_players_csv_info(self):
         self.csv_inv_log.log((self.player1.invalid_actions, self.player2.invalid_actions))
@@ -38,7 +36,7 @@ class SimpleTakingTricksEnv(object):
     def reset(self):
         player1 = randint(0, 1) == 1
         cards = self.generator.generate_stack_and_players_cards()
-        stock = choice([cards[0], cards[1]], size=1)[0]
+        stock = cards[choice([0, 1], size=1)[0]]
         if player1:
             self.player1.reset(cards[2], stock)
             self.player2.reset(cards[3])
@@ -116,24 +114,23 @@ class SimpleTakingTricksEnv(object):
 
     def __full_training_step(self, action: int):
         reward = 0
-        rewards = []
+        op_reward = 0
         card: Card =None
         trump: Suits =self.current_observation["data"].trump
         l = [card for card in self.player_handler.hand_cards if card.id() == action]
-        opponent_card = self.current_observation["data"].played_card
+        opponent_card: Card = self.current_observation["data"].played_card
 
         if not any(l) or (opponent_card is not None and not GameRules.is_card_valid(
                 self.player_handler.hand_cards, l[0], opponent_card, trump)):
             reward = INVALID_MOVE_REWARD
             self.player_handler.invalid_actions += 1
+            card = opponent_card
         else:
             card = l[0]
             self.player_handler.hand_cards.remove(card)
-            reward = 0
             self.logger.append_to_log(self.player_handler.name + " played card " + card.__str__())
             
             if opponent_card is not None:
-                op_reward = 0
                 self.played_cards.append(card)
                 self.played_cards.append(opponent_card)
 
@@ -144,29 +141,30 @@ class SimpleTakingTricksEnv(object):
                 else:
                     self.opponent_handler.tricks.append(trick)
                     op_reward = (card.value.value + opponent_card.value.value)
-            
-                self.is_player1_turn = not self.is_player1_turn if op_reward > 0 else self.is_player1_turn
-
-                self.current_observation = self.create_observation(trump=trump)
-                rewards = [reward,op_reward]
-                self.__update_op_rewards(op_reward)
+                card = None
+                
             else:
                 if(GameRules.has_pair(self.player_handler.hand_cards, card)):
                     reward += (card.suit.value)
                     trump = card.suit
                     self.logger.append_to_log(self.player_handler.name + f" meld {trump.name} by {card} and got {trump.value} points")
 
-                self.is_player1_turn = not self.is_player1_turn
-                rewards = [reward]
-                self.current_observation = self.create_observation(trump=trump, card=card)
+        rewards = [reward,op_reward] if op_reward > 0 else [reward]
         self.__update_rewards(reward)
-        self.logger.append_to_log(f"player1_cards: {self.player1.hand_cards}")
-        self.logger.append_to_log(f"player2_cards: {self.player2.hand_cards}")
+        self.__update_op_rewards(op_reward)
+        if reward >= 0:
+            self.logger.append_to_log(f"player1_cards: {self.player1.hand_cards}")
+            self.logger.append_to_log(f"player2_cards: {self.player2.hand_cards}")
+            self.player_handler.score += reward
+            self.opponent_handler.score += op_reward
+        self.is_player1_turn = not self.is_player1_turn if (op_reward > 0 or opponent_card is None) and reward >= 0 else self.is_player1_turn
+        self.current_observation = self.create_observation(trump=trump, card=card)
         return self.current_observation, rewards, self.done
 
     def __valid_card_estimator_step(self, action):
         reward = 0
-        rewards = []
+        op_reward = 0
+        card: Card =None
         l = [card for card in self.player_handler.hand_cards if card.id() == action]
         opponent_card: Card =self.current_observation["data"].played_card
         trump: Suits =self.current_observation["data"].trump
@@ -180,7 +178,6 @@ class SimpleTakingTricksEnv(object):
             self.logger.append_to_log(self.player_handler.name + " played card " + card.__str__())
             
             if opponent_card is not None:
-                op_reward = 0
                 trick = [card, opponent_card]
                 if GameRules.does_card_beat_opponents_one(card, opponent_card, trump):
                     self.player_handler.tricks.append(trick)
@@ -189,16 +186,15 @@ class SimpleTakingTricksEnv(object):
                     op_reward = 1
                 self.played_cards.append(card)
                 self.played_cards.append(opponent_card)
-                self.is_player1_turn = not self.is_player1_turn if op_reward > 0 else self.is_player1_turn
-
-                self.current_observation = self.create_observation(trump=trump)
+                card = None
             else:
                 if(GameRules.has_pair(self.player_handler.hand_cards, card)):
                     trump = card.suit
                     self.logger.append_to_log(self.player_handler.name + f" meld {trump.name} and got {trump.value} points")
-
-                self.is_player1_turn = not self.is_player1_turn
-                self.current_observation = self.create_observation(trump=trump, card=card)
-        rewards = [reward]
+                
         self.__update_rewards(reward)
+        rewards = [reward]
+        self.is_player1_turn = not self.is_player1_turn if (op_reward > 0 or opponent_card is None) else self.is_player1_turn
+        if reward >= 0:
+            self.current_observation = self.create_observation(trump=trump, card=card)
         return self.current_observation, rewards, self.done
