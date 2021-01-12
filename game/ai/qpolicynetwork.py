@@ -4,7 +4,7 @@ from keras.losses import MSE
 from tensorflow.python.framework.ops import Tensor
 
 from . import (Activation, Input, Dense, n_sum, TrainingEnum,
-               relu, softmax, datetime, Adam, Model, print_tensor,
+               relu, softmax, datetime, Adam, Model, print_tensor, ndarray,
                nan_to_num, path, k_sum, k_log, List, SGD)
 
 class QPolicyNetwork(object):
@@ -25,17 +25,19 @@ class QPolicyNetwork(object):
         self.policy_trainer: Model =None
         self.flag = flag
         
-    def predict_probs(self, vec):
+    def predict_probs(self, vec: ndarray):
         probs = nan_to_num(self.policy_predictor.predict(vec))
         return probs / n_sum(probs)
 
-    def predict_values(self, vec):
+    def predict_values(self, vec: ndarray):
         values = self.policy_predictor.predict(vec)
         return values
 
     def build_network(self):
         state_input = Input(shape=(self.states_one_hot_len,))
         wrapped = Dense(self.states_one_hot_len)(state_input)
+        wrapped = Activation(relu)(wrapped)
+        wrapped = Dense(2*self.states_one_hot_len)(wrapped)
         wrapped = Activation(relu)(wrapped)
         wrapped = Dense(2*self.action_output_size)(wrapped)
         wrapped = Activation(relu)(wrapped)
@@ -71,15 +73,14 @@ class QPolicyNetwork(object):
         self.policy_predictor.save_weights(path.join("previous_memories",
                                    f"{self.memories_directory}", f"{self.network_name}_{date}.h5"))
 
-    def loss_function_generator(self, discounted_reward):
+    def loss_function_generator(self, discounted_reward: Tensor):
 
         if self.flag is not TrainingEnum.FULL_TRAINING:
             return MSE
 
-        print(f"type of tensor {discounted_reward}")
         def gradient_loss(pi: Tensor, pi_prediction: Tensor):
             pi_s_a = k_sum(pi * pi_prediction, axis=1)
-            loss = discounted_reward * k_log(
+            loss = -discounted_reward * k_log(
                      pi_s_a)
             return loss
         return gradient_loss

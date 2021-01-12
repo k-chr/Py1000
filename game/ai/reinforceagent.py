@@ -40,15 +40,15 @@ class ReinforceAgent(object):
 
     def remember_S_A_R(self, state: State, action: int, reward: float):
         self.memory.remember_S_A_R(state, action, reward)
-
+        
     def remeber_traumatic_S_A_R(self, state: State, action: int, reward: float):
         self.traumatic_memory.remember_S_A_R(state, action, reward)
 
-    def get_action(self, state: State):
+    def get_action(self, state: State) -> int:
         vec = state.to_one_hot_vec()[None]
         return self.__action_getter(vec)
 
-    def get_action_from_probs(self, vec: ndarray):
+    def get_action_from_probs(self, vec: ndarray) -> int:
         probs = self.model.predict_probs(vec)
         try:
             action = choice(range(self.action_size), 1, p=probs[0])[0]
@@ -57,7 +57,7 @@ class ReinforceAgent(object):
             print(f"probabilities: {probs[0]} contains NaN")
             raise Exception
 
-    def get_action_from_value(self, vec: ndarray):    
+    def get_action_from_value(self, vec: ndarray) -> int:    
         values = self.model.predict_values(vec)
         indices = argmax(values[0])
         if isinstance(indices, int64):
@@ -68,14 +68,14 @@ class ReinforceAgent(object):
         return action
 
     def replay(self):
-        self.__replay(self.memory.states, self.memory.actions, self.memory.rewards, message="Learning positive memories...")
-        self.__replay(self.traumatic_memory.states, self.traumatic_memory.actions, self.traumatic_memory.rewards, message="Learning negative memories...")
+        self.__replay(self.memory, message="Learning positive memories...")
+        self.__replay(self.traumatic_memory, message="Learning negative memories...")
         self.clean_memory()
 
-    def __replay(self, states: List[State], actions: List[int], rewards: List[float], message=""):
-        state_batch = self.states_batch(states)
-        action_batch = self.actions_batch(actions)
-        discounted_rewards_batch = self.get_cumulative_rewards(rewards) if self.flag is TrainingEnum.FULL_TRAINING else array(rewards)
+    def __replay(self, memory: Memory, message=""):
+        state_batch = self.states_batch(memory.states)
+        action_batch = self.actions_batch(memory)
+        discounted_rewards_batch = self.get_cumulative_rewards(memory.rewards) if self.flag is TrainingEnum.FULL_TRAINING else array(memory.rewards)
         if(len(state_batch) == 0 or len(action_batch) == 0 or len(discounted_rewards_batch) == 0):
             return
         print(message)
@@ -86,11 +86,11 @@ class ReinforceAgent(object):
             print(e)
 
     def replay_traumatic_only(self):
-        self.__replay(self.traumatic_memory.states, self.traumatic_memory.actions, self.traumatic_memory.rewards, message="Learning negative memories...")
+        self.__replay(self.traumatic_memory, message="Learning negative memories...")
         self.traumatic_memory.clean()
 
-    def actions_batch(self, actions: List[int]) -> ndarray:
-        return array([self.sample(action) for action in actions])
+    def actions_batch(self, memory: Memory) -> ndarray:
+        return array([self.sample(action) for action in memory.actions])
 
     def states_batch(self, states: List[State]) -> ndarray:
         return array([state.to_one_hot_vec() for state in states])

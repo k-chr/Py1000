@@ -23,15 +23,26 @@ class SimpleTakingTricksEnv(object):
         self.file_name = f"simpletakingtricksenv_session_{datetime.now().strftime('%b_%d_%Y_%H_%M_%S')}.log"
         self.csv_rewards = f"simpletakingtricksenv_rewards_{datetime.now().strftime('%b_%d_%Y_%H_%M_%S')}.csv"
         self.csv_invalid = f"simpletakingtricksenv_invalid_{datetime.now().strftime('%b_%d_%Y_%H_%M_%S')}.csv"
+        self.csv_score = f"simpletakingtricksenv_score_{datetime.now().strftime('%b_%d_%Y_%H_%M_%S')}.csv"
         self.logger = GameLogger(self.file_name)
         self.csv_inv_log = CSVLogger(self.csv_invalid)
         self.csv_rew_log = CSVLogger(self.csv_rewards)
+        self.csv_score_log = CSVLogger(self.csv_score)
         self.player1 = EnvPlayer("player1")
         self.player2 = EnvPlayer("player2")
 
-    def log_players_csv_info(self):
+    def log_episode_info(self):
         self.csv_inv_log.log((self.player1.invalid_actions, self.player2.invalid_actions))
         self.csv_rew_log.log((self.player1.rewards, self.player2.rewards))
+        self.csv_score_log.log((self.player1.score, self.player2.score))
+        self.logger.append_to_log(f"{self.player1.name}'s' score is {self.player1.score} |\
+                                    {self.player2.name}'s' score is {self.player2.score}")
+
+    def end_logging(self):
+        self.logger.end_logging()
+        self.csv_inv_log.save()
+        self.csv_rew_log.save()
+        self.csv_score_log.save()
 
     def reset(self):
         player1 = randint(0, 1) == 1
@@ -61,15 +72,15 @@ class SimpleTakingTricksEnv(object):
                                         known_stock=self.player_handler.known_stock)}
 
     @property
-    def player_handler(self):
+    def player_handler(self) -> EnvPlayer:
         return self.player1 if self.is_player1_turn else self.player2
 
     @property
-    def done(self):
+    def done(self) -> bool:
         return len(self.played_cards) == 20
         
     @property
-    def opponent_handler(self):
+    def opponent_handler(self) -> EnvPlayer:
         return self.player2 if self.is_player1_turn else self.player1
 
     def step(self, action: int): 
@@ -109,6 +120,7 @@ class SimpleTakingTricksEnv(object):
         if reward > 0:
             self.is_player1_turn = not self.is_player1_turn
             self.current_observation = self.create_observation(card=card if opponent_card is None else None, trump=trump)
+
         rewards = [reward]
         return self.current_observation, rewards, self.done
 
@@ -119,28 +131,35 @@ class SimpleTakingTricksEnv(object):
         trump: Suits =self.current_observation["data"].trump
         l = [card for card in self.player_handler.hand_cards if card.id() == action]
         opponent_card: Card = self.current_observation["data"].played_card
-
+        the_same_player = False
         if not any(l) or (opponent_card is not None and not GameRules.is_card_valid(
                 self.player_handler.hand_cards, l[0], opponent_card, trump)):
             reward = INVALID_MOVE_REWARD
             self.player_handler.invalid_actions += 1
             card = opponent_card
+            the_same_player = True
         else:
             card = l[0]
             self.player_handler.hand_cards.remove(card)
             self.logger.append_to_log(self.player_handler.name + " played card " + card.__str__())
-            
+            reward = VALID_MOVE_REWARD
             if opponent_card is not None:
                 self.played_cards.append(card)
                 self.played_cards.append(opponent_card)
-
+                trick_value = (card.value.value + opponent_card.value.value)
                 trick = [card, opponent_card]
                 if GameRules.does_card_beat_opponents_one(card, opponent_card, trump):
                     self.player_handler.tricks.append(trick)
-                    reward += (card.value.value + opponent_card.value.value)
+                    reward += trick_value
+                    op_reward -= trick_value
+                    self.player_handler.score += trick_value
+                    the_same_player = True
                 else:
                     self.opponent_handler.tricks.append(trick)
-                    op_reward = (card.value.value + opponent_card.value.value)
+                    op_reward = trick_value
+                    reward -= trick_value
+                    self.opponent_handler.score += trick
+
                 card = None
                 
             else:
@@ -149,15 +168,14 @@ class SimpleTakingTricksEnv(object):
                     trump = card.suit
                     self.logger.append_to_log(self.player_handler.name + f" meld {trump.name} by {card} and got {trump.value} points")
 
-        rewards = [reward,op_reward] if op_reward > 0 else [reward]
+        rewards = [reward, op_reward]
         self.__update_rewards(reward)
         self.__update_op_rewards(op_reward)
-        if reward >= 0:
+        if not the_same_player:
             self.logger.append_to_log(f"player1_cards: {self.player1.hand_cards}")
             self.logger.append_to_log(f"player2_cards: {self.player2.hand_cards}")
-            self.player_handler.score += reward
-            self.opponent_handler.score += op_reward
-        self.is_player1_turn = not self.is_player1_turn if (op_reward > 0 or opponent_card is None) and reward >= 0 else self.is_player1_turn
+            
+        self.is_player1_turn = not self.is_player1_turn if not the_same_player else self.is_player1_turn
         self.current_observation = self.create_observation(trump=trump, card=card)
         return self.current_observation, rewards, self.done
 
