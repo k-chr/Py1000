@@ -15,7 +15,7 @@ from .. import (path, datetime, zeros,
                 choice, List, array, 
                 nan_to_num, n_sum, ndarray,
                 argmax, int64, deque, Deque,
-                Callable as fun)
+                Callable as fun, NamedTuple)
 from ..enums import TrainingEnum
 from ..states.biddingstate import BiddingState
 from ..states.giveawaystate import GiveawayState
