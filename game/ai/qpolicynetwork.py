@@ -1,11 +1,9 @@
 from __future__ import annotations
-from keras.losses import MSE
 
-from tensorflow.python.framework.ops import Tensor
-
-from . import (Activation, Input, Dense, n_sum, TrainingEnum,
-               relu, softmax, datetime, Adam, Model, print_tensor, ndarray,
-               nan_to_num, path, k_sum, k_log, List, SGD)
+from . import (Activation, Input, Dense, n_sum,
+               TrainingEnum, relu, softmax, datetime,
+               Adam, Model, ndarray,nan_to_num, path,
+               k_sum, k_log, List, SGD, Tensor, MSE)
 
 class QPolicyNetwork(object):
 

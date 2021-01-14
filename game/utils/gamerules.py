@@ -8,6 +8,8 @@ class GameRules(object):
 
     @classmethod
     def is_card_valid(cls, cards: List[Card], card: Card, opponent_card: Card, trump: Suits =Suits.NO_SUIT) -> bool:
+        if opponent_card is None and card in cards: 
+            return True
         if card.suit is not opponent_card.suit:
             if cls.is_suit_present(cards, opponent_card.suit):
                 return False

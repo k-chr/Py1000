@@ -69,14 +69,14 @@ class Sim(QObject):
                 steps += 1
                 obs, rewards, done = self.env.step(action)
                 if rewards[0] < 0 and ((not self.flag is TrainingEnum.FULL_TRAINING
-                        ) or (self.flag is TrainingEnum.FULL_TRAINING and rewards[1] == 0
+                        ) or (self.flag is TrainingEnum.FULL_TRAINING and rewards[1] is None
                     )):
                     player.remeber_traumatic_S_A_R(state, action, rewards[0])
                 else:
                     player.remember_S_A_R(state, action, rewards[0])
 
                 #delayed reward
-                if(len(rewards) > 1):
+                if(len(rewards) > 1 and rewards[1] is not None):
                     op.memory.update_last_reward(rewards[1])
 
                 if(len(player.traumatic_memory.states) == STEPS_BATCH_SIZE):

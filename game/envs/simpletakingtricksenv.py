@@ -87,10 +87,10 @@ class SimpleTakingTricksEnv(object):
        return self.__fun(action)
 
     def __update_rewards(self, reward: float):
-        self.player_handler.rewards += reward
+        self.player_handler.rewards += reward if reward is not None else 0
 
     def __update_op_rewards(self, reward: float):
-        self.opponent_handler.rewards += reward
+        self.opponent_handler.rewards += reward if reward is not None else 0
 
     def __own_card_estimator_step(self, action: int):
         reward = 0
@@ -138,6 +138,7 @@ class SimpleTakingTricksEnv(object):
             self.player_handler.invalid_actions += 1
             card = opponent_card
             the_same_player = True
+            op_reward = None
         else:
             card = l[0]
             self.player_handler.hand_cards.remove(card)
@@ -158,15 +159,17 @@ class SimpleTakingTricksEnv(object):
                     self.opponent_handler.tricks.append(trick)
                     op_reward = trick_value
                     reward -= trick_value
-                    self.opponent_handler.score += trick
+                    self.opponent_handler.score += trick_value
 
                 card = None
                 
             else:
                 if(GameRules.has_pair(self.player_handler.hand_cards, card)):
                     reward += (card.suit.value)
+                    self.player_handler.score += card.suit.value
                     trump = card.suit
                     self.logger.append_to_log(self.player_handler.name + f" meld {trump.name} by {card} and got {trump.value} points")
+                op_reward = None
 
         rewards = [reward, op_reward]
         self.__update_rewards(reward)
