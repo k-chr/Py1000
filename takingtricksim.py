@@ -1,6 +1,6 @@
 from game.envs.simpletakingtricksenv import SimpleTakingTricksEnv
 from game.ai.takingtricksagent import TakingTricksAgent
-from game.enums import TrainingEnum
+from game.enums import TrainingEnum, NetworkMode, RewardMapperMode
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal, QTimer, QCoreApplication
 import sys
 from datetime import datetime
@@ -13,7 +13,20 @@ STEPS_BATCH_SIZE = 100
 EPISODES = 200_000
 DUMP_PERIOD = 500
 TRAINING_FLAG = TrainingEnum.PRETRAINING_OWN_CARDS
+REWARD_MAPPPER = RewardMapperMode.DISCOUNTED
+NETWORK = NetworkMode.SINGLE
 
+def get_network_type(string: str) -> NetworkMode:
+    try: 
+        return NetworkMode[string]
+    except:
+        raise argparse.ArgumentTypeError(f'provided network mode flag: {string} is not available')
+
+def get_reward_mapper_type(string: str) -> RewardMapperMode:
+    try: 
+        return RewardMapperMode[string]
+    except:
+        raise argparse.ArgumentTypeError(f'provided reward mapper flag: {string} is not available')
 
 def get_date(string: str) -> datetime:
     try:
@@ -25,13 +38,18 @@ def get_flag(string: str) -> TrainingEnum:
     try: 
         return TrainingEnum[string]
     except:
-        raise argparse.ArgumentTypeError(f'provided training flag: {string} is not availabe')
+        raise argparse.ArgumentTypeError(f'provided training flag: {string} is not available')
 
 def init_parser() -> argparse.ArgumentParser: 
     parser = argparse.ArgumentParser()
+
     parser.add_argument('--date', type=get_date, help='expected format: Mon_DD_YY_HH_MM_ss')
     parser.add_argument('--training-flag', type=get_flag, default=TRAINING_FLAG, 
                         help=f'available values: {TrainingEnum._member_names_}')
+    parser.add_argument('--network-flag', type=get_network_type, default=NETWORK, 
+                        help=f'available values: {NetworkMode._member_names_}')
+    parser.add_argument('--rewards-flag', type=get_reward_mapper_type, default=REWARD_MAPPPER, 
+                        help=f'available values: {RewardMapperMode._member_names_}')
 
     def handler(message: str):
         print(message, file=sys.stderr)
@@ -41,13 +59,16 @@ def init_parser() -> argparse.ArgumentParser:
     setattr(parser, 'error', handler)
     return parser
 
+
 class Sim(QObject):
     finished = pyqtSignal()
 
     def __init__(self, args: argparse.Namespace, parent=None):
         super(Sim, self).__init__(parent)
-        date = args.date
-        self.flag = args.training_flag
+        date: datetime = args.date
+        self.flag: TrainingEnum = args.training_flag
+        self.network_type: NetworkMode = args.network_flag
+        self.reward_mapper_type: RewardMapperMode = args.rewards_flag
         self.player1 = TakingTricksAgent(40, "player1", last_weights=date, flag=self.flag, alpha=0.01 if not self.flag is TrainingEnum.FULL_TRAINING else 0.0001)
         self.player2 = TakingTricksAgent(40, "player1", last_weights=date, flag=self.flag, alpha=0.01 if not self.flag is TrainingEnum.FULL_TRAINING else 0.0001)
         self.env = SimpleTakingTricksEnv(self.flag)
