@@ -19,8 +19,8 @@ NETWORK = NetworkMode.SINGLE
 
 def get_network_type(string: str) -> NetworkMode:
     try: 
-        return reduce(lambda x, y: x if isinstance(x, NetworkMode) \
-                            else NetworkMode[x] | NetworkMode[y], string.split('|'),
+        return reduce(lambda x, y: (x if isinstance(x, NetworkMode) \
+                            else NetworkMode[x]) | NetworkMode[y], string.split('|'),
                             NetworkMode.SINGLE & NetworkMode.CLUSTER)
     except:
         raise argparse.ArgumentTypeError(f'provided network mode flag: {string} is not available')
