@@ -92,12 +92,12 @@ class QPolicyNetwork(object):
         l = [__instance for __instance in QPolicyNetwork.__instances if (
                 __instance.states_one_hot_len == n_one_hot and __instance.action_output_size == n_actions and __instance.alpha == alpha 
                 and __instance.init_date == start_from and __instance.memories_directory == mem_dir and __instance.network_name == name
-                and flag is __instance.flag
+                and flag is __instance.flag and mode & __instance.mode
             )]
         __instance = None
 
         if not any(l):
-            __instance = QPolicyNetwork(name, n_actions, batch_size, alpha, mem_dir, n_one_hot, start_from, flag)
+            __instance = QPolicyNetwork(name, n_actions, batch_size, alpha, mem_dir, n_one_hot, start_from, flag, mode)
             QPolicyNetwork.__instances.append(__instance)
             __instance.build_network()
 
