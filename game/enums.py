@@ -12,6 +12,16 @@ class TrainingEnum(Enum):
     PRETRAINING_OWN_CARDS = 0x1
     PRETRAINING_VALID_CARDS = 0x2
 
+class NetworkMode(Enum):
+    CLUSTER = 0x02
+    SINGLE = 0X01
+    SINGLE_LARGE = 0x03
+
+class RewardMapperMode(Enum):
+    DISCOUNTED = 0x00
+    DISCOUNTED_REVERSED = 0x01
+    NOT_MODIFIED = 0x02
+
 class Cards(Enum):
     NINE = 0
     TEN = 10
@@ -35,3 +45,4 @@ class Cards(Enum):
             val = 4
 
         return val
+        
