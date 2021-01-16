@@ -1,3 +1,4 @@
+from functools import reduce
 from game.envs.simpletakingtricksenv import SimpleTakingTricksEnv
 from game.ai.takingtricksagent import TakingTricksAgent
 from game.enums import TrainingEnum, NetworkMode, RewardMapperMode
@@ -18,7 +19,9 @@ NETWORK = NetworkMode.SINGLE
 
 def get_network_type(string: str) -> NetworkMode:
     try: 
-        return NetworkMode[string]
+        return reduce(lambda x, y: x if isinstance(x, NetworkMode) \
+                            else NetworkMode[x] | NetworkMode[y], string.split('|'),
+                            NetworkMode.SINGLE & NetworkMode.CLUSTER)
     except:
         raise argparse.ArgumentTypeError(f'provided network mode flag: {string} is not available')
 
@@ -34,7 +37,7 @@ def get_date(string: str) -> datetime:
     except:
         raise argparse.ArgumentTypeError('provided date is not convertible')
 
-def get_flag(string: str) -> TrainingEnum:
+def get_training_flag(string: str) -> TrainingEnum:
     try: 
         return TrainingEnum[string]
     except:
@@ -44,10 +47,10 @@ def init_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--date', type=get_date, help='expected format: Mon_DD_YY_HH_MM_ss')
-    parser.add_argument('--training-flag', type=get_flag, default=TRAINING_FLAG, 
+    parser.add_argument('--training-flag', type=get_training_flag, default=TRAINING_FLAG, 
                         help=f'available values: {TrainingEnum._member_names_}')
     parser.add_argument('--network-flag', type=get_network_type, default=NETWORK, 
-                        help=f'available values: {NetworkMode._member_names_}')
+                        help=f'available values: {NetworkMode._member_names_} and their combinations using \"|\" separator')
     parser.add_argument('--rewards-flag', type=get_reward_mapper_type, default=REWARD_MAPPPER, 
                         help=f'available values: {RewardMapperMode._member_names_}')
 

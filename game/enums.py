@@ -1,4 +1,4 @@
-from . import Enum
+from . import Enum, IntFlag
 
 class Suits(Enum):
     S = 40
@@ -12,10 +12,10 @@ class TrainingEnum(Enum):
     PRETRAINING_OWN_CARDS = 0x1
     PRETRAINING_VALID_CARDS = 0x2
 
-class NetworkMode(Enum):
+class NetworkMode(IntFlag):
+    SINGLE = 0x01
     CLUSTER = 0x02
-    SINGLE = 0X01
-    SINGLE_LARGE = 0x03
+    LARGE = 0x04
 
 class RewardMapperMode(Enum):
     DISCOUNTED = 0x00
@@ -45,4 +45,3 @@ class Cards(Enum):
             val = 4
 
         return val
-        
