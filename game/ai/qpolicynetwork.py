@@ -1,17 +1,18 @@
 from __future__ import annotations
 
-from . import (Activation, Input, Dense, n_sum,
+from . import (Activation, Input, Dense, n_sum, NetworkMode,
                TrainingEnum, relu, softmax, datetime,
-               Adam, Model, ndarray,nan_to_num, path,
+               Adam, Model, ndarray, nan_to_num, path,
                k_sum, k_log, List, SGD, Tensor, MSE)
+
+from .reinforceagent import Batch
 
 class QPolicyNetwork(object):
 
-    __instances: List[QPolicyNetwork] = []
+    __instances: List[QPolicyNetwork] =[]
 
     def __init__(self, fname: str, n_actions: int, batch_size: int, alpha: float, 
-                 mem_dir: str, n_one_hot: int, start_from: datetime, flag: TrainingEnum):
-        super(QPolicyNetwork, self).__init__()
+                 mem_dir: str, n_one_hot: int, start_from: datetime, flag: TrainingEnum, mode: NetworkMode):
         self.batch_size = batch_size
         self.states_one_hot_len = n_one_hot
         self.action_output_size = n_actions
@@ -22,6 +23,8 @@ class QPolicyNetwork(object):
         self.policy_predictor: Model =None
         self.policy_trainer: Model =None
         self.flag = flag
+        self.mode = mode
+        self.layer_scale = 8 if self.mode & NetworkMode.LARGE else 2
         
     def predict_probs(self, vec: ndarray):
         probs = nan_to_num(self.policy_predictor.predict(vec))
@@ -35,9 +38,9 @@ class QPolicyNetwork(object):
         state_input = Input(shape=(self.states_one_hot_len,))
         wrapped = Dense(self.states_one_hot_len)(state_input)
         wrapped = Activation(relu)(wrapped)
-        wrapped = Dense(2*self.states_one_hot_len)(wrapped)
+        wrapped = Dense(self.layer_scale*self.states_one_hot_len)(wrapped)
         wrapped = Activation(relu)(wrapped)
-        wrapped = Dense(2*self.action_output_size)(wrapped)
+        wrapped = Dense(self.layer_scale*self.action_output_size)(wrapped)
         wrapped = Activation(relu)(wrapped)
         wrapped = Dense(self.action_output_size)(wrapped)
         layers = Activation(softmax)(wrapped) if self.flag is TrainingEnum.FULL_TRAINING else wrapped
@@ -85,8 +88,8 @@ class QPolicyNetwork(object):
 
     @staticmethod
     def get_instance(name: str, n_actions: int, batch_size: int, alpha: float, 
-                 mem_dir: str, n_one_hot: int, start_from: datetime, flag: TrainingEnum):
-        l = [__instance for __instance in  QPolicyNetwork.__instances if (
+                 mem_dir: str, n_one_hot: int, start_from: datetime, flag: TrainingEnum, mode: NetworkMode =NetworkMode.SINGLE):
+        l = [__instance for __instance in QPolicyNetwork.__instances if (
                 __instance.states_one_hot_len == n_one_hot and __instance.action_output_size == n_actions and __instance.alpha == alpha 
                 and __instance.init_date == start_from and __instance.memories_directory == mem_dir and __instance.network_name == name
                 and flag is __instance.flag
@@ -102,3 +105,10 @@ class QPolicyNetwork(object):
             __instance = l[0]
 
         return __instance
+
+    def learn(self, memory: Batch):
+        try:
+            network_input = {'state':memory.states, 'discounted_reward':memory.rewards} if self.flag is TrainingEnum.FULL_TRAINING else {'state':memory.states}
+            self.policy_trainer.fit(network_input, memory.actions, epochs=1) 
+        except Exception as e:
+            print(e)

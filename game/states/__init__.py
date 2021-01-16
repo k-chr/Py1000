@@ -1,3 +1,2 @@
-from ..card import Card
-from ..enums import Suits
+from ..card import Card, Suits
 from .. import List, zeros, concatenate, deepcopy
