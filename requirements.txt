@@ -1,0 +1,6 @@
+PyQt5
+Keras==2.3.1
+tb-nightly
+tensorflow==2.2
+cx-Freeze
+numpy==1.19.1
