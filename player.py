@@ -1,13 +1,13 @@
 from card import *
 MAX_VALUE = 1000
-from server import *
+from net.server import *
 from threading import *
 from time import sleep
 from statusgame import StatusGame
-from networkdialog import NetworkDialog
-from farewelldialog import FarewellDialog
+from ui.dialogs.networkdialog import NetworkDialog
+from ui.dialogs.farewelldialog import FarewellDialog
 from peer import Peer
-from initdialog import InitDialog
+from ui.dialogs.biddialog import BidDialog
 from PyQt5.QtCore import QObject, pyqtSignal
 from randomcardgenerator import RandomCardGenerator
 RULE = 900
@@ -49,7 +49,9 @@ class Player(QObject):
         self.__server.setNewPlayer()
     def onGameEnd(self, who):
         initStr = "YOU WON!" if (who == "SERVER" and self.is_HOST == True) or (who == 'PEER' and self.is_HOST == False) else "YOU LOST!" if who != "DRAW" else "It\'s a draw!"
-        QSound.play(os.path.join('sounds', 'win.wav' if "WIN" in initStr else 'lose.mp3'))
+        sound = QSound(os.path.join('sounds', 'win.wav' if "WIN" in initStr else 'lose.mp3'), self)
+        sound.setLoops(4)
+        sound.play()
         res = FarewellDialog.getDialog(title = initStr)
         self.cleanUp()
         StatusGame.getInstance().set_status_name('BACK_TO_MENU')
@@ -294,7 +296,7 @@ class Player(QObject):
             print("stack choosing")
         elif status == "VALUE_DECLARATION":
             self.computeForbiddenVal()
-            ret, val = InitDialog.getDialog(min=self.currentBid if self.is_main_player == False else self.declared_value, max=self.forbidden)
+            ret, val = BidDialog.getDialog(min=self.currentBid if self.is_main_player == False else self.declared_value, max=self.forbidden)
             
             if self.is_main_player == False:
                 self.declared_value = ret

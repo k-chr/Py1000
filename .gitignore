@@ -14,3 +14,11 @@ __pycache__
 /.idea/vcs.xml
 build
 dist
+*.spec
+*.vs
+*.log
+*.csv
+*.h5
+*.xlsx
+env/*
+.vscode

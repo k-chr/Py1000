@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{872832d1-3520-4eb9-9535-f19abfbbf956}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>main.py</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId />
+    <TestFramework>Pytest</TestFramework>
+    <IsWindowsApplication>False</IsWindowsApplication>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="icon.ico" />
+    <Content Include="images\1.png" />
+    <Content Include="images\2.png" />
+    <Content Include="images\backgrounds\bg1.png" />
+    <Content Include="images\backgrounds\bg2.png" />
+    <Content Include="images\backgrounds\bg3.png" />
+    <Content Include="images\backgrounds\bg4.png" />
+    <Content Include="images\backgrounds\blank.png" />
+    <Content Include="images\backgrounds\blank1.png" />
+    <Content Include="images\backgrounds\blank2.png" />
+    <Content Include="images\backgrounds\blank3.png" />
+    <Content Include="images\backgrounds\blank4.png" />
+    <Content Include="images\banner.png" />
+    <Content Include="images\buttons\help.png" />
+    <Content Include="images\buttons\host.png" />
+    <Content Include="images\buttons\peer.png" />
+    <Content Include="images\buttons\quit.png" />
+    <Content Include="images\buttons\settings.png" />
+    <Content Include="images\cards\10C.png" />
+    <Content Include="images\cards\10D.png" />
+    <Content Include="images\cards\10H.png" />
+    <Content Include="images\cards\10S.png" />
+    <Content Include="images\cards\11C.png" />
+    <Content Include="images\cards\11D.png" />
+    <Content Include="images\cards\11H.png" />
+    <Content Include="images\cards\11S.png" />
+    <Content Include="images\cards\12C.png" />
+    <Content Include="images\cards\12D.png" />
+    <Content Include="images\cards\12H.png" />
+    <Content Include="images\cards\12S.png" />
+    <Content Include="images\cards\13C.png" />
+    <Content Include="images\cards\13D.png" />
+    <Content Include="images\cards\13H.png" />
+    <Content Include="images\cards\13S.png" />
+    <Content Include="images\cards\14C.png" />
+    <Content Include="images\cards\14D.png" />
+    <Content Include="images\cards\14H.png" />
+    <Content Include="images\cards\14S.png" />
+    <Content Include="images\cards\9C.png" />
+    <Content Include="images\cards\9D.png" />
+    <Content Include="images\cards\9H.png" />
+    <Content Include="images\cards\9S.png" />
+    <Content Include="images\cards\back.png" />
+    <Content Include="images\club.png" />
+    <Content Include="images\default.png" />
+    <Content Include="images\diamond.png" />
+    <Content Include="images\font\install_font.bat" />
+    <Content Include="images\font\Kbreindeergames-ra2O.ttf" />
+    <Content Include="images\gondola_coursor.png" />
+    <Content Include="images\heart.png" />
+    <Content Include="images\ico.png" />
+    <Content Include="images\installer_ico.png" />
+    <Content Include="images\main.jpg" />
+    <Content Include="images\spade.png" />
+    <Content Include="installer_icon.ico" />
+    <Content Include="sounds\background.wav" />
+    <Content Include="sounds\c1.wav" />
+    <Content Include="sounds\c2.wav" />
+    <Content Include="sounds\c3.wav" />
+    <Content Include="sounds\c4.wav" />
+    <Content Include="sounds\c5.wav" />
+    <Content Include="sounds\c6.wav" />
+    <Content Include="sounds\c7.wav" />
+    <Content Include="sounds\c8.wav" />
+    <Content Include="sounds\lose.mp3" />
+    <Content Include="sounds\win.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="game\ai\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="app.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="game\card.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="game\enums.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="game\envs\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="game\utils\gamerules.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="game\utils\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="game\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="net\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="fun_threading\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="sounds\soundmanager.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="sounds\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\dialogs\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\game\carddesk.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\game\cardgraphicsview.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\game\gameplayscene.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\game\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\layouts\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\widgets\banner.py" />
+    <Compile Include="card.py" />
+    <Compile Include="net\communicationhandler.py" />
+    <Compile Include="config.py" />
+    <Compile Include="ui\game\cardview.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\widgets\configbutton.py" />
+    <Compile Include="ui\dialogs\farewelldialog.py" />
+    <Compile Include="fun_threading\functionalrunnable.py" />
+    <Compile Include="fun_threading\functionalthread.py" />
+    <Compile Include="ui\widgets\gamebutton.py" />
+    <Compile Include="ui\layouts\gamelayout.py" />
+    <Compile Include="ui\dialogs\biddialog.py" />
+    <Compile Include="main.py" />
+    <Compile Include="ui\widgets\pulsingprogressbar.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\game\suitlabel.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\windows\mainwindow.py" />
+    <Compile Include="ui\dialogs\networkdialog.py" />
+    <Compile Include="peer.py" />
+    <Compile Include="player.py" />
+    <Compile Include="game\utils\randomcardgenerator.py" />
+    <Compile Include="net\server.py" />
+    <Compile Include="setup.py" />
+    <Compile Include="statusgame.py" />
+    <Compile Include="ui\layouts\testlayout.py" />
+    <Compile Include="ui\widgets\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\windows\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ui\layouts\welcomelayout.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="game\ai\" />
+    <Folder Include="game\" />
+    <Folder Include="game\envs\" />
+    <Folder Include="game\utils\" />
+    <Folder Include="images" />
+    <Folder Include="images\backgrounds" />
+    <Folder Include="images\buttons" />
+    <Folder Include="images\cards" />
+    <Folder Include="images\font\" />
+    <Folder Include="net\" />
+    <Folder Include="sounds\" />
+    <Folder Include="fun_threading\" />
+    <Folder Include="ui\" />
+    <Folder Include="ui\dialogs\" />
+    <Folder Include="ui\game\" />
+    <Folder Include="ui\layouts\" />
+    <Folder Include="ui\widgets\" />
+    <Folder Include="ui\windows\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+</Project>
