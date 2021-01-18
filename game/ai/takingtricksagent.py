@@ -10,8 +10,10 @@ from .memory import Memory
 
 def _get_own_cards_vec(state: TakingTrickState) -> ndarray:
     hand: ndarray =zeros(state.action_space)
+
     for card in state.hand_cards:
         hand[card.id()] = 1
+
     return hand
 
 def get_reward_modifier(beta: float) -> fun[[float], float]:
@@ -22,13 +24,16 @@ def get_reward_modifier(beta: float) -> fun[[float], float]:
     return wrapped
 
 def _get_valid_cards_vec(state: TakingTrickState) -> ndarray:
+
     if state.played_card is None:
         return _get_own_cards_vec(state)
 
     hand: ndarray =zeros(state.action_space)
+
     for card in state.hand_cards:
         if GameRules.is_card_valid(state.hand_cards, card, state.played_card, state.trump):
             hand[card.id()] = 1
+
     return hand
 
 def _sample_state(state: State) -> ndarray:
@@ -44,6 +49,7 @@ action_mappers: Dict[TrainingEnum, Union[fun[[TakingTrickState], ndarray], fun[[
     TrainingEnum.PRETRAINING_OWN_CARDS: _get_own_cards_vec,
     TrainingEnum.PRETRAINING_VALID_CARDS: _get_valid_cards_vec
 }
+
 
 class TakingTricksAgent(ReinforceAgent):
 
@@ -66,11 +72,13 @@ class TakingTricksAgent(ReinforceAgent):
         self.__state_mapper: fun[[State], ndarray] = _sample_state
 
     def get_action(self, state: State) -> int:
+
         if self.__errors >= self.__MAX_ERRORS and self.flag is TrainingEnum.FULL_TRAINING:
             self.__errors = 0
             vec = list(map(lambda card: card.id(), list(filter(lambda x:GameRules.is_card_valid(
                     state.hand_cards, x, state.played_card, trump=state.trump), state.hand_cards
                 ))))
+
             return choice(vec, 1)[0]
             
         return super().get_action(state)
@@ -79,15 +87,15 @@ class TakingTricksAgent(ReinforceAgent):
         self.memory.save_data_for_replay_and_clean_temp(rewards_mapper=self.__rewards_mapper, 
                                                         reward_mapper=get_reward_modifier(self.beta))
         self.traumatic_memory.save_data_for_replay_and_clean_temp(rewards_mapper=self.__rewards_mapper, 
-                                                                  reward_mapper=get_reward_modifier(self.beta))
+                                                                  reward_mapper=get_reward_modifier(self.beta_penalty))
 
     def remeber_traumatic_S_A_R(self, state: State, action: int, reward: float):
         self.__errors += 1
-        return super().remeber_traumatic_S_A_R(state, action, reward)
+        return super().remeber_traumatic_S_A_R_B(state, action, reward)
     
     def remember_S_A_R(self, state: State, action: int, reward: float):
         self.errors = 0
-        return super().remember_S_A_R(state, action, reward)
+        return super().remember_S_A_R_B(state, action, reward)
 
     def _get_sample_batch_from_memory(self, memory: Memory, batch_size: int) -> Union[Batch, Dict[int, Batch]]:
         get_action_vec = self.__action_mapper

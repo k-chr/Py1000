@@ -82,11 +82,11 @@ class ReinforceAgent(object):
         self.invalid_actions = 0
         self.__action_getter = self.get_action_from_probs if self.flag is TrainingEnum.FULL_TRAINING else self.get_action_from_value
 
-    def remember_S_A_R(self, state: State, action: int, reward: float):
-        self.memory.remember_S_A_R(state, action, reward)
+    def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
+        self.memory.remember_S_A_R_B(state, action, reward, behavior)
         
-    def remeber_traumatic_S_A_R(self, state: State, action: int, reward: float):
-        self.traumatic_memory.remember_S_A_R(state, action, reward)
+    def remeber_traumatic_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
+        self.traumatic_memory.remember_S_A_R_B(state, action, reward, behavior)
 
     def get_action(self, state: State) -> int:
         vec = state.to_one_hot_vec()[None]
