@@ -1,16 +1,47 @@
 from .qpolicynetwork import QPolicyNetwork
-from . import zeros, State, array, List, choice, TrainingEnum, ndarray, argmax, int64
+from . import (zeros, State, array, List, Dict,
+               choice, TrainingEnum, ndarray,
+               argmax, int64, fun, Batch, NetworkMode)
 from .memory import Memory
 
-def get_cumulative_rewards(arr: List[float], gamma: float =0.9) -> ndarray:
-  l = len(arr)
-  G = zeros(l)
-  r_t_1 = 0
-  T = reversed(range(0, l))
-  for t, r_t in zip(T, arr[::-1]):
-      r_t_1 = r_t_1 * gamma + r_t
-      G[t] = r_t_1
-  return array([array(g) for g in G])
+MIN_SIZE_OF_BATCH = 0x20
+ACTION_SIZE = 0x18
+
+def zeros_as_list(len: int) -> List[float]:
+    return [0 for _ in range(len)]
+
+def get_cumulative_rewards(gamma: float =0.9) -> fun[[List[float]], List[float]]:
+
+    def wrapped(arr: List[float]):
+        l = len(arr)
+        G = zeros_as_list(l)
+        r_t_1 = 0
+        T = reversed(range(0, l))
+
+        for t, r_t in zip(T, arr[::-1]):
+            r_t_1 = r_t_1 * gamma + r_t
+            G[t] = r_t_1
+
+        return G
+    
+    return wrapped
+
+def get_cumulative_reward_reversed(gamma: float =0.9) -> fun[[List[float]], List[float]]:
+
+    def wrapped(arr: List[float]):
+
+        l = len(arr)
+        G = zeros_as_list(l)
+        r_t_1 = 0
+        T = range(0, l)
+
+        for t, r_t in zip(T, arr):
+            r_t_1 = r_t_1 * gamma + r_t
+            G[t] = r_t_1
+
+        return G
+
+    return wrapped
 
 FACTORS = {
     60: 1.2,
@@ -27,7 +58,7 @@ FACTORS = {
 class ReinforceAgent(object):
     
     def __init__(self, state_size: int, action_size: int, 
-                 gamma: float =0.99, alpha: float =0.001, flag: TrainingEnum =TrainingEnum.FULL_TRAINING):
+                 gamma: float =0.99, alpha: float =0.001, flag: TrainingEnum =TrainingEnum.FULL_TRAINING, mode: NetworkMode = NetworkMode.SINGLE):
         self.state_size = state_size
         self.action_size = action_size
         self.gamma = gamma
@@ -36,6 +67,9 @@ class ReinforceAgent(object):
         self.memory: Memory =Memory()
         self.model: QPolicyNetwork =None
         self.flag = flag
+        self.mode = mode
+        self.score = 0
+        self.invalid_actions = 0
         self.__action_getter = self.get_action_from_probs if self.flag is TrainingEnum.FULL_TRAINING else self.get_action_from_value
 
     def remember_S_A_R(self, state: State, action: int, reward: float):
@@ -56,6 +90,16 @@ class ReinforceAgent(object):
         except:
             print(f"probabilities: {probs[0]} contains NaN")
             raise Exception
+    
+    def set_score(self, score: int):
+        self.score = score 
+
+    def set_invalid_actions_count(self, invalid_actions: int):
+        self.invalid_actions = invalid_actions
+
+    @property
+    def beta(self):
+        return FACTORS.get(max(list(filter(lambda x: x <= self.score, FACTORS.keys())), default=0), 1)
 
     def get_action_from_value(self, vec: ndarray) -> int:    
         values = self.model.predict_values(vec)
@@ -68,46 +112,20 @@ class ReinforceAgent(object):
         return action
 
     def replay(self):
-        self.__replay(self.memory, message="Learning positive memories...")
-        self.__replay(self.traumatic_memory, message="Learning negative memories...")
-        self.clean_memory()
-
-    def __replay(self, memory: Memory, message=""):
-        state_batch = self.states_batch(memory.states)
-        action_batch = self.actions_batch(memory)
-        discounted_rewards_batch = self.get_cumulative_rewards(memory.rewards) if self.flag is TrainingEnum.FULL_TRAINING else array(memory.rewards)
-        if(len(state_batch) == 0 or len(action_batch) == 0 or len(discounted_rewards_batch) == 0):
-            return
-        print(message)
-        try:
-            d = {'state':state_batch, 'discounted_reward':discounted_rewards_batch} if self.flag is TrainingEnum.FULL_TRAINING else {'state':state_batch}
-            self.model.policy_trainer.fit(d, action_batch, epochs=1) 
-        except Exception as e:
-            print(e)
-
-    def replay_traumatic_only(self):
-        self.__replay(self.traumatic_memory, message="Learning negative memories...")
-        self.traumatic_memory.clean()
-
-    def actions_batch(self, memory: Memory) -> ndarray:
-        return array([self.sample(action) for action in memory.actions])
-
-    def states_batch(self, states: List[State]) -> ndarray:
-        return array([state.to_one_hot_vec() for state in states])
-
-    def clean_memory(self) -> None:
-        self.memory.clean()
-        self.traumatic_memory.clean()
+        self.persist_episode_and_clean_memory()
+        self._replay(self.memory, message="Learning positive memories...")
+        self._replay(self.traumatic_memory, message="Learning negative memories...")
 
     def sample(self, action: int) -> ndarray:
         z: ndarray =zeros(self.action_size)
         z[action] = 1
         return z
 
-    def get_cumulative_rewards(self, rewards: List[float]) -> ndarray:
-        return get_cumulative_rewards(rewards, self.gamma)
+    def persist_episode_and_clean_memory(self) -> None:
+        pass
 
-    def scale_rewards(self, score: int):
-        beta = FACTORS.get(max(list(filter(lambda x: x <= score, FACTORS.keys())), default=0), 1)
-        for i in range(len(self.memory.rewards)):
-            self.memory.rewards[i] *= beta
+    def _get_sample_batch_from_memory(self, memory: Memory, batch_size: int =MIN_SIZE_OF_BATCH) -> Dict[int, Batch]: 
+        pass
+
+    def _replay(self, memory: Memory, message=""):
+        pass
