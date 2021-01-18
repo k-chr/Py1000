@@ -1,4 +1,4 @@
-from card import *
+
 MAX_VALUE = 1000
 from net.server import *
 from threading import *
@@ -9,7 +9,7 @@ from ui.dialogs.farewelldialog import FarewellDialog
 from peer import Peer
 from ui.dialogs.biddialog import BidDialog
 from PyQt5.QtCore import QObject, pyqtSignal
-from randomcardgenerator import RandomCardGenerator
+# from randomcardgenerator import RandomCardGenerator
 RULE = 900
 class Player(QObject):
     __server = None
@@ -49,9 +49,6 @@ class Player(QObject):
         self.__server.setNewPlayer()
     def onGameEnd(self, who):
         initStr = "YOU WON!" if (who == "SERVER" and self.is_HOST == True) or (who == 'PEER' and self.is_HOST == False) else "YOU LOST!" if who != "DRAW" else "It\'s a draw!"
-        sound = QSound(os.path.join('sounds', 'win.wav' if "WIN" in initStr else 'lose.mp3'), self)
-        sound.setLoops(4)
-        sound.play()
         res = FarewellDialog.getDialog(title = initStr)
         self.cleanUp()
         StatusGame.getInstance().set_status_name('BACK_TO_MENU')
@@ -123,23 +120,16 @@ class Player(QObject):
         return tup[0] in self.hand_cards and tup[1] in self.hand_cards     
     def computeForbiddenVal(self):
         val = 130
-        if self.find_pair( (Card('H', 12), Card('H', 13))):
-            val += 100
-        if self.find_pair( (Card('D', 12), Card('D', 13))):
-            val+=80
-        if self.find_pair( (Card('C', 12), Card('C', 13))):
-            val += 60
-        if self.find_pair( (Card('S', 12), Card('S', 13))):
-            val += 40
+        
         self.forbidden = val
     def on_got_cards(self,server=list(), player=list(), stack1 = list(), stack2=list()):
-        self.hand_cards = [Card(tup[0], tup[1]) for tup in player]
+        # self.hand_cards = [Card(tup[0], tup[1]) for tup in player]
         self.computeForbiddenVal()
         print("forbidden value",self.forbidden)
-        self.opponent_cards = [Card(tup[0], tup[1]) for tup in server]
-        s1 = [Card(tup[0], tup[1]) for tup in stack1]
-        s2 = [Card(tup[0], tup[1]) for tup in stack2]
-        self.cardsToHandInReady.emit(self.hand_cards, self.opponent_cards,(tuple(s1), tuple(s2)))
+        # self.opponent_cards = [Card(tup[0], tup[1]) for tup in server]
+        # s1 = [Card(tup[0], tup[1]) for tup in stack1]
+        # s2 = [Card(tup[0], tup[1]) for tup in stack2]
+        # self.cardsToHandInReady.emit(self.hand_cards, self.opponent_cards,(tuple(s1), tuple(s2)))
     def on_player_choosen(self, val):
         print("I'm here again")
         print(val)
@@ -266,20 +256,20 @@ class Player(QObject):
             
             if self.__server is not None and self.is_HOST != False:
                 print("I\'m gonna randomize cards")
-                generator = RandomCardGenerator(self.value_rand) 
-                stack1,stack2, player,server = generator.generate_stack_and_players_cards()
-                self.hand_cards = server
+                # generator = RandomCardGenerator(self.value_rand) 
+                # stack1,stack2, player,server = generator.generate_stack_and_players_cards()
+                # self.hand_cards = server
                 self.computeForbiddenVal()
                 print("forbidden Value", self.forbidden)
-                self.opponent_cards = player
-                QTimer.singleShot(400, lambda hand_cards = self.hand_cards, opponent_cards=self.opponent_cards, s1 = tuple(stack1), s2 = tuple(stack2):self.cardsToHandInReady.emit(hand_cards, opponent_cards,(s1, s2)))
-                op_stacks = [[stack[0].getTuple(), stack[1].getTuple()] for stack in [stack1, stack2]]
-                op_server = [card.getTuple() for card in reversed(server)]
-                op = [card.getTuple() for card in reversed(player)]
-                print(op_stacks, op_server, op)
-                msg_dict = self.__server.prepareServerMessage('CARDS_HANDIN', STACKS=op_stacks,
-                                                              SERVER_CARDS=op_server, PLAYER_CARDS=op)
-                QTimer.singleShot(1000, lambda msg = msg_dict:self.__server.sendCmd(msg))
+                # self.opponent_cards = player
+                # QTimer.singleShot(400, lambda hand_cards = self.hand_cards, opponent_cards=self.opponent_cards, s1 = tuple(stack1), s2 = tuple(stack2):self.cardsToHandInReady.emit(hand_cards, opponent_cards,(s1, s2)))
+                # op_stacks = [[stack[0].getTuple(), stack[1].getTuple()] for stack in [stack1, stack2]]
+                # op_server = [card.getTuple() for card in reversed(server)]
+                # op = [card.getTuple() for card in reversed(player)]
+                # print(op_stacks, op_server, op)
+                # msg_dict = self.__server.prepareServerMessage('CARDS_HANDIN', STACKS=op_stacks,
+                #                                               SERVER_CARDS=op_server, PLAYER_CARDS=op)
+                # QTimer.singleShot(1000, lambda msg = msg_dict:self.__server.sendCmd(msg))
             else:
                 if(self.clientSignalsNotConnected == True):
                     self.__client.gameEnded.connect(self.onGameEnd)
@@ -296,7 +286,7 @@ class Player(QObject):
             print("stack choosing")
         elif status == "VALUE_DECLARATION":
             self.computeForbiddenVal()
-            ret, val = BidDialog.getDialog(min=self.currentBid if self.is_main_player == False else self.declared_value, max=self.forbidden)
+            ret, val = BidDialog.get_dialog(min=self.currentBid if self.is_main_player == False else self.declared_value, max=self.forbidden)
             
             if self.is_main_player == False:
                 self.declared_value = ret
@@ -367,7 +357,8 @@ class Player(QObject):
         value = 0
         #tu też muszą znajdować się z musików
         for card in self.played_left[:]:
-            value += POINTS.get(card.value, 0)
+            # value += POINTS.get(card.value, 0)
+            pass
         if (len(self.played_left) > 0):
             for rep in self.reportedSuits:
                 value += rep

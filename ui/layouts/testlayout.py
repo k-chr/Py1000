@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import *
 from card import *
 from ui.dialogs.biddialog import BidDialog
 from config import Config
-from randomcardgenerator import RandomCardGenerator
+from game.utils.randomcardgenerator import RandomCardGenerator
 PLAY_SCENE_SIZE = 1200, 900
 class Suit(QLabel):
     __size =[50,50]

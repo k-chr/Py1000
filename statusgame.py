@@ -17,6 +17,7 @@ STATUS_GAME = { "PEER_CLEANING":"Waiting for peer...",
                 "CONNECTION_FAILED":"Failed to connect, check if you have connection to LAN",
                 "PEER_DECK_CLEANING":"Waiting until peer will collect cards from deck.",
                 "BACK_TO_MENU":"Back to menu."}
+
 class Signals(QObject):
     statusChanged = pyqtSignal()
 

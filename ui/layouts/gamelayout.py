@@ -2,37 +2,13 @@ import os
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from card import *
+# from card import *
 from ui.dialogs.biddialog import BidDialog
 from config import Config
 from PyQt5.QtMultimedia import QSound, QSoundEffect
 PLAY_SCENE_SIZE = 1200, 900
 
-class Suit(QLabel):
-    __size =[50,50]
-    __suit = ""
-    __pixmap = None
-    __pixmaps = {'C':'club.png','H':'heart.png', 'S':'spade.png', 'D':'diamond.png', '':'default.png'}
-    def __init__(self,parent=None, suit=""):
-        super(Suit, self).__init__(parent)
-        self.setFixedHeight(self.__size[1])
-        self.setFixedWidth(self.__size[0])
-        self.setAutoFillBackground(True)
-        self.setText("NONE")
-        self.setPixmap
-        self.__suit = suit
-        self.__pixmap = QPixmap(os.path.join('images', self.__pixmaps[self.__suit])).scaled(QSize(self.__size[0], self.__size[1]))
-        self.setPixmap(self.__pixmap)
-    def changeSuit(self, suit):
-        name = self.__pixmaps.get(suit, '')
-        print(name)
-        if(name != ''):
-            self.__suit = suit
-            self.__pixmap = QPixmap(os.path.join('images', self.__pixmaps[self.__suit])).scaled(QSize(self.__size[0], self.__size[1]))
-            self.setPixmap(self.__pixmap)
-            self.update()
-    def get_suit(self):
-        return self.__suit
+
 class GamePlayScene(QGraphicsScene):
     __pixmap = None
     def __init__(self, parent = None, pixmap=None):
@@ -113,7 +89,8 @@ class GameLayout(QHBoxLayout):
     def setBg(self):
         print(self.view.width(), self.view.height())
         self.playscene.setPGeometry(self.view.geometry())
-        self.init_card_decks(CARD_DIMENSIONS)
+        # self.init_card_decks(CARD_DIMENSIONS)
+
     def create_playscene(self, WINDOW_SIZE):
         self.view = QGraphicsView()
         self.view.setContentsMargins(0,0,0,0)
@@ -128,23 +105,26 @@ class GameLayout(QHBoxLayout):
         self.playscene.setSceneRect(QRectF(0, 0, *PLAY_SCENE_SIZE))
         QTimer.singleShot(100, lambda: self.__isItTimeToSetBg.emit())
         return self.view
+
     def on_opponentScore(self,score):
         self.opponentScore.setText(score.__str__())
+
     def on_updateScore(self, score):
         self.score.setText(score.__str__())
+
     def initCards(self,server, player, stacks):
         print("Im initiating own cards")
-        self.init_hand_cards(server, CARD_DIMENSIONS)
-        print("Im initiating enemy cards")
-        self.init_opponent_cards(player, CARD_DIMENSIONS)
-        print("Im initiating stack cards")
-        self.init_card_stacks(stacks[0], stacks[1], CARD_DIMENSIONS)
+        # self.init_hand_cards(server, CARD_DIMENSIONS)
+        # print("Im initiating enemy cards")
+        # self.init_opponent_cards(player, CARD_DIMENSIONS)
+        # print("Im initiating stack cards")
+        # self.init_card_stacks(stacks[0], stacks[1], CARD_DIMENSIONS)
         print(self.player.is_HOST == False and self.player.is_FirstPlayer == False)
         print(self.player.is_HOST and self.player.value_rand != 0)
-        if((self.player.is_HOST == False and self.player.is_FirstPlayer == False) or (self.player.is_HOST and self.player.value_rand != 0)):
-            StatusGame.getInstance().set_status_name("VALUE_DECLARATION")
-        else:
-            StatusGame.getInstance().set_status_name("OPPONENT_MOVE")
+        # if((self.player.is_HOST == False and self.player.is_FirstPlayer == False) or (self.player.is_HOST and self.player.value_rand != 0)):
+        #     StatusGame.getInstance().set_status_name("VALUE_DECLARATION")
+        # else:
+        #     StatusGame.getInstance().set_status_name("OPPONENT_MOVE")
         
     def create_player_info(self, player):
         self.player_info_wg = PlayerInfoWidget()
@@ -214,22 +194,25 @@ class GameLayout(QHBoxLayout):
         vbox.addWidget(label)
         self.frame = QFrame()
         self.frame.setFixedSize(QSize(50,50))
-        self.reported = Suit(self.frame,'')
+        # self.reported = Suit(self.frame,'')
         self.player.updateTrump.connect(self.reported.changeSuit)
         vbox.addWidget(self.reported)
         
         self.player_info_wg.setLayout(vbox)
         return self.player_info_wg
+
     def setDeclaredValue(self, val):
         self.declared.setText(str(val))
+
     def setScore(self, player):
         self.score.setText(player.calculate_score().__str__())
 
     def set_stack_choice(self, cardstack):
-        if StatusGame.getInstance().get_status_name() == "STACK_CHOOSING":
-            self.stack_choice = cardstack.number - 1
-            self.cardstacks[self.stack_choice].showCards()
-            StatusGame.getInstance().set_status_name("STACK_CARD_TAKING")
+        pass
+        # if StatusGame.getInstance().get_status_name() == "STACK_CHOOSING":
+        #     self.stack_choice = cardstack.number - 1
+        #     self.cardstacks[self.stack_choice].showCards()
+        #     StatusGame.getInstance().set_status_name("STACK_CARD_TAKING")
 
     def init_opponent_cards(self, cards, CARD_DIMENSIONS):
         y_temp = 0
@@ -260,11 +243,11 @@ class GameLayout(QHBoxLayout):
         x = self.playscene.width() / 2 - CARD_DIMENSIONS.width() / 2
         y = self.playscene.height() / 2
         for i in range(0, 2):
-            carddeck = CardDeck()
-            carddeck.setPos(x, y)
+            # carddeck = CardDeck()
+            # carddeck.setPos(x, y)
             y -= CARD_DIMENSIONS.height() + 2
-            self.carddecks.append(carddeck)
-            self.playscene.addItem(carddeck)
+            # self.carddecks.append(carddeck)
+            # self.playscene.addItem(carddeck)
     def on_stackAccepted(self, index):
         stack = self.cardstacks[index-1]
         if(self.player.is_HOST == True):
@@ -273,7 +256,8 @@ class GameLayout(QHBoxLayout):
         else:
             msg = self.player.get_client().prepareClientMessage("STACK_CHANGED", STACK_INDEX=0 if index == 2 else 1, CARDS=[card.getTuple() for card in stack.cards])
             self.player.get_client().sendCmd(msg)
-        StatusGame.getInstance().set_status_name("VALUE_DECLARATION")
+        # StatusGame.getInstance().set_status_name("VALUE_DECLARATION")
+
     def init_card_stacks(self, cards1, cards2, CARD_DIMENSIONS): 
         print("Im initiating stacks at the moment")#cards to tupla
         self.cardstacks = []
@@ -281,13 +265,13 @@ class GameLayout(QHBoxLayout):
         y = self.playscene.height() / 2 - CARD_DIMENSIONS.height() / 2
         for i in range(2, 0, -1):
             print("Im initiating single stack at the moment")
-            cardstack = CardStack(i)  # 1 - 1, 2 - 2
-            cardstack.signals.stackAccepted.connect(self.on_stackAccepted)
-            cardstack.signals.clicked.connect(lambda cardstack=cardstack: self.set_stack_choice(cardstack))
-            cardstack.setPos(QPoint(x, y))
+            # cardstack = CardStack(i)  # 1 - 1, 2 - 2
+            # cardstack.signals.stackAccepted.connect(self.on_stackAccepted)
+            # cardstack.signals.clicked.connect(lambda cardstack=cardstack: self.set_stack_choice(cardstack))
+            # cardstack.setPos(QPoint(x, y))
             x = self.playscene.width() / 8
-            self.cardstacks.append(cardstack)
-            self.playscene.addItem(cardstack)
+            # self.cardstacks.append(cardstack)
+            # self.playscene.addItem(cardstack)
         self.cardstacks[0].addCards(cards1)
         self.cardstacks[1].addCards(cards2)
         for i, card in enumerate(cards1):
@@ -302,7 +286,6 @@ class GameLayout(QHBoxLayout):
             self.playscene.addItem(card)
         self.cardstacks.reverse()
 
-
     def add_to_left(self):
         for carddeck in self.carddecks:
             card = carddeck.remove_card()
@@ -313,13 +296,13 @@ class GameLayout(QHBoxLayout):
     def drop_card_from_opponent_hand(self, card):
         print("dropping card")
         
-        card1 = Card(*card)
+        # card1 = Card(*card)
         if self.carddecks[1].card is None:
             card_to_remove = None
             for c in self.player.opponent_cards:
-                if c == card1:
+                # if c == card1:
                     card_to_remove = c
-            playRandomCardSound(self)
+            # playRandomCardSound(self)
             print("to remove ", card_to_remove)
             card_to_remove.setZValue(1)
             self.player.remove_card_from_opponent_hand(card_to_remove)
@@ -342,90 +325,93 @@ class GameLayout(QHBoxLayout):
             d = self.player.get_server().prepareServerMessage("WHO_TAKES", WHO=who)
             self.player.get_server().sendCmd(d)
         elif (self.carddecks[0].card is None):
-            StatusGame.getInstance().set_status_name('YOUR_MOVE')
+            # StatusGame.getInstance().set_status_name('YOUR_MOVE')
+            pass
             
         print("opponent cards size: ", len(self.player.opponent_cards))
+
     def change_opponent_cards_with_stack(self, tup, index):
         print("changing stack")
         
-        list_ = [Card(*c) for c in tup]
+        # list_ = [Card(*c) for c in tup]
         val = False
         stack = self.cardstacks[index].cards
-        if (list_[0] == stack[0] and list_[1] == stack[1]) or (list_[0] == stack[1] and list_[1] == stack[0]):
-            return
+        # if (list_[0] == stack[0] and list_[1] == stack[1]) or (list_[0] == stack[1] and list_[1] == stack[0]):
+            # return
         stack_cards = []
         cards = []
-        if list_[0] == stack[0] or list_[0] == stack[1]:
-            miss_card = None
-            for stack_card in stack:
-                if stack_card != list_[0]:
-                    miss_card = stack_card
-                    break
-            for c in self.player.opponent_cards:
-                if c == list_[1]:
-                    cards.append(c)
-                    break
-            stack_cards.append(miss_card)
-        elif list_[1] == stack[0] or list_[1] == stack[1]:
-            miss_card = None
-            for stack_card in stack:
-                if stack_card != list_[1]:
-                    miss_card = stack_card
-                    break
-            for c in self.player.opponent_cards:
-                if c == list_[0]:
-                    cards.append(c)
-                    break
-            stack_cards.append(miss_card)            
-        else:
-            for idx, c1 in enumerate(list_):
-                miss_card = None
-                stack_card = stack[idx]
-                if stack_card != c1:
-                    miss_card = stack_card
-                for c in self.player.opponent_cards:
-                    if c == c1:
-                        cards.append(c)
-                        break
-                stack_cards.append(miss_card)            
-        print("cards to move", cards)
-        print("stack-cards to move", stack_cards)
-        for idx, c2 in enumerate(cards):
-            stack_card = stack_cards[idx]
-            anime1 = QVariantAnimation(self)
-            anime2 = QVariantAnimation(self)
-            self.player.remove_card_from_opponent_hand(c2)
-            c2.setZValue(1)
-            self.cardstacks[index].remove_card(stack_card, "HAND_STACK")
-            temp_pos_stack = stack_card.offset()
-            temp_pos_card = c2.offset()
-            c2.rotate180H()
-            c2.turn_back_up()
-            anime1.valueChanged.connect(stack_card.setOffset)
-            anime1.setDuration(500)
-            playRandomCardSound(self)
-            anime1.setStartValue(stack_card.offset())
-            anime1.setEndValue(temp_pos_card)
-            stack_card.rotate180H()
-            stack_card.turn_back_up()
-            anime1.start()
+        # if list_[0] == stack[0] or list_[0] == stack[1]:
+        #     miss_card = None
+        #     for stack_card in stack:
+        #         if stack_card != list_[0]:
+        #             miss_card = stack_card
+        #             break
+        #     for c in self.player.opponent_cards:
+        #         if c == list_[1]:
+        #             cards.append(c)
+        #             break
+        #     stack_cards.append(miss_card)
+        # elif list_[1] == stack[0] or list_[1] == stack[1]:
+        #     miss_card = None
+        #     for stack_card in stack:
+        #         if stack_card != list_[1]:
+        #             miss_card = stack_card
+        #             break
+        #     for c in self.player.opponent_cards:
+        #         if c == list_[0]:
+        #             cards.append(c)
+        #             break
+        #     stack_cards.append(miss_card)            
+        # else:
+        #     for idx, c1 in enumerate(list_):
+        #         miss_card = None
+        #         stack_card = stack[idx]
+        #         if stack_card != c1:
+        #             miss_card = stack_card
+        #         for c in self.player.opponent_cards:
+        #             if c == c1:
+        #                 cards.append(c)
+        #                 break
+        #         stack_cards.append(miss_card)            
+        # print("cards to move", cards)
+        # print("stack-cards to move", stack_cards)
+        # for idx, c2 in enumerate(cards):
+        #     stack_card = stack_cards[idx]
+        #     anime1 = QVariantAnimation(self)
+        #     anime2 = QVariantAnimation(self)
+        #     self.player.remove_card_from_opponent_hand(c2)
+        #     c2.setZValue(1)
+        #     self.cardstacks[index].remove_card(stack_card, "HAND_STACK")
+        #     temp_pos_stack = stack_card.offset()
+        #     temp_pos_card = c2.offset()
+        #     c2.rotate180H()
+        #     c2.turn_back_up()
+        #     anime1.valueChanged.connect(stack_card.setOffset)
+        #     anime1.setDuration(500)
+        #     playRandomCardSound(self)
+        #     anime1.setStartValue(stack_card.offset())
+        #     anime1.setEndValue(temp_pos_card)
+        #     stack_card.rotate180H()
+        #     stack_card.turn_back_up()
+        #     anime1.start()
 
-            self.player.add_card_to_opponent_hand(stack_card)
-            stack_card.setZValue(1)
-            anime2.valueChanged.connect(c2.setOffset)
-            anime2.setDuration(500)
-            playRandomCardSound(self)
-            anime2.setStartValue(c2.offset())
-            anime2.setEndValue(temp_pos_stack)
-            anime2.start()
+        #     self.player.add_card_to_opponent_hand(stack_card)
+        #     stack_card.setZValue(1)
+        #     anime2.valueChanged.connect(c2.setOffset)
+        #     anime2.setDuration(500)
+        #     playRandomCardSound(self)
+        #     anime2.setStartValue(c2.offset())
+        #     anime2.setEndValue(temp_pos_stack)
+        #     anime2.start()
 
-            self.cardstacks[index].add_card(c2)
+        #     self.cardstacks[index].add_card(c2)
     def change_card_location(self, card):
         print("Im here")
-        if (card.location == "HAND" ) and StatusGame.getInstance().get_status_name() == "YOUR_MOVE":
-            self.drop_card_from_hand(card)
-        elif card.location == "HAND" and StatusGame.getInstance().get_status_name() == "STACK_CARD_TAKING":
-            self.change_card_with_stack(card)
+        # if (card.location == "HAND" ) and StatusGame.getInstance().get_status_name() == "YOUR_MOVE":
+        #     self.drop_card_from_hand(card)
+        # elif card.location == "HAND" and StatusGame.getInstance().get_status_name() == "STACK_CARD_TAKING":
+        #     self.change_card_with_stack(card)
+
     def isSuitPresent(self, suit):
         val = False
         for card in self.player.hand_cards:
@@ -433,6 +419,7 @@ class GameLayout(QHBoxLayout):
                 val = True
                 break
         return val
+
     def isGreaterPresent(self, card1):
         val = False
         for card in self.player.hand_cards:
@@ -440,6 +427,7 @@ class GameLayout(QHBoxLayout):
                 val = True
                 break
         return val
+
     def isTrumpPresent(self):
         val = False
         suit = self.reported.get_suit()
@@ -448,6 +436,7 @@ class GameLayout(QHBoxLayout):
                 val = True
                 break
         return val
+
     def drop_card_from_hand(self, card):
     
         if self.carddecks[1].card is not None:
@@ -461,14 +450,14 @@ class GameLayout(QHBoxLayout):
                     return
                     
         if self.carddecks[0].card is None:
-            StatusGame.getInstance().set_status_name("OPPONENT_MOVE")
+            # StatusGame.getInstance().set_status_name("OPPONENT_MOVE")
             self.player.remove_card_from_hand(card)
             IS_TRUMP = False
             if self.carddecks[1].card is None:
                 for c in self.player.hand_cards:
                     if card.isPair(c):
                         IS_TRUMP = True
-                        self.player.reportedSuits.append(BIDDING[card.suit])
+                        # self.player.reportedSuits.append(BIDDING[card.suit])
                         self.player.on_trumpChanged(card.suit)
                         break
             if self.player.is_HOST == True:
@@ -490,7 +479,7 @@ class GameLayout(QHBoxLayout):
             anime.valueChanged.connect(card.setOffset)
             anime.setDuration(500)
             
-            playRandomCardSound(self)
+            # playRandomCardSound(self)
             anime.setStartValue(card.offset())
             anime.setEndValue(self.carddecks[0].pos())
             anime.start()
@@ -521,7 +510,7 @@ class GameLayout(QHBoxLayout):
 
         anime1.valueChanged.connect(stack_card.setOffset)
         anime1.setDuration(500)
-        playRandomCardSound(self)
+        # playRandomCardSound(self)
         anime1.setStartValue(stack_card.offset())
         anime1.setEndValue(temp_pos_card)
         anime1.start()
@@ -531,7 +520,7 @@ class GameLayout(QHBoxLayout):
         stack_card.signals.clicked.connect(lambda card=stack_card: self.change_card_location(card))
         anime2.valueChanged.connect(card.setOffset)
         anime2.setDuration(500)
-        playRandomCardSound(self)
+        # playRandomCardSound(self)
         anime2.setStartValue(card.offset())
         anime2.setEndValue(temp_pos_stack)
         anime2.start()
@@ -549,7 +538,8 @@ class GameLayout(QHBoxLayout):
             if(who == "SERVER" and self.player.is_HOST == True) or (who == "PEER" and self.player.is_HOST == False ):
                 self.add_to_left()
                 if(len(self.player.hand_cards) > 0):
-                    StatusGame.getInstance().set_status_name("YOUR_MOVE")
+                    # StatusGame.getInstance().set_status_name("YOUR_MOVE")
+                    pass
                 else:
                     if((self.player.is_main_player == True and len(self.player.played_left) == 20) or (self.player.is_main_player == False and len(self.player.played_left)>0)):
                         for c  in self.cardstacks[0].cards:
@@ -569,13 +559,14 @@ class GameLayout(QHBoxLayout):
                             self.playscene.removeItem(c)
                         for stack in self.cardstacks:
                             stack.removeCards()   
-                    StatusGame.getInstance().set_status_name("SCORING")
+                    # StatusGame.getInstance().set_status_name("SCORING")
                     self.reported.changeSuit('')
                     self.declared.setText("0")
             else:
                 self.add_to_opponent_left()
                 if(len(self.player.hand_cards) > 0):    
-                    StatusGame.getInstance().set_status_name("OPPONENT_MOVE")
+                    # StatusGame.getInstance().set_status_name("OPPONENT_MOVE")
+                    pass
                 else:
                     if((self.player.is_main_player == True and len(self.player.played_left) == 20) or (self.player.is_main_player == False and len(self.player.played_left)>0)):
                         for c  in self.cardstacks[0].cards:
@@ -595,12 +586,13 @@ class GameLayout(QHBoxLayout):
                             self.playscene.removeItem(c)
                         for stack in self.cardstacks:
                             stack.removeCards()  
-                    StatusGame.getInstance().set_status_name("SCORING")
+                    # StatusGame.getInstance().set_status_name("SCORING")
                     self.reported.changeSuit('')
                     self.declared.setText("0")
             if(self.player.is_HOST == False):
                 self.player.cardsFromDeckTaken.emit()
             else:
-                self.player.prevStat = StatusGame.getInstance().get_status_name()
-                StatusGame.getInstance().set_status_name("PEER_DECK_CLEANING")
+                # self.player.prevStat = StatusGame.getInstance().get_status_name()
+                # StatusGame.getInstance().set_status_name("PEER_DECK_CLEANING")
+                pass
         QTimer.singleShot(1500, lambda someone=who:wrapper(someone))

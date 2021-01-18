@@ -8,7 +8,7 @@ import os
 from PyQt5.QtWidgets import QProgressBar, QGraphicsDropShadowEffect, QDialog, QVBoxLayout, QStyleFactory, QLabel, QGridLayout, QLineEdit, QDialogButtonBox
 from PyQt5.QtCore import QSize, Qt, QPropertyAnimation, pyqtSignal, QTimer
 from PyQt5.QtNetwork import QHostAddress, QNetworkInterface, QAbstractSocket
-from PyQt5.QtGui import QColor, QFont, QIntValidator
+from PyQt5.QtGui import QColor, QFont, QIcon, QIntValidator, QPixmap
 from ui.widgets.pulsingprogressbar import PulsingProgressBar
 
 class NetworkDialog(QDialog):
@@ -61,13 +61,12 @@ class NetworkDialog(QDialog):
         layout.addWidget(label)
         return layout
     def error(self):
-        #self.toClose=True
-        print("HERE")
         QTimer.singleShot(3000,lambda: self.done(QDialog.Rejected))
-        print("HERE2")
+
     def finishHostDialog(self):
         print("ajm hir")
         self.done(QDialog.Accepted)
+
     def endDialog(self):
         if self.progressBar != None:
             self.progressBar.end()
@@ -78,8 +77,10 @@ class NetworkDialog(QDialog):
             self.button = None
         if self.ipGroup != None:
             self.Group = None
+
     def getIp(self):
         return self.__ip
+
     def getPeerLayout(self):
         layout = QVBoxLayout()
         layout.addWidget(QLabel('Provide ip address of host: '))
@@ -106,15 +107,18 @@ class NetworkDialog(QDialog):
         layout.addWidget(buttons)
         self.button.setEnabled(False)
         return layout
+
     def peerAccept(self):
         self.__ip = '.'.join(self.ipGroup[idx].text() for idx in sorted(self.ipGroup))
         super(NetworkDialog, self).accept()
+
     def checkIp(self, string):
         value = True
         for key, val in self.ipGroup.items():
             if val.text() == "":
                 value = False
         self.button.setEnabled(value)
+
     @staticmethod
     def getDialog(who,receiver=None, parent = None):
         dialog = NetworkDialog(who, parent)
