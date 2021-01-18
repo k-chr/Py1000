@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QButtonGroup
 from .. import pyqtSignal, QHBoxLayout, QPixmap, QVBoxLayout, QSizePolicy, QApplication,\
                QWidget, QButtonGroup,QPalette, QBrush, QCoreApplication, Qt
 from ..widgets.banner import Banner
-from ..widgets.gamebutton import GameButton
+from ..widgets.menubutton import MenuButton
 from statusgame import StatusGame
 from ..dialogs.configdialog import ConfigDialog
 
@@ -23,7 +23,7 @@ class WelcomeLayout(QHBoxLayout):
         super(WelcomeLayout, self).__init__(parent)
         self.setAlignment(Qt.AlignCenter)
         self.banner = Banner(Config.get_instance().banner, bannerHeight)
-        self.buttonList = [GameButton(QPixmap(path.join('images/buttons', name+'.png')), name) for name in buttonNames]
+        self.buttonList = [MenuButton(QPixmap(path.join('images/buttons', name+'.png')), name) for name in buttonNames]
         self.buttonGroup = QButtonGroup()
         self.menu = QVBoxLayout()
         self.menu.addWidget(self.banner)

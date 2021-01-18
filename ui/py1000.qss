@@ -29,8 +29,21 @@ ConfigComboBox QAbstractItemView::view{
 ConfigComboBox {
     image: url('images/backgrounds/blank.png');  
     min-height:35px;
+    font-size: 18px;
+    font-family: KBREINDEERGAMES;
 }
-            
+
+ConfigButton{
+    color: white; 
+    background-repeat: none;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-size: 18px;
+    font-family: KBREINDEERGAMES;
+}
+
 ConfigComboBox:editable { 
     image: url(/images/backgrounds/blank2.png);
 }
