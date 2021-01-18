@@ -14,11 +14,8 @@ class ConfigButton(QPushButton):
     def __init__(self, parent: QWidget =None, text: str =None):
         super(ConfigButton, self).__init__(parent)
         self.setText(text)
-        self.setFont(QFont('KBREINDEERGAMES', 18))
-        self.setStyleSheet("color: white; background-repeat: none; padding-left: 6px;" +
-                           " padding-right: 6px; padding-top: 6px; padding-bottom: 6px;")
         self.setAttribute(Qt.WA_Hover)
-        self.pixmap = self.pixmap = QPixmap(path.join('images/backgrounds', 'blank2.png'))
+        self.pixmap = QPixmap(path.join('images/backgrounds', 'blank2.png'))
         self.disbledPixmap = QPixmap(path.join('images/backgrounds', 'blank3.png'))
         self.setAutoFillBackground(True)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -39,7 +36,6 @@ class ConfigButton(QPushButton):
             painter.drawPixmap(0,0, self.pixmap.scaled(QSize(self.width(), self.height())))
         else:
             painter.drawPixmap(0,0, self.disbledPixmap.scaled(QSize(self.width(), self.height()))) 
-        painter.setFont(QFont('KBREINDEERGAMES', 18))
         if self.isEnabled():
             painter.setPen(Qt.white)
         else:
@@ -47,7 +43,6 @@ class ConfigButton(QPushButton):
         painter.drawText(self.rect(), Qt.AlignCenter, self.text())
         
         painter.end()
-        #super(ConfigButton, self).paintEvent(event)
 
     def leaveEvent(self, event):
         if event.type() == QEvent.Leave:

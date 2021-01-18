@@ -31,8 +31,6 @@ class MainWindow(QMainWindow):
         event.accept()
 
     def create_welcome_game_layout(self):
-        self.welcomeLayout = None
-        w_bg = QPixmap(os.path.join('images', 'main.jpg'))
         self.welcomeLayout = WelcomeLayout(350,  ['host', 'peer', 'settings', 'help', 'quit'])
         return self.welcomeLayout
 
