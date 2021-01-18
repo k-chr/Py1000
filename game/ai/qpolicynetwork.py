@@ -3,9 +3,8 @@ from __future__ import annotations
 from . import (Activation, Input, Dense, n_sum, NetworkMode,
                TrainingEnum, relu, softmax, datetime,
                Adam, Model, ndarray, nan_to_num, path,
-               k_sum, k_log, List, SGD, Tensor, MSE)
+               k_sum, k_log, List, SGD, Tensor, MSE, Batch)
 
-from .reinforceagent import Batch
 
 class QPolicyNetwork(object):
 
@@ -24,7 +23,7 @@ class QPolicyNetwork(object):
         self.policy_trainer: Model =None
         self.flag = flag
         self.mode = mode
-        self.layer_scale = 8 if self.mode & NetworkMode.LARGE else 2
+        self.layer_scale = 16 if self.mode & NetworkMode.LARGE else 4
         
     def predict_probs(self, vec: ndarray):
         probs = nan_to_num(self.policy_predictor.predict(vec))
@@ -106,9 +105,9 @@ class QPolicyNetwork(object):
 
         return __instance
 
-    def learn(self, memory: Batch):
+    def train(self, memory: Batch):
         try:
             network_input = {'state':memory.states, 'discounted_reward':memory.rewards} if self.flag is TrainingEnum.FULL_TRAINING else {'state':memory.states}
-            self.policy_trainer.fit(network_input, memory.actions, epochs=1) 
+            self.policy_trainer.fit(network_input, memory.actions, epochs=1)
         except Exception as e:
             print(e)

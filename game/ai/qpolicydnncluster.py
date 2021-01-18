@@ -1,8 +1,11 @@
 from __future__ import annotations
 from .qpolicynetwork import QPolicyNetwork
-from . import Dict, datetime, TrainingEnum, NetworkMode, ndarray, Union, Batch, List
+from . import (Dict, datetime, TrainingEnum, 
+               NetworkMode, ndarray, Union,
+               Batch, List)
 
 MAX_CARDS_IN_HAND = 0xA
+
 
 class TakingTrickQPolicyDNNCluster(QPolicyNetwork):
 
@@ -34,14 +37,13 @@ class TakingTrickQPolicyDNNCluster(QPolicyNetwork):
         for _, node in self.nodes.items():
             node.save_weights_to_date()
 
-    def learn(self, memory: Union[Batch, Dict[int, Batch]]):
+    def train(self, memory: Union[Batch, Dict[int, Batch]]):
         if isinstance(memory, Batch):
-            return super().learn(memory)
+            return super().train(memory)
 
         for idx, batch in memory.items():
-            self.nodes[idx].learn(batch)
+            self.nodes[idx].train(batch)
 
-    
     @staticmethod
     def get_instance(name: str, n_actions: int, batch_size: int, alpha: float, 
                  mem_dir: str, n_one_hot: int, start_from: datetime, flag: TrainingEnum, mode: NetworkMode =NetworkMode.SINGLE):
