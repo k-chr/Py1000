@@ -1,5 +1,7 @@
 from .state import State
-from . import zeros, concatenate, List, Card, Suits, deepcopy
+from . import zeros, concatenate, List, Card, Suits, deepcopy, DECK_SIZE
+
+
 
 class TakingTrickState(State):
 
@@ -10,21 +12,22 @@ class TakingTrickState(State):
         self.tricks = deepcopy(tricks_taken_by_both_players)
         self.played_card = deepcopy(played_card) if played_card is not None else None
         self.trump = trump
+        self.action_space = DECK_SIZE()
 
     def to_one_hot_vec(self):
-        hand = zeros(24)
+        hand = zeros(DECK_SIZE())
         for card in self.hand_cards:
             hand[card.id()] = 1
 
-        stock = zeros(24)
+        stock = zeros(DECK_SIZE())
         for card in self.known_stock:
             stock[card.id()] = 1
 
-        tricks = zeros(24)
+        tricks = zeros(DECK_SIZE())
         for card in self.tricks:
             tricks[card.id()] = 1
 
-        played_card = zeros(24)
+        played_card = zeros(DECK_SIZE())
         if self.played_card is not None:
             played_card[self.played_card.id()] = 1
 

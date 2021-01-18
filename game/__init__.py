@@ -8,3 +8,6 @@ from numpy.random import choice
 from datetime import datetime
 from os import path
 from collections import deque
+
+def DECK_SIZE():
+    return 24
