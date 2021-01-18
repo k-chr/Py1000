@@ -54,6 +54,16 @@ FACTORS = {
     300:1.2**8
 }
 
+PENALTIES = {
+    10: 1.4,
+    20: 1.4**2,
+    40: 1.4**3,
+    80: 1.4**4,
+    160: 1.4**5,
+    320: 1.4**6,
+    640: 1.4**7
+}
+
 
 class ReinforceAgent(object):
     
@@ -100,6 +110,10 @@ class ReinforceAgent(object):
     @property
     def beta(self):
         return FACTORS.get(max(list(filter(lambda x: x <= self.score, FACTORS.keys())), default=0), 1)
+
+    @property
+    def beta_penalty(self):
+        return PENALTIES.get(max(list(filter(lambda x: x <= self.invalid_actions, PENALTIES.keys())), default=0), 1)
 
     def get_action_from_value(self, vec: ndarray) -> int:    
         values = self.model.predict_values(vec)
