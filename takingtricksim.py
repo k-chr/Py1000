@@ -72,8 +72,10 @@ class Sim(QObject):
         self.flag: TrainingEnum = args.training_flag
         self.network_type: NetworkMode = args.network_flag
         self.reward_mapper_type: RewardMapperMode = args.rewards_flag
-        self.player1 = TakingTricksAgent(40, "player1", last_weights=date, flag=self.flag, alpha=0.01 if not self.flag is TrainingEnum.FULL_TRAINING else 0.0001)
-        self.player2 = TakingTricksAgent(40, "player1", last_weights=date, flag=self.flag, alpha=0.01 if not self.flag is TrainingEnum.FULL_TRAINING else 0.0001)
+        self.player1 = TakingTricksAgent(40, "player_agent", last_weights=date, flag=self.flag, alpha=0.01 if not self.flag is TrainingEnum.FULL_TRAINING else 0.0001, 
+                                            mode=self.network_type, reward_mode=self.reward_mapper_type)
+        self.player2 = TakingTricksAgent(40, "player_agent", last_weights=date, flag=self.flag, alpha=0.01 if not self.flag is TrainingEnum.FULL_TRAINING else 0.0001, 
+                                            mode=self.network_type, reward_mode=self.reward_mapper_type)
         self.env = SimpleTakingTricksEnv(self.flag)
 
     @pyqtSlot()

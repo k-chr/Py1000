@@ -1,6 +1,6 @@
 from .qpolicynetwork import QPolicyNetwork
 from . import (zeros, State, array, List, Dict,
-               choice, TrainingEnum, ndarray,
+               choice, TrainingEnum, ndarray, NetworkOutput,
                argmax, int64, fun, Batch, NetworkMode)
 from .memory import Memory
 
@@ -88,18 +88,30 @@ class ReinforceAgent(object):
     def remember_traumatic_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
         self.traumatic_memory.remember_S_A_R_B(state, action, reward, behavior)
 
-    def get_action(self, state: State) -> int:
+    def get_action(self, state: State) -> NetworkOutput:
         vec = state.to_one_hot_vec()[None]
         return self.__action_getter(vec)
 
-    def get_action_from_probs(self, vec: ndarray) -> int:
+    def get_action_from_probs(self, vec: ndarray) -> NetworkOutput:
         probs = self.model.predict_probs(vec)
         try:
             action = choice(range(self.action_size), 1, p=probs[0])[0]
-            return action
+            return NetworkOutput(action, probs[action], probs)
         except:
             print(f"probabilities: {probs[0]} contains NaN")
             raise Exception
+
+    def get_action_from_value(self, vec: ndarray) -> NetworkOutput:    
+        values = self.model.predict_values(vec)
+        indices = argmax(values[0])
+        action = 0
+        if isinstance(indices, int64):
+            action = indices
+        elif len(indices) == 1:
+            action = indices[0]
+        else:
+            action = choice(indices, 1)[0]
+        return NetworkOutput(action, values[action], values)
     
     def set_score(self, score: int):
         self.score = score 
@@ -114,16 +126,6 @@ class ReinforceAgent(object):
     @property
     def beta_penalty(self):
         return PENALTIES.get(max(list(filter(lambda x: x <= self.invalid_actions, PENALTIES.keys())), default=0), 1)
-
-    def get_action_from_value(self, vec: ndarray) -> int:    
-        values = self.model.predict_values(vec)
-        indices = argmax(values[0])
-        if isinstance(indices, int64):
-            return indices
-        if len(indices) == 1:
-            return indices[0]
-        action = choice(indices, 1)[0]
-        return action
 
     def replay(self):
         self.persist_episode_and_clean_memory()

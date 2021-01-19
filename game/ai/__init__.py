@@ -29,3 +29,4 @@ k_pow = keras.backend.pow
 k_mean = keras.backend.mean
 
 Batch = NamedTuple("BatchSAR", [('states', ndarray), ('actions', ndarray), ('rewards', ndarray), ('behaviors', ndarray)])
+NetworkOutput = NamedTuple("NetworkOutput", [('action', int), ('action_prob', float), ('probs', List[float])])

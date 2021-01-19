@@ -1,4 +1,3 @@
-from sys import maxsize
 from . import (List, State, deque,
                Deque, fun)
 

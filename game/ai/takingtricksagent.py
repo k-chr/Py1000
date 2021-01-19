@@ -1,9 +1,11 @@
-from .reinforceagent import ReinforceAgent, Batch, MIN_SIZE_OF_BATCH, get_cumulative_rewards, get_cumulative_reward_reversed
+from .reinforceagent import (ReinforceAgent, Batch, MIN_SIZE_OF_BATCH,
+                             get_cumulative_rewards, NetworkOutput,
+                             get_cumulative_reward_reversed)
 from .qpolicynetwork import QPolicyNetwork
 from .qpolicydnncluster import TakingTrickQPolicyDNNCluster
-from . import (datetime, TakingTrickState, NetworkMode, RewardMapperMode,
-               TrainingEnum, ndarray, array,
-               zeros, GameRules, List, State,
+from . import (datetime, TakingTrickState, NetworkMode, 
+               RewardMapperMode, TrainingEnum, ndarray, 
+               array, zeros, GameRules, List, State,
                choice, Dict, fun, Union)
 from ..states import DECK_SIZE
 from .memory import Memory
@@ -71,18 +73,18 @@ class TakingTricksAgent(ReinforceAgent):
         self.__action_mapper = action_mappers.get(self.flag, self.sample)
         self.__state_mapper: fun[[State], ndarray] = _sample_state
 
-    def get_action(self, state: State) -> int:
-
+    def get_action(self, state: State) -> NetworkOutput:
+        output = super().get_action(state)
         if self.__errors >= self.__MAX_ERRORS and self.flag is TrainingEnum.FULL_TRAINING:
             self.__errors = 0
             state: TakingTrickState =state
-            vec = list(map(lambda card: card.id(), list(filter(lambda x: GameRules.is_card_valid(
+            vec: List[int] =list(map(lambda card: card.id(), list(filter(lambda x: GameRules.is_card_valid(
                     state.hand_cards, x, state.played_card, trump=state.trump), state.hand_cards
                 ))))
-
-            return choice(vec, 1)[0]
-            
-        return super().get_action(state)
+            action: int = choice(vec, 1)[0]
+            output.action = action
+            output.action_prob = output.probs[action]
+        return output
 
     def persist_episode_and_clean_memory(self) -> None:
         self.memory.save_data_for_replay_and_clean_temp(rewards_mapper=self.__rewards_mapper, 
