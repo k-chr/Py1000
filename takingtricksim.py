@@ -1,4 +1,6 @@
 from functools import reduce
+from game.states.takingtrickstate import TakingTrickState
+from game import NetworkOutput
 from game.envs.simpletakingtricksenv import SimpleTakingTricksEnv
 from game.ai.takingtricksagent import TakingTricksAgent
 from game.enums import TrainingEnum, NetworkMode, RewardMapperMode
@@ -10,7 +12,6 @@ import signal
 import argparse
 
 sys.setrecursionlimit(10000)
-STEPS_BATCH_SIZE = 100
 EPISODES = 200_000
 DUMP_PERIOD = 500
 TRAINING_FLAG = TrainingEnum.PRETRAINING_OWN_CARDS
@@ -90,30 +91,29 @@ class Sim(QObject):
             while not done:
                 player = self.player1 if obs["is_player1_turn"] else self.player2
                 op = self.player2 if obs["is_player1_turn"] else self.player1
-                state = obs["data"]
-                action = player.get_action(state)
+                state: TakingTrickState =obs["data"]
+                output: NetworkOutput =player.get_action(state)
                 steps += 1
-                obs, rewards, done = self.env.step(action)
+                obs, rewards, done = self.env.step(output)
                 if rewards[0] < 0 and ((not self.flag is TrainingEnum.FULL_TRAINING
                         ) or (self.flag is TrainingEnum.FULL_TRAINING and rewards[1] is None
                     )):
-                    player.remeber_traumatic_S_A_R(state, action, rewards[0])
+                    player.remember_traumatic_S_A_R_B(state, output.action, rewards[0], output.action_prob)
                 else:
-                    player.remember_S_A_R(state, action, rewards[0])
+                    player.remember_S_A_R_B(state, output.action, rewards[0], output.action_prob)
 
                 #delayed reward
                 if(len(rewards) > 1 and rewards[1] is not None):
                     op.memory.update_last_reward(rewards[1])
 
-                if(len(player.traumatic_memory.states) == STEPS_BATCH_SIZE):
-                    player.replay_traumatic_only()
-
             self.env.log_episode_info()
             print(f"[{episode + 1}/{EPISODES}]")
 
             if self.flag is TrainingEnum.FULL_TRAINING:
-                self.player1.scale_rewards(self.env.player1.score)
-                self.player2.scale_rewards(self.env.player2.score)
+                self.player1.set_score(self.env.player1.score)
+                self.player1.set_invalid_actions_count(self.env.player1.invalid_actions)
+                self.player2.set_score(self.env.player2.score)
+                self.player2.set_invalid_actions_count(self.env.player2.invalid_actions)
 
             self.player1.replay()
             self.player2.replay()
@@ -126,7 +126,6 @@ class Sim(QObject):
         self.finished.emit()
         
     def sigint_handler(self, *args):
-        self.env.log_episode_info()
         self.env.end_logging()
         QCoreApplication.exit()
 
