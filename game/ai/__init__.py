@@ -15,7 +15,7 @@ from .. import (path, datetime, zeros, Union,
                 choice, List, array, Dict,
                 nan_to_num, n_sum, ndarray,
                 argmax, int64, deque, Deque,
-                Callable as fun, NamedTuple)
+                Callable as fun, Batch, NetworkOutput)
 from ..enums import TrainingEnum, RewardMapperMode, NetworkMode
 from ..states.biddingstate import BiddingState
 from ..states.giveawaystate import GiveawayState
@@ -27,6 +27,3 @@ k_sum = keras.backend.sum
 k_log = keras.backend.log
 k_pow = keras.backend.pow
 k_mean = keras.backend.mean
-
-Batch = NamedTuple("BatchSAR", [('states', ndarray), ('actions', ndarray), ('rewards', ndarray), ('behaviors', ndarray)])
-NetworkOutput = NamedTuple("NetworkOutput", [('action', int), ('action_prob', float), ('probs', List[float])])

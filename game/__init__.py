@@ -11,3 +11,6 @@ from collections import deque
 
 def DECK_SIZE():
     return 24
+
+Batch = NamedTuple("BatchSAR", [('states', ndarray), ('actions', ndarray), ('rewards', ndarray), ('behaviors', ndarray)])
+NetworkOutput = NamedTuple("NetworkOutput", [('action', int), ('action_prob', float), ('probs', List[float])])

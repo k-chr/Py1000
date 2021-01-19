@@ -46,13 +46,14 @@ class QPolicyNetwork(object):
         self.policy_predictor = Model(state_input, layers)
         state = Input(shape=(self.states_one_hot_len,), name='state')
         discounted_reward_placeholder = Input(shape=(1,), name='discounted_reward')
-        inputs = [state, discounted_reward_placeholder] if self.flag is TrainingEnum.FULL_TRAINING else [state]
+        behavior_policy_placeholder = Input(shape=(1,), name='behavior_policy')
+        inputs = [state, discounted_reward_placeholder, behavior_policy_placeholder] if self.flag is TrainingEnum.FULL_TRAINING else [state]
         trainer_layers = self.policy_predictor(state)
         model = Model(inputs=inputs, outputs=trainer_layers)
         self.load_weights_from_date()
         model.compile(optimizer=Adam(learning_rate=self.alpha) if self.flag is TrainingEnum.FULL_TRAINING\
                         else SGD(learning_rate=self.alpha), 
-                     loss=self.loss_function_generator(discounted_reward_placeholder))
+                     loss=self.loss_function_generator(discounted_reward_placeholder, behavior_policy_placeholder))
         self.policy_trainer = model
         
     def load_weights_from_date(self):
@@ -73,7 +74,7 @@ class QPolicyNetwork(object):
         self.policy_predictor.save_weights(path.join("previous_memories",
                                    f"{self.memories_directory}", f"{self.network_name}_{date}.h5"))
 
-    def loss_function_generator(self, discounted_reward: Tensor):
+    def loss_function_generator(self, discounted_reward: Tensor, behavior_policy: Tensor):
 
         if self.flag is not TrainingEnum.FULL_TRAINING:
             return MSE
@@ -82,7 +83,8 @@ class QPolicyNetwork(object):
             pi_s_a = k_sum(pi * pi_prediction, axis=1)
             loss = -discounted_reward * k_log(
                      pi_s_a)
-            return loss
+            importance_weight = behavior_policy/pi_s_a
+            return loss * importance_weight
         return gradient_loss
 
     @staticmethod
@@ -107,7 +109,13 @@ class QPolicyNetwork(object):
 
     def train(self, memory: Batch):
         try:
-            network_input = {'state':memory.states, 'discounted_reward':memory.rewards} if self.flag is TrainingEnum.FULL_TRAINING else {'state':memory.states}
+            network_input = {
+                             'state':memory.states,
+                             'discounted_reward':memory.rewards,
+                             'behavior_policy': memory.behaviors
+                            } if self.flag is TrainingEnum.FULL_TRAINING else {
+                             'state':memory.states
+                            }
             self.policy_trainer.fit(network_input, memory.actions, epochs=1)
         except Exception as e:
             print(e)
