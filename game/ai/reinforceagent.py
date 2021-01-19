@@ -85,7 +85,7 @@ class ReinforceAgent(object):
     def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
         self.memory.remember_S_A_R_B(state, action, reward, behavior)
         
-    def remeber_traumatic_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
+    def remember_traumatic_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
         self.traumatic_memory.remember_S_A_R_B(state, action, reward, behavior)
 
     def get_action(self, state: State) -> int:

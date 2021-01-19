@@ -28,4 +28,4 @@ k_log = keras.backend.log
 k_pow = keras.backend.pow
 k_mean = keras.backend.mean
 
-Batch = NamedTuple("BatchSAR", [('states', ndarray), ('actions', ndarray), ('rewards', ndarray)])
+Batch = NamedTuple("BatchSAR", [('states', ndarray), ('actions', ndarray), ('rewards', ndarray), ('behaviors', ndarray)])

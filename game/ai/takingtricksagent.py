@@ -75,7 +75,8 @@ class TakingTricksAgent(ReinforceAgent):
 
         if self.__errors >= self.__MAX_ERRORS and self.flag is TrainingEnum.FULL_TRAINING:
             self.__errors = 0
-            vec = list(map(lambda card: card.id(), list(filter(lambda x:GameRules.is_card_valid(
+            state: TakingTrickState =state
+            vec = list(map(lambda card: card.id(), list(filter(lambda x: GameRules.is_card_valid(
                     state.hand_cards, x, state.played_card, trump=state.trump), state.hand_cards
                 ))))
 
@@ -89,13 +90,13 @@ class TakingTricksAgent(ReinforceAgent):
         self.traumatic_memory.save_data_for_replay_and_clean_temp(rewards_mapper=self.__rewards_mapper, 
                                                                   reward_mapper=get_reward_modifier(self.beta_penalty))
 
-    def remeber_traumatic_S_A_R(self, state: State, action: int, reward: float):
+    def remember_traumatic_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
         self.__errors += 1
-        return super().remeber_traumatic_S_A_R_B(state, action, reward)
+        return super().remember_traumatic_S_A_R_B(state, action, reward, behavior)
     
-    def remember_S_A_R(self, state: State, action: int, reward: float):
+    def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
         self.errors = 0
-        return super().remember_S_A_R_B(state, action, reward)
+        return super().remember_S_A_R_B(state, action, reward, behavior)
 
     def _get_sample_batch_from_memory(self, memory: Memory, batch_size: int) -> Union[Batch, Dict[int, Batch]]:
         get_action_vec = self.__action_mapper
@@ -119,13 +120,13 @@ class TakingTricksAgent(ReinforceAgent):
             return {i:prepare_batch_from_indices(memory, get_action_vec, state_mapper, 
                         action_source, ids, clipped) for i, ids in chunk_indices.items()}
 
-
         indices: List[int] = list(range(len(memory.states_queue)))
 
         return prepare_batch_from_indices(memory, get_action_vec, state_mapper, action_source, indices, clipped)
 
     def _replay(self, memory: Memory, message):
         data = self._get_sample_batch_from_memory(memory, self.__batch_size)
+
         if data is not None:
             print(message)
             self.model.train(data)
@@ -135,6 +136,7 @@ def prepare_batch_from_indices(memory: Memory, get_action_vec: Union[fun[[Taking
     s: List[ndarray] =[]
     a: List[ndarray] =[]
     r: List[ndarray] =[]
+    b: List[ndarray] =[]
 
     indices = choice(indices, clipped, replace=False)
 
@@ -142,5 +144,6 @@ def prepare_batch_from_indices(memory: Memory, get_action_vec: Union[fun[[Taking
         s.append(state_mapper(memory.states_queue[idx]))
         a.append(get_action_vec(action_source[idx]))
         r.append(array(memory.rewards_queue[idx]))
+        b.append(array(memory.behaviors_queue[idx]))
 
-    return Batch(array(s), array(a), array(r))
+    return Batch(array(s), array(a), array(r), array(b))
