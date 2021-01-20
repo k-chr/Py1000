@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import Callable
-
 from keras import Sequential, Model 
 from keras.layers import Dense, Activation, InputLayer
 from keras import Input
@@ -11,8 +10,8 @@ from keras.losses import MSE
 from keras.losses import categorical_crossentropy
 from keras.backend import  print_tensor
 import keras.backend
-from .. import (path, datetime, zeros, Union,
-                choice, List, array, Dict,
+from .. import (path, datetime, zeros, Union, reshape,
+                choice, List, array, Dict, 
                 nan_to_num, n_sum, ndarray,
                 argmax, int64, deque, Deque,
                 Callable as fun, Batch, NetworkOutput)

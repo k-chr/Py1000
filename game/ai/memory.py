@@ -17,10 +17,10 @@ class Memory:
         self.behaviors.append(behavior)
 
     def init_queues(self):
-        self.actions_queue: Deque[int] =deque(maxsize=MAX_DATA_SIZE)
-        self.states_queue: Deque[State] =deque(maxsize=MAX_DATA_SIZE)
-        self.rewards_queue: Deque[float] =deque(maxsize=MAX_DATA_SIZE)
-        self.behaviors_queue: Deque[float] =deque(maxsize=MAX_DATA_SIZE)
+        self.actions_queue: Deque[int] =deque(maxlen=MAX_DATA_SIZE)
+        self.states_queue: Deque[State] =deque(maxlen=MAX_DATA_SIZE)
+        self.rewards_queue: Deque[float] =deque(maxlen=MAX_DATA_SIZE)
+        self.behaviors_queue: Deque[float] =deque(maxlen=MAX_DATA_SIZE)
 
     def save_data_for_replay_and_clean_temp(self, reward_mapper: fun[[float], float] =None,
                                                   rewards_mapper: fun[[List[float]], List[float]] =None):

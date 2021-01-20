@@ -21,21 +21,22 @@ class TakingTrickQPolicyDNNCluster(QPolicyNetwork):
             self.nodes[i] = QPolicyNetwork.get_instance(f'{self.network_name}_node_{i}', self.action_output_size, self.batch_size, 
                                                            self.alpha, self.memories_directory, self.states_one_hot_len, self.init_date, self.flag, self.mode)
         
-    def predict_probs(self, vec: ndarray, cards_in_hand: int):
+    def predict_probs(self, vec: ndarray, cards_in_hand: int =0):
         if cards_in_hand >= 2 and cards_in_hand <= MAX_CARDS_IN_HAND:
             self.policy_predictor = self.nodes[cards_in_hand].policy_predictor
 
         return super().predict_probs(vec)
     
-    def predict_values(self, vec: ndarray, cards_in_hand: int):
+    def predict_values(self, vec: ndarray, cards_in_hand: int =0):
         if cards_in_hand >= 2 and cards_in_hand <= MAX_CARDS_IN_HAND:
             self.policy_predictor = self.nodes[cards_in_hand].policy_predictor
 
         return super().predict_values(vec)
 
     def save_weights_to_date(self):
+        date=datetime.now()
         for _, node in self.nodes.items():
-            node.save_weights_to_date()
+            node.save_weights_to_date(date=date)
 
     def train(self, memory: Union[Batch, Dict[int, Batch]]):
         if isinstance(memory, Batch):

@@ -3,7 +3,7 @@ from enum import Enum, IntFlag
 from random import randint, shuffle
 from copy import deepcopy
 from typing import List, Deque, Callable, NamedTuple, Dict, Union
-from numpy import zeros, concatenate, array, nan_to_num, sum as n_sum, ndarray, argmax, int64
+from numpy import zeros, concatenate, array, nan_to_num, sum as n_sum, ndarray, argmax, int64, asarray, reshape
 from numpy.random import choice
 from datetime import datetime
 from os import path
