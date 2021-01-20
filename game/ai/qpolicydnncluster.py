@@ -2,9 +2,8 @@ from __future__ import annotations
 from .qpolicynetwork import QPolicyNetwork
 from . import (Dict, datetime, TrainingEnum, 
                NetworkMode, ndarray, Union,
-               Batch, List)
-
-MAX_CARDS_IN_HAND = 0xA
+               Batch, List, MAX_CARDS_IN_HAND,
+               MIN_CARDS_IN_HAND)
 
 
 class TakingTrickQPolicyDNNCluster(QPolicyNetwork):
@@ -21,28 +20,29 @@ class TakingTrickQPolicyDNNCluster(QPolicyNetwork):
             self.nodes[i] = QPolicyNetwork.get_instance(f'{self.network_name}_node_{i}', self.action_output_size, self.batch_size, 
                                                            self.alpha, self.memories_directory, self.states_one_hot_len, self.init_date, self.flag, self.mode)
         
-    def predict_probs(self, vec: ndarray, cards_in_hand: int):
+    def predict_probs(self, vec: ndarray, cards_in_hand: int =0):
         if cards_in_hand >= 2 and cards_in_hand <= MAX_CARDS_IN_HAND:
             self.policy_predictor = self.nodes[cards_in_hand].policy_predictor
 
         return super().predict_probs(vec)
     
-    def predict_values(self, vec: ndarray, cards_in_hand: int):
-        if cards_in_hand >= 2 and cards_in_hand <= MAX_CARDS_IN_HAND:
+    def predict_values(self, vec: ndarray, cards_in_hand: int =0):
+        if cards_in_hand >= MIN_CARDS_IN_HAND and cards_in_hand <= MAX_CARDS_IN_HAND:
             self.policy_predictor = self.nodes[cards_in_hand].policy_predictor
 
         return super().predict_values(vec)
 
     def save_weights_to_date(self):
+        date=datetime.now()
         for _, node in self.nodes.items():
-            node.save_weights_to_date()
+            node.save_weights_to_date(date=date)
 
-    def train(self, memory: Union[Batch, Dict[int, Batch]]):
+    def train(self, memory: Union[Batch, Dict[int, Batch]], message: str =""):
         if isinstance(memory, Batch):
-            return super().train(memory)
+            return super().train(memory, message)
 
         for idx, batch in memory.items():
-            self.nodes[idx].train(batch)
+            self.nodes[idx].train(batch, message)
 
     @staticmethod
     def get_instance(name: str, n_actions: int, batch_size: int, alpha: float, 

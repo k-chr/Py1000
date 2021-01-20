@@ -2,7 +2,7 @@ from . import Suits, Card, TakingTrickState, RandomCardGenerator, randint, GameR
 from ..utils.gamelogger import GameLogger
 from ..utils.csvlogger import CSVLogger
 from .env_player import EnvPlayer
-from .. import choice
+from .. import choice, NetworkOutput, List
 
 INVALID_MOVE_REWARD = -50
 MY_CARD_REWARD = 0.1
@@ -30,6 +30,7 @@ class SimpleTakingTricksEnv(object):
         self.csv_score_log = CSVLogger(self.csv_score)
         self.player1 = EnvPlayer("player1")
         self.player2 = EnvPlayer("player2")
+        self.unknown_stock: List[Card] =[] 
 
     def log_episode_info(self):
         self.csv_inv_log.log((self.player1.invalid_actions, self.player2.invalid_actions))
@@ -47,7 +48,9 @@ class SimpleTakingTricksEnv(object):
     def reset(self):
         player1 = randint(0, 1) == 1
         cards = self.generator.generate_stack_and_players_cards()
-        stock = cards[choice([0, 1], size=1)[0]]
+        stock_ind = choice([0, 1], size=1)[0]
+        stock, uknown_stock = (cards[stock_ind], cards[int(not stock_ind)])
+        self.unknown_stock = uknown_stock
         if player1:
             self.player1.reset(cards[2], stock)
             self.player2.reset(cards[3])
@@ -83,7 +86,7 @@ class SimpleTakingTricksEnv(object):
     def opponent_handler(self) -> EnvPlayer:
         return self.player2 if self.is_player1_turn else self.player1
 
-    def step(self, action: int): 
+    def step(self, action: NetworkOutput): 
        return self.__fun(action)
 
     def __update_rewards(self, reward: float):
@@ -92,7 +95,8 @@ class SimpleTakingTricksEnv(object):
     def __update_op_rewards(self, reward: float):
         self.opponent_handler.rewards += reward if reward is not None else 0
 
-    def __own_card_estimator_step(self, action: int):
+    def __own_card_estimator_step(self, agentAction: NetworkOutput):
+        action = agentAction.action
         reward = 0
         rewards = []
         card: Card =None
@@ -124,13 +128,16 @@ class SimpleTakingTricksEnv(object):
         rewards = [reward]
         return self.current_observation, rewards, self.done
 
-    def __full_training_step(self, action: int):
+    def __full_training_step(self, agentAction: NetworkOutput):
         reward = 0
+        action = agentAction.action
         op_reward = 0
         card: Card =None
         trump: Suits =self.current_observation["data"].trump
         l = [card for card in self.player_handler.hand_cards if card.id() == action]
         opponent_card: Card = self.current_observation["data"].played_card
+        played_cards: List[Card] = self.current_observation["data"].tricks_taken_by_both_players
+        known_stock: List[Card] = self.current_observation["data"].known_stock
         the_same_player = False
         if not any(l) or (opponent_card is not None and not GameRules.is_card_valid(
                 self.player_handler.hand_cards, l[0], opponent_card, trump)):
@@ -142,7 +149,18 @@ class SimpleTakingTricksEnv(object):
         else:
             card = l[0]
             self.player_handler.hand_cards.remove(card)
+            card_with_probs = {c.__str__():agentAction.probs[c.id()] for c in self.player_handler.hand_cards}
+            self.logger.append_to_log("____________________________________________________________________________")
+            self.logger.append_to_log(f"state info: [tricks, unknown stock, known stock, played card, current trump")
+            self.logger.append_to_log(f"tricks taken by both players: {played_cards}")
+            self.logger.append_to_log(f"unknown stock: {self.unknown_stock}")
+            self.logger.append_to_log(f"known stock: {known_stock}")
+            self.logger.append_to_log(f"played card: {opponent_card}")
+            self.logger.append_to_log(f"current trump: {trump}")
+            self.logger.append_to_log("____________________________________________________________________________")
+            self.logger.append_to_log(f"{self.player_handler.name}'s cards with probabilities: {card_with_probs}")
             self.logger.append_to_log(self.player_handler.name + " played card " + card.__str__())
+            
             reward = VALID_MOVE_REWARD
             if opponent_card is not None:
                 self.played_cards.append(card)
@@ -170,6 +188,7 @@ class SimpleTakingTricksEnv(object):
                     trump = card.suit
                     self.logger.append_to_log(self.player_handler.name + f" meld {trump.name} by {card} and got {trump.value} points")
                 op_reward = None
+        self.logger.append_to_log("____________________________________________________________________________")
 
         rewards = [reward, op_reward]
         self.__update_rewards(reward)
@@ -182,8 +201,9 @@ class SimpleTakingTricksEnv(object):
         self.current_observation = self.create_observation(trump=trump, card=card)
         return self.current_observation, rewards, self.done
 
-    def __valid_card_estimator_step(self, action):
+    def __valid_card_estimator_step(self, agentAction: NetworkOutput):
         reward = 0
+        action = agentAction.action
         op_reward = 0
         card: Card =None
         l = [card for card in self.player_handler.hand_cards if card.id() == action]

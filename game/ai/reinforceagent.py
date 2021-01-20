@@ -1,6 +1,6 @@
 from .qpolicynetwork import QPolicyNetwork
 from . import (zeros, State, array, List, Dict,
-               choice, TrainingEnum, ndarray,
+               choice, TrainingEnum, ndarray, NetworkOutput,
                argmax, int64, fun, Batch, NetworkMode)
 from .memory import Memory
 
@@ -54,6 +54,16 @@ FACTORS = {
     300:1.2**8
 }
 
+PENALTIES = {
+    10: 1.4,
+    20: 1.4**2,
+    40: 1.4**3,
+    80: 1.4**4,
+    160: 1.4**5,
+    320: 1.4**6,
+    640: 1.4**7
+}
+
 
 class ReinforceAgent(object):
     
@@ -70,26 +80,37 @@ class ReinforceAgent(object):
         self.mode = mode
         self.score = 0
         self.invalid_actions = 0
-        self.__action_getter = self.get_action_from_probs if self.flag is TrainingEnum.FULL_TRAINING else self.get_action_from_value
+        self._action_getter = self.get_action_from_probs if self.flag is TrainingEnum.FULL_TRAINING else self.get_action_from_value
 
-    def remember_S_A_R(self, state: State, action: int, reward: float):
-        self.memory.remember_S_A_R(state, action, reward)
+    def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
+        self.memory.remember_S_A_R_B(state, action, reward, behavior)
         
-    def remeber_traumatic_S_A_R(self, state: State, action: int, reward: float):
-        self.traumatic_memory.remember_S_A_R(state, action, reward)
+    def remember_traumatic_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
+        self.traumatic_memory.remember_S_A_R_B(state, action, reward, behavior)
 
-    def get_action(self, state: State) -> int:
-        vec = state.to_one_hot_vec()[None]
-        return self.__action_getter(vec)
+    def get_action(self, state: State) -> NetworkOutput:
+        pass
 
-    def get_action_from_probs(self, vec: ndarray) -> int:
-        probs = self.model.predict_probs(vec)
+    def get_action_from_probs(self, vec: ndarray, **args) -> NetworkOutput:
+        probs = self.model.predict_probs(vec, **args)
         try:
-            action = choice(range(self.action_size), 1, p=probs[0])[0]
-            return action
+            action = choice(range(self.action_size), 1, p=probs)[0]
+            return NetworkOutput(action, probs[action], probs)
         except:
-            print(f"probabilities: {probs[0]} contains NaN")
+            print(f"probabilities: {probs} contains NaN")
             raise Exception
+
+    def get_action_from_value(self, vec: ndarray, **args) -> NetworkOutput:    
+        values = self.model.predict_values(vec, **args)[0]
+        indices = argmax(values)
+        action = 0
+        if isinstance(indices, int64):
+            action = indices
+        elif len(indices) == 1:
+            action = indices[0]
+        else:
+            action = choice(indices, 1)[0]
+        return NetworkOutput(action, values[action], values)
     
     def set_score(self, score: int):
         self.score = score 
@@ -101,15 +122,9 @@ class ReinforceAgent(object):
     def beta(self):
         return FACTORS.get(max(list(filter(lambda x: x <= self.score, FACTORS.keys())), default=0), 1)
 
-    def get_action_from_value(self, vec: ndarray) -> int:    
-        values = self.model.predict_values(vec)
-        indices = argmax(values[0])
-        if isinstance(indices, int64):
-            return indices
-        if len(indices) == 1:
-            return indices[0]
-        action = choice(indices, 1)[0]
-        return action
+    @property
+    def beta_penalty(self):
+        return PENALTIES.get(max(list(filter(lambda x: x <= self.invalid_actions, PENALTIES.keys())), default=0), 1)
 
     def replay(self):
         self.persist_episode_and_clean_memory()

@@ -4,3 +4,5 @@ tb-nightly
 tensorflow==2.2
 cx-Freeze
 numpy==1.19.1
+scipy==1.4.1
+h5py==2.10.0
