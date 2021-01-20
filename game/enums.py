@@ -7,20 +7,28 @@ class Suits(Enum):
     H = 100
     NO_SUIT = 0
 
+
 class TrainingEnum(Enum):
     FULL_TRAINING = 0x0
     PRETRAINING_OWN_CARDS = 0x1
     PRETRAINING_VALID_CARDS = 0x2
+
 
 class NetworkMode(IntFlag):
     SINGLE = 0x01
     CLUSTER = 0x02
     LARGE = 0x04
 
+    @property
+    def computed_name(self):
+       return self.__str__().replace('NetworkMode.', '').replace('|', '_')
+
+
 class RewardMapperMode(Enum):
     DISCOUNTED = 0x00
     DISCOUNTED_REVERSED = 0x01
     NOT_MODIFIED = 0x02
+
 
 class Cards(Enum):
     NINE = 0
