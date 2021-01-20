@@ -55,7 +55,7 @@ class QPolicyNetwork(object):
                         else SGD(lr=self.alpha), 
                      loss=self.loss_function_generator(discounted_reward_placeholder, behavior_policy_placeholder))
         self.policy_trainer = model
-        model.summary()
+        self.policy_predictor.summary()
 
         
     def load_weights_from_date(self):
@@ -66,7 +66,7 @@ class QPolicyNetwork(object):
                 mkdir(path.join("previous_memories", f"{self.memories_directory}"))
 
             self.policy_predictor.load_weights(path.join("previous_memories",
-                                        f"{self.memories_directory}", f"{self.network_name}_{self.mode.name}_{self.flag.name}_{date}.h5"))
+                                        f"{self.memories_directory}", f"{self.network_name}_{self.mode.computed_name}_{self.flag.name}_{date}.h5"))
 
     def save_weights_to_date(self, date: datetime =None):
         date_str = (date if date is not None else datetime.now()).strftime("%b_%d_%Y_%H_%M_%S")
@@ -74,7 +74,7 @@ class QPolicyNetwork(object):
                 from os import mkdir
                 mkdir(path.join("previous_memories", f"{self.memories_directory}"))
         self.policy_predictor.save_weights(path.join("previous_memories",
-                                   f"{self.memories_directory}", f"{self.network_name}_{self.mode.name}_{self.flag.name}_{date_str}.h5"))
+                                   f"{self.memories_directory}", f"{self.network_name}_{self.mode.computed_name}_{self.flag.name}_{date_str}.h5"))
 
     def loss_function_generator(self, discounted_reward: Tensor, behavior_policy: Tensor):
 
@@ -108,7 +108,11 @@ class QPolicyNetwork(object):
 
         return __instance
 
-    def train(self, memory: Batch):
+    def train(self, memory: Batch, message: str =""):
+
+        if memory is None:
+            return
+
         try:
             network_input = {
                              'state':memory.states,
@@ -117,6 +121,11 @@ class QPolicyNetwork(object):
                             } if self.flag is TrainingEnum.FULL_TRAINING else {
                              'state':memory.states
                             }
+
+            if message != "":
+                print(message)
+
             self.policy_trainer.fit(network_input, memory.actions, epochs=1)
+
         except Exception as e:
             print(e)

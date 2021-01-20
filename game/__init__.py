@@ -9,6 +9,9 @@ from datetime import datetime
 from os import path
 from collections import deque
 
+MAX_CARDS_IN_HAND = 0xA
+MIN_CARDS_IN_HAND = 0x2
+
 def DECK_SIZE():
     return 24
 

@@ -11,10 +11,10 @@ from keras.losses import categorical_crossentropy
 from keras.backend import  print_tensor
 import keras.backend
 from .. import (path, datetime, zeros, Union, reshape,
-                choice, List, array, Dict, 
-                nan_to_num, n_sum, ndarray,
-                argmax, int64, deque, Deque,
-                Callable as fun, Batch, NetworkOutput)
+                choice, List, array, Dict, MIN_CARDS_IN_HAND, 
+                MAX_CARDS_IN_HAND, nan_to_num, n_sum, ndarray,
+                argmax, int64, deque, Deque, Callable as fun, 
+                Batch, NetworkOutput)
 from ..enums import TrainingEnum, RewardMapperMode, NetworkMode
 from ..states.biddingstate import BiddingState
 from ..states.giveawaystate import GiveawayState
