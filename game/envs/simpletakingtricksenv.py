@@ -30,7 +30,7 @@ class SimpleTakingTricksEnv(object):
         self.csv_score_log = CSVLogger(self.csv_score)
         self.player1 = EnvPlayer("player1")
         self.player2 = EnvPlayer("player2")
-        self.uknown_stock: List[Card] =[] 
+        self.unknown_stock: List[Card] =[] 
 
     def log_episode_info(self):
         self.csv_inv_log.log((self.player1.invalid_actions, self.player2.invalid_actions))
@@ -50,7 +50,7 @@ class SimpleTakingTricksEnv(object):
         cards = self.generator.generate_stack_and_players_cards()
         stock_ind = choice([0, 1], size=1)[0]
         stock, uknown_stock = (cards[stock_ind], cards[int(not stock_ind)])
-        self.uknown_stock = uknown_stock
+        self.unknown_stock = uknown_stock
         if player1:
             self.player1.reset(cards[2], stock)
             self.player2.reset(cards[3])
@@ -151,9 +151,9 @@ class SimpleTakingTricksEnv(object):
             self.player_handler.hand_cards.remove(card)
             card_with_probs = {c.__str__():agentAction.probs[c.id()] for c in self.player_handler.hand_cards}
             self.logger.append_to_log("____________________________________________________________________________")
-            self.logger.append_to_log(f"state info: [tricks, uknown stock, known stock, played card, current trump")
+            self.logger.append_to_log(f"state info: [tricks, unknown stock, known stock, played card, current trump")
             self.logger.append_to_log(f"tricks taken by both players: {played_cards}")
-            self.logger.append_to_log(f"uknown stock: {self.uknown_stock}")
+            self.logger.append_to_log(f"unknown stock: {self.unknown_stock}")
             self.logger.append_to_log(f"known stock: {known_stock}")
             self.logger.append_to_log(f"played card: {opponent_card}")
             self.logger.append_to_log(f"current trump: {trump}")
