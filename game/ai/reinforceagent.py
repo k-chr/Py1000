@@ -80,7 +80,7 @@ class ReinforceAgent(object):
         self.mode = mode
         self.score = 0
         self.invalid_actions = 0
-        self.__action_getter = self.get_action_from_probs if self.flag is TrainingEnum.FULL_TRAINING else self.get_action_from_value
+        self._action_getter = self.get_action_from_probs if self.flag is TrainingEnum.FULL_TRAINING else self.get_action_from_value
 
     def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
         self.memory.remember_S_A_R_B(state, action, reward, behavior)
@@ -89,21 +89,20 @@ class ReinforceAgent(object):
         self.traumatic_memory.remember_S_A_R_B(state, action, reward, behavior)
 
     def get_action(self, state: State) -> NetworkOutput:
-        vec = state.to_one_hot_vec()[None]
-        return self.__action_getter(vec)
+        pass
 
-    def get_action_from_probs(self, vec: ndarray) -> NetworkOutput:
-        probs = self.model.predict_probs(vec)
+    def get_action_from_probs(self, vec: ndarray, **args) -> NetworkOutput:
+        probs = self.model.predict_probs(vec, **args)
         try:
-            action = choice(range(self.action_size), 1, p=probs[0])[0]
+            action = choice(range(self.action_size), 1, p=probs)[0]
             return NetworkOutput(action, probs[action], probs)
         except:
-            print(f"probabilities: {probs[0]} contains NaN")
+            print(f"probabilities: {probs} contains NaN")
             raise Exception
 
-    def get_action_from_value(self, vec: ndarray) -> NetworkOutput:    
-        values = self.model.predict_values(vec)
-        indices = argmax(values[0])
+    def get_action_from_value(self, vec: ndarray, **args) -> NetworkOutput:    
+        values = self.model.predict_values(vec, **args)[0]
+        indices = argmax(values)
         action = 0
         if isinstance(indices, int64):
             action = indices

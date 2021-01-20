@@ -57,7 +57,7 @@ class TakingTricksAgent(ReinforceAgent):
 
     @property
     def __MAX_ERRORS(self):
-        return 500
+        return 1
 
     def __init__(self, batch_size: int, prefix: str,
                  gamma: float =0.99, alpha: float =0.0001, last_weights: datetime =None,
@@ -73,17 +73,17 @@ class TakingTricksAgent(ReinforceAgent):
         self.__action_mapper = action_mappers.get(self.flag, self.sample)
         self.__state_mapper: fun[[State], ndarray] = _sample_state
 
-    def get_action(self, state: State) -> NetworkOutput:
-        output = super().get_action(state)
-        if self.__errors >= self.__MAX_ERRORS and self.flag is TrainingEnum.FULL_TRAINING:
+    def get_action(self, state: TakingTrickState) -> NetworkOutput:
+        output = self._action_getter(state.to_one_hot_vec(), cards_in_hand=len(state.hand_cards))
+        if self.__errors >= self.__MAX_ERRORS:
             self.__errors = 0
             state: TakingTrickState =state
             vec: List[int] =list(map(lambda card: card.id(), list(filter(lambda x: GameRules.is_card_valid(
                     state.hand_cards, x, state.played_card, trump=state.trump), state.hand_cards
                 ))))
             action: int = choice(vec, 1)[0]
-            output.action = action
-            output.action_prob = output.probs[action]
+            output = NetworkOutput(action, output.probs[action] ,output.probs )
+        
         return output
 
     def persist_episode_and_clean_memory(self) -> None:
@@ -111,7 +111,7 @@ class TakingTricksAgent(ReinforceAgent):
         if(len(memory.states_queue) < clipped and self.mode & NetworkMode.SINGLE):
             return None
 
-        if self.mode is NetworkMode.CLUSTER:
+        if self.mode & NetworkMode.CLUSTER:
             l = list(range(len(memory.states_queue)))
             hand_range = list(range(2, 10))
             chunk_indices: Dict[int, List[int]] = {i: [idx for idx in l if len(memory.states_queue[idx].hand_cards) == i] for i in hand_range }
