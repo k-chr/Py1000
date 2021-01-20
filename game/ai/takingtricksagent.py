@@ -9,6 +9,7 @@ from . import (datetime, TakingTrickState, NetworkMode,
                choice, Dict, fun, Union)
 from ..states import DECK_SIZE
 from .memory import Memory
+from .memorycluster import TakingTrickClusterMemory
 
 def _get_own_cards_vec(state: TakingTrickState) -> ndarray:
     hand: ndarray =zeros(state.action_space)
@@ -64,9 +65,11 @@ class TakingTricksAgent(ReinforceAgent):
                  state_size: int =100, action_size: int =DECK_SIZE(), flag: TrainingEnum =TrainingEnum.FULL_TRAINING, 
                  mode: NetworkMode =NetworkMode.SINGLE, reward_mode: RewardMapperMode =RewardMapperMode.DISCOUNTED):
         super(TakingTricksAgent, self).__init__(state_size, action_size, gamma=gamma, alpha=alpha, flag=flag, mode=mode)
-        initializer = TakingTrickQPolicyDNNCluster.get_instance if mode & NetworkMode.CLUSTER else QPolicyNetwork.get_instance
+        initializer, memory_initializer = (TakingTrickQPolicyDNNCluster.get_instance, TakingTrickClusterMemory) if mode & NetworkMode.CLUSTER else (QPolicyNetwork.get_instance, Memory)
         self.model: Union[QPolicyNetwork, TakingTrickQPolicyDNNCluster] =initializer("TakingTricksAgent", action_size, batch_size,
                                    alpha, prefix, state_size, last_weights, flag, mode)
+        self.memory = memory_initializer()
+        self.traumatic_memory = memory_initializer()
         self.__errors = 0
         self.__batch_size = batch_size
         self.__rewards_mapper: fun[[List[float]], List[float]] = rewards_mappers[reward_mode](self.gamma)
@@ -104,37 +107,32 @@ class TakingTricksAgent(ReinforceAgent):
         get_action_vec = self.__action_mapper
         state_mapper = self.__state_mapper
         clipped = batch_size if batch_size >= MIN_SIZE_OF_BATCH else MIN_SIZE_OF_BATCH
-        action_source = memory.actions_queue\
-                                    if self.flag is TrainingEnum.FULL_TRAINING \
-                                    else memory.states_queue
-
-        if(len(memory.states_queue) < clipped and self.mode & NetworkMode.SINGLE):
-            return None
-
+        
         if self.mode & NetworkMode.CLUSTER:
-            l = list(range(len(memory.states_queue)))
-            hand_range = list(range(2, 10))
-            chunk_indices: Dict[int, List[int]] = {i: [idx for idx in l if len(memory.states_queue[idx].hand_cards) == i] for i in hand_range }
-            
-            if not all([length >= batch_size for length in list(map(len, chunk_indices.values()))]):
-                return None
-            
-            return {i:prepare_batch_from_indices(memory, get_action_vec, state_mapper, 
-                        action_source, ids, clipped) for i, ids in chunk_indices.items()}
+            m: TakingTrickClusterMemory = memory
 
-        indices: List[int] = list(range(len(memory.states_queue)))
+            return {i:prepare_batch_from_indices(mem, get_action_vec, state_mapper, self.__action_source(mem), 
+                    list(range(mem.length)), clipped) for i, mem in m.cluster.items()}
 
-        return prepare_batch_from_indices(memory, get_action_vec, state_mapper, action_source, indices, clipped)
+        indices: List[int] = list(range(memory.length))
+
+        return prepare_batch_from_indices(memory, get_action_vec, state_mapper, self.__action_source(memory), indices, clipped)
 
     def _replay(self, memory: Memory, message):
         data = self._get_sample_batch_from_memory(memory, self.__batch_size)
+        self.model.train(data, message)
 
-        if data is not None:
-            print(message)
-            self.model.train(data)
+    def __action_source(self, memory: Memory):
+        return memory.actions_queue\
+                if self.flag is TrainingEnum.FULL_TRAINING \
+                else memory.states_queue
 
 def prepare_batch_from_indices(memory: Memory, get_action_vec: Union[fun[[TakingTrickState], ndarray], fun[[int], ndarray]],
                                state_mapper: fun[[State], ndarray], action_source: Union[State,int], indices: List[int], clipped: int) -> Batch:
+
+    if memory.length < clipped:
+        return None
+
     s: List[ndarray] =[]
     a: List[ndarray] =[]
     r: List[ndarray] =[]

@@ -9,6 +9,11 @@ class Memory:
     def __init__(self):
         self.__clean()
         self.init_queues() 
+        self._length = 0
+
+    @property
+    def length(self):
+        return self._length
 
     def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
         self.states.append(state)
@@ -38,6 +43,7 @@ class Memory:
             self.states_queue.append(self.states[i])
             self.rewards_queue.append(self.rewards[i])
             self.behaviors_queue.append(self.behaviors[i])
+            self._length = min((MAX_DATA_SIZE, self._length + 1))
 
         self.__clean()
 
