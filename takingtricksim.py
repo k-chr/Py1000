@@ -23,7 +23,7 @@ from numpy import zeros
 
 sys.setrecursionlimit(10000)
 EPISODES = 200_000
-DUMP_PERIOD = 500
+DUMP_PERIOD = 5000
 TRAINING_FLAG = TrainingEnum.PRETRAINING_OWN_CARDS
 REWARD_MAPPPER = RewardMapperMode.DISCOUNTED
 NETWORK = NetworkMode.SINGLE
