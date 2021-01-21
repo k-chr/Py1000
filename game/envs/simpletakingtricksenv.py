@@ -2,7 +2,7 @@ from . import Suits, Card, TakingTrickState, RandomCardGenerator, randint, GameR
 from ..utils.gamelogger import GameLogger
 from ..utils.csvlogger import CSVLogger
 from .env_player import EnvPlayer
-from .. import choice, NetworkOutput, List
+from .. import choice, NetworkOutput, List, deque, Deque
 
 INVALID_MOVE_REWARD = -50
 MY_CARD_REWARD = 0.1
@@ -20,10 +20,11 @@ class SimpleTakingTricksEnv(object):
         self.generator = RandomCardGenerator()
         self.current_observation = {}
         self.played_cards = []
-        self.file_name = f"simpletakingtricksenv_session_{datetime.now().strftime('%b_%d_%Y_%H_%M_%S')}.log"
-        self.csv_rewards = f"simpletakingtricksenv_rewards_{datetime.now().strftime('%b_%d_%Y_%H_%M_%S')}.csv"
-        self.csv_invalid = f"simpletakingtricksenv_invalid_{datetime.now().strftime('%b_%d_%Y_%H_%M_%S')}.csv"
-        self.csv_score = f"simpletakingtricksenv_score_{datetime.now().strftime('%b_%d_%Y_%H_%M_%S')}.csv"
+        self.date = datetime.now()
+        self.file_name = f"simpletakingtricksenv_session_{self.date.strftime('%b_%d_%Y_%H_%M_%S')}.log"
+        self.csv_rewards = f"simpletakingtricksenv_rewards_{self.date.strftime('%b_%d_%Y_%H_%M_%S')}.csv"
+        self.csv_invalid = f"simpletakingtricksenv_invalid_{self.date.strftime('%b_%d_%Y_%H_%M_%S')}.csv"
+        self.csv_score = f"simpletakingtricksenv_score_{self.date.strftime('%b_%d_%Y_%H_%M_%S')}.csv"
         self.logger = GameLogger(self.file_name)
         self.csv_inv_log = CSVLogger(self.csv_invalid)
         self.csv_rew_log = CSVLogger(self.csv_rewards)
@@ -31,11 +32,19 @@ class SimpleTakingTricksEnv(object):
         self.player1 = EnvPlayer("player1")
         self.player2 = EnvPlayer("player2")
         self.unknown_stock: List[Card] =[] 
-
+     
     def log_episode_info(self):
-        self.csv_inv_log.log((self.player1.invalid_actions, self.player2.invalid_actions))
-        self.csv_rew_log.log((self.player1.rewards, self.player2.rewards))
-        self.csv_score_log.log((self.player1.score, self.player2.score))
+        self.player1.save()
+        self.player2.save()
+        self.csv_inv_log.log((self.player1.invalid_actions, self.player2.invalid_actions, 
+                              self.player1.invalid_actions + self.player2.invalid_actions, 
+                              self.player1.mean_invalid_actions_count + self.player2.mean_invalid_actions_count))
+        self.csv_rew_log.log((self.player1.rewards, self.player2.rewards,
+                              self.player1.rewards + self.player2.rewards,
+                              self.player1.mean_reward + self.player2.mean_reward))
+        self.csv_score_log.log((self.player1.score, self.player2.score,
+                                self.player1.score + self.player2.score,
+                                self.player1.mean_score + self.player2.mean_score))
         self.logger.append_to_log(f"{self.player1.name}'s' score is {self.player1.score} |\
                                     {self.player2.name}'s' score is {self.player2.score}")
 
@@ -51,6 +60,7 @@ class SimpleTakingTricksEnv(object):
         stock_ind = choice([0, 1], size=1)[0]
         stock, uknown_stock = (cards[stock_ind], cards[int(not stock_ind)])
         self.unknown_stock = uknown_stock
+
         if player1:
             self.player1.reset(cards[2], stock)
             self.player2.reset(cards[3])
