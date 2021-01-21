@@ -66,7 +66,7 @@ class QPolicyNetwork(object):
                 mkdir(path.join("previous_memories", f"{self.memories_directory}"))
 
             self.policy_predictor.load_weights(path.join("previous_memories",
-                                        f"{self.memories_directory}", f"{self.network_name}_{self.mode.computed_name}_{self.flag.name}_{date}.h5"))
+                                        f"{self.memories_directory}", f"{self.network_name}_{self.mode.computed_name}_{date}.h5"))
 
     def save_weights_to_date(self, date: datetime =None):
         date_str = (date if date is not None else datetime.now()).strftime("%b_%d_%Y_%H_%M_%S")
@@ -74,7 +74,7 @@ class QPolicyNetwork(object):
                 from os import mkdir
                 mkdir(path.join("previous_memories", f"{self.memories_directory}"))
         self.policy_predictor.save_weights(path.join("previous_memories",
-                                   f"{self.memories_directory}", f"{self.network_name}_{self.mode.computed_name}_{self.flag.name}_{date_str}.h5"))
+                                   f"{self.memories_directory}", f"{self.network_name}_{self.mode.computed_name}_{date_str}.h5"))
 
     def loss_function_generator(self, discounted_reward: Tensor, behavior_policy: Tensor):
 
