@@ -85,7 +85,7 @@ class TakingTricksAgent(ReinforceAgent):
                     state.hand_cards, x, state.played_card, trump=state.trump), state.hand_cards
                 ))))
             action: int = choice(vec, 1)[0]
-            output = NetworkOutput(action, output.probs[action] ,output.probs )
+            output = NetworkOutput(action, output.probs[action], output.probs)
         
         return output
 

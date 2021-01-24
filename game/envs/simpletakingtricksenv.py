@@ -1,4 +1,6 @@
-from . import Suits, Card, TakingTrickState, RandomCardGenerator, randint, GameRules, datetime, TrainingEnum
+from . import (Suits, Card, TakingTrickState,
+               RandomCardGenerator, randint, GameRules,
+               datetime, TrainingEnum)
 from ..utils.gamelogger import GameLogger
 from ..utils.csvlogger import CSVLogger
 from .env_player import EnvPlayer
@@ -10,9 +12,11 @@ NOT_MY_CARD_REWARD = -MY_CARD_REWARD
 VALID_MOVE_REWARD = -INVALID_MOVE_REWARD/30
 FULL_TRAINING_REWARD_FACTOR = 1
 
+
 class SimpleTakingTricksEnv(object):
     
-    def __init__(self, date: datetime =datetime.now(), flag: TrainingEnum =TrainingEnum.FULL_TRAINING, session: str=f"session_{datetime.now().strftime('%b_%d_%Y_%H_%M_%S')}"):
+    def __init__(self, date: datetime =datetime.now(), flag: TrainingEnum =TrainingEnum.FULL_TRAINING, 
+                 session: str=f"session_{datetime.now().strftime('%b_%d_%Y_%H_%M_%S')}"):
 
         self.flag = flag
         self.__fun =  self.__full_training_step if self.flag is TrainingEnum.FULL_TRAINING else self.__valid_card_estimator_step if (

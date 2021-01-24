@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.python.ops.gen_array_ops import Const
+
 config = tf.compat.v1.ConfigProto(gpu_options = 
                          tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.9)
 # device_count = {'GPU': 1}
