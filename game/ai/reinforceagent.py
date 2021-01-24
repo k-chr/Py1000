@@ -67,9 +67,10 @@ PENALTIES = {
 
 class ReinforceAgent(object):
     
-    def __init__(self, state_size: int, action_size: int, 
+    def __init__(self, session: str, state_size: int, action_size: int, 
                  gamma: float =0.99, alpha: float =0.001, flag: TrainingEnum =TrainingEnum.FULL_TRAINING, mode: NetworkMode = NetworkMode.SINGLE):
         self.state_size = state_size
+        self.session = session
         self.action_size = action_size
         self.gamma = gamma
         self.learning_rate = alpha

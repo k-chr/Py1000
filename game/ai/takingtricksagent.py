@@ -60,13 +60,13 @@ class TakingTricksAgent(ReinforceAgent):
     def __MAX_ERRORS(self):
         return 1
 
-    def __init__(self, batch_size: int, prefix: str,
+    def __init__(self, batch_size: int, prefix: str, session: str,
                  gamma: float =0.99, alpha: float =0.0001, last_weights: datetime =None,
                  state_size: int =100, action_size: int =DECK_SIZE(), flag: TrainingEnum =TrainingEnum.FULL_TRAINING, 
                  mode: NetworkMode =NetworkMode.SINGLE, reward_mode: RewardMapperMode =RewardMapperMode.DISCOUNTED):
-        super(TakingTricksAgent, self).__init__(state_size, action_size, gamma=gamma, alpha=alpha, flag=flag, mode=mode)
+        super(TakingTricksAgent, self).__init__(session, state_size, action_size, gamma=gamma, alpha=alpha, flag=flag, mode=mode)
         initializer, memory_initializer = (TakingTrickQPolicyDNNCluster.get_instance, TakingTrickClusterMemory) if mode & NetworkMode.CLUSTER else (QPolicyNetwork.get_instance, Memory)
-        self.model: Union[QPolicyNetwork, TakingTrickQPolicyDNNCluster] =initializer("TakingTricksAgent", action_size, batch_size,
+        self.model: Union[QPolicyNetwork, TakingTrickQPolicyDNNCluster] =initializer("TakingTricksAgent", session, action_size, batch_size,
                                    alpha, prefix, state_size, last_weights, flag, mode)
         self.memory = memory_initializer()
         self.traumatic_memory = memory_initializer()
