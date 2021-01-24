@@ -2,7 +2,6 @@ from .state import State
 from . import zeros, concatenate, List, Card, Suits, deepcopy, DECK_SIZE
 
 
-
 class TakingTrickState(State):
 
     def __init__(self, hand_cards: List[Card], known_stock: List[Card],

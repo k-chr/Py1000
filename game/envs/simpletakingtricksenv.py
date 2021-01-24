@@ -12,7 +12,7 @@ FULL_TRAINING_REWARD_FACTOR = 1
 
 class SimpleTakingTricksEnv(object):
     
-    def __init__(self, flag: TrainingEnum =TrainingEnum.FULL_TRAINING):
+    def __init__(self, date: datetime =datetime.now(), flag: TrainingEnum =TrainingEnum.FULL_TRAINING, session: str=f"session_{datetime.now().strftime('%b_%d_%Y_%H_%M_%S')}"):
 
         self.flag = flag
         self.__fun =  self.__full_training_step if self.flag is TrainingEnum.FULL_TRAINING else self.__valid_card_estimator_step if (
@@ -20,15 +20,16 @@ class SimpleTakingTricksEnv(object):
         self.generator = RandomCardGenerator()
         self.current_observation = {}
         self.played_cards = []
-        self.date = datetime.now()
-        self.file_name = f"simpletakingtricksenv_session_{self.date.strftime('%b_%d_%Y_%H_%M_%S')}.log"
-        self.csv_rewards = f"simpletakingtricksenv_rewards_{self.date.strftime('%b_%d_%Y_%H_%M_%S')}.csv"
-        self.csv_invalid = f"simpletakingtricksenv_invalid_{self.date.strftime('%b_%d_%Y_%H_%M_%S')}.csv"
-        self.csv_score = f"simpletakingtricksenv_score_{self.date.strftime('%b_%d_%Y_%H_%M_%S')}.csv"
-        self.logger = GameLogger(self.file_name)
-        self.csv_inv_log = CSVLogger(self.csv_invalid)
-        self.csv_rew_log = CSVLogger(self.csv_rewards)
-        self.csv_score_log = CSVLogger(self.csv_score)
+        self.session = session
+        self.date = date
+        self.file_name = f"simpletakingtricksenv_game.log"
+        self.csv_rewards = f"simpletakingtricksenv_rewards.csv"
+        self.csv_invalid = f"simpletakingtricksenv_invalid_actions.csv"
+        self.csv_score = f"simpletakingtricksenv_score.csv"
+        self.logger = GameLogger(self.session, self.file_name)
+        self.csv_inv_log = CSVLogger(self.session, self.csv_invalid)
+        self.csv_rew_log = CSVLogger(self.session, self.csv_rewards)
+        self.csv_score_log = CSVLogger(self.session, self.csv_score)
         self.player1 = EnvPlayer("player1")
         self.player2 = EnvPlayer("player2")
         self.unknown_stock: List[Card] =[] 
@@ -45,8 +46,8 @@ class SimpleTakingTricksEnv(object):
         self.csv_score_log.log((self.player1.score, self.player2.score,
                                 self.player1.score + self.player2.score,
                                 self.player1.mean_score + self.player2.mean_score))
-        self.logger.append_to_log(f"{self.player1.name}'s' score is {self.player1.score} |\
-                                    {self.player2.name}'s' score is {self.player2.score}")
+        self.logger.append_to_log(f"{self.player1.name}'s' score is {self.player1.score}" + " | " +
+                                    f"{self.player2.name}'s' score is {self.player2.score}")
 
     def end_logging(self):
         self.logger.end_logging()

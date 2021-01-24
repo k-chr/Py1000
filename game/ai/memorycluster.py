@@ -2,7 +2,7 @@ from .memory import Memory, fun, List
 from . import Dict, MIN_CARDS_IN_HAND, MAX_CARDS_IN_HAND
 from ..states.takingtrickstate import TakingTrickState
 
-SINGLE_CLUSTER_SIZE = 0x0800
+SINGLE_CLUSTER_SIZE = 0x1000
 
 class TakingTrickClusterMemory(Memory):
 
@@ -18,4 +18,3 @@ class TakingTrickClusterMemory(Memory):
     def save_data_for_replay_and_clean_temp(self, reward_mapper: fun[[float], float], rewards_mapper: fun[[List[float]], List[float]]):
         for _, memory in self.cluster.items():
             memory.save_data_for_replay_and_clean_temp(reward_mapper, rewards_mapper)
-            
