@@ -117,7 +117,7 @@ class Sim(QObject):
             file.write(f"REWARDS_MAPPER_TYPE = {self.reward_mapper_type.name}\n")
             file.write(f"ALPHA = {self.alpha}\n")
             file.write(f"EPISODES = {self.episodes}\n")
-            file.write(f"DATE = {self.date.strftime('%b_%d_%Y_%H_%M_%S')}\n")
+            file.write(f"DATE = {self.date.strftime('%b_%d_%Y_%H_%M_%S') if self.date is not None else None}\n")
 
         return
 
