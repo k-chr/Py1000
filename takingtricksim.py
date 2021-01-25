@@ -26,7 +26,7 @@ from secrets import token_hex
 sys.setrecursionlimit(10000)
 ALPHA = Constraint[float](0.000001, 0.01, 0.0001)
 EPISODES = Constraint[int](100_000, 1_000_000, 200_000)
-DUMP_PERIOD = 500
+DUMP_PERIOD = 5000
 TRAINING_FLAG = TrainingEnum.PRETRAINING_OWN_CARDS
 REWARD_MAPPPER = RewardMapperMode.DISCOUNTED
 NETWORK = NetworkMode.SINGLE

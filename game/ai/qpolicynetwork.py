@@ -21,6 +21,7 @@ class QPolicyNetwork(object):
         self.network_name = fname
         self.alpha = alpha
         self.init_date = start_from
+        self.created_date = datetime.now()
         self.memories_directory = mem_dir
         self.policy_predictor: Model =None
         self.policy_trainer: Model =None
@@ -72,7 +73,7 @@ class QPolicyNetwork(object):
             self.policy_predictor.load_weights(path.join(directory, f"{self.network_name}_{self.mode.computed_name}_{date}.h5"))
 
     def save_weights_to_date(self, date: datetime =None):
-        date_str = (date if date is not None else datetime.now()).strftime("%b_%d_%Y_%H_%M_%S")
+        date_str = (date if date is not None else self.created_date).strftime("%b_%d_%Y_%H_%M_%S")
         directory = path.join(self.session, MEM_DIR, self.memories_directory, self.flag.name)
         if not (path.isdir(directory)):
                 from os import makedirs

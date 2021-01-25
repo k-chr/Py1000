@@ -33,9 +33,8 @@ class TakingTrickQPolicyDNNCluster(QPolicyNetwork):
         return super().predict_values(vec)
 
     def save_weights_to_date(self):
-        date=datetime.now()
         for _, node in self.nodes.items():
-            node.save_weights_to_date(date=date)
+            node.save_weights_to_date(date=self.created_date)
 
     def train(self, memory: Union[Batch, Dict[int, Batch]], message: str =""):
         if isinstance(memory, Batch):
