@@ -250,7 +250,7 @@ class SimpleTakingTricksEnv(object):
                 
         self.__update_rewards(reward)
         rewards = [reward]
-        self.is_player1_turn = not self.is_player1_turn if (op_reward > 0 or opponent_card is None) else self.is_player1_turn
+        self.is_player1_turn = not self.is_player1_turn if (op_reward > 0 or opponent_card is None) and reward >= 0 else self.is_player1_turn
         if reward >= 0:
             self.current_observation = self.create_observation(trump=trump, card=card)
         return self.current_observation, rewards, self.done
