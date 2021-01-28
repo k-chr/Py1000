@@ -26,3 +26,6 @@ k_sum = keras.backend.sum
 k_log = keras.backend.log
 k_pow = keras.backend.pow
 k_mean = keras.backend.mean
+transpose = keras.backend.transpose
+from tensorflow import math
+div_no_nan = math.divide_no_nan

@@ -15,7 +15,7 @@ class CSVLogger(object):
         self.writer = writer(self.output, quoting=QUOTE_NONE, delimiter=',')
         self.count_rows = 0
 
-    def log(self, tup):
+    def log(self, tup):  
         self.writer.writerow(tup)
         self.count_rows += 1
         if self.count_rows == 500:
