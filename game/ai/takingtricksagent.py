@@ -95,11 +95,11 @@ class TakingTricksAgent(ReinforceAgent):
         self.traumatic_memory.save_data_for_replay_and_clean_temp(rewards_mapper=self.__rewards_mapper, 
                                                                   reward_mapper=get_reward_modifier(self.beta_penalty))
 
-    def remember_traumatic_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
+    def remember_traumatic_S_A_R_B(self, state: State, action: int, reward: float, behavior: List[float]):
         self.__errors += 1
         return super().remember_traumatic_S_A_R_B(state, action, reward, behavior)
     
-    def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
+    def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: List[float]):
         self.errors = 0
         return super().remember_S_A_R_B(state, action, reward, behavior)
 

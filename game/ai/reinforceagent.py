@@ -83,17 +83,17 @@ class ReinforceAgent(object):
         self.invalid_actions = 0
         self._action_getter = self.get_action_from_probs if self.flag is TrainingEnum.FULL_TRAINING else self.get_action_from_value
 
-    def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
+    def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: List[float]):
         self.memory.remember_S_A_R_B(state, action, reward, behavior)
         
-    def remember_traumatic_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
+    def remember_traumatic_S_A_R_B(self, state: State, action: int, reward: float, behavior: List[float]):
         self.traumatic_memory.remember_S_A_R_B(state, action, reward, behavior)
 
     def get_action(self, state: State) -> NetworkOutput:
         pass
 
     def get_action_from_probs(self, vec: ndarray, **args) -> NetworkOutput:
-        probs = self.model.predict_probs(vec, **args)
+        probs = self.model.predict_probs(vec, **args)[0]
         try:
             action = choice(range(self.action_size), 1, p=probs)[0]
             return NetworkOutput(action, probs[action], probs)
@@ -130,7 +130,8 @@ class ReinforceAgent(object):
     def replay(self):
         self.persist_episode_and_clean_memory()
         self._replay(self.memory, message="Learning positive memories...")
-        self._replay(self.traumatic_memory, message="Learning negative memories...")
+        if self.flag is not TrainingEnum.FULL_TRAINING:
+            self._replay(self.traumatic_memory, message="Learning negative memories...")
 
     def sample(self, action: int) -> ndarray:
         z: ndarray =zeros(self.action_size)
