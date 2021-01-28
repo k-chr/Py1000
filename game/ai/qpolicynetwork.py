@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from . import (Activation, Input, Dense, n_sum, NetworkMode,
                TrainingEnum, relu, softmax, datetime,
-               Adam, Model, ndarray, nan_to_num, path,
+               Adam, Model, ndarray, nan_to_num, path, div_no_nan,
                k_sum, k_log, List, SGD, Tensor, MSE, Batch, reshape)
 
 MEM_DIR = "previous_memories"
@@ -50,14 +50,16 @@ class QPolicyNetwork(object):
         self.policy_predictor = Model(state_input, layers)
         state = Input(shape=(self.states_one_hot_len,), name='state')
         discounted_reward_placeholder = Input(shape=(1,), name='discounted_reward')
-        behavior_policy_placeholder = Input(shape=(1,), name='behavior_policy')
-        inputs = [state, discounted_reward_placeholder, behavior_policy_placeholder] if self.flag is TrainingEnum.FULL_TRAINING else [state]
+        behavior_policy_placeholder = Input(shape=(self.action_output_size,), name='behavior_policy')
+        current_policy_placeholder = Input(shape=(self.action_output_size,), name='current_policy')
+        inputs = [state, discounted_reward_placeholder, behavior_policy_placeholder, current_policy_placeholder] if self.flag is TrainingEnum.FULL_TRAINING else [state]
         trainer_layers = self.policy_predictor(state)
         model = Model(inputs=inputs, outputs=trainer_layers)
         self.load_weights_from_date()
         model.compile(optimizer=Adam(lr=self.alpha) if self.flag is TrainingEnum.FULL_TRAINING\
                         else SGD(lr=self.alpha), 
-                     loss=self.loss_function_generator(discounted_reward_placeholder, behavior_policy_placeholder))
+                     loss=self.loss_function_generator(discounted_reward_placeholder, 
+                            behavior_policy_placeholder, current_policy_placeholder))
         self.policy_trainer = model
         self.policy_predictor.summary()
 
@@ -80,16 +82,16 @@ class QPolicyNetwork(object):
                 makedirs(directory, exist_ok=True)
         self.policy_predictor.save_weights(path.join(directory, f"{self.network_name}_{self.mode.computed_name}_{date_str}.h5"))
 
-    def loss_function_generator(self, discounted_reward: Tensor, behavior_policy: Tensor):
+    def loss_function_generator(self, discounted_reward: Tensor, behavior_policy: Tensor, current_policy: Tensor):
 
         if self.flag is not TrainingEnum.FULL_TRAINING:
             return MSE
 
         def gradient_loss(pi: Tensor, pi_prediction: Tensor):
-            pi_s_a = k_sum(pi * pi_prediction, axis=1)
-            importance_weight = pi_s_a / behavior_policy
-            loss = -discounted_reward * k_log(pi_s_a)
-            return loss * importance_weight
+            importance_weight = div_no_nan( current_policy, behavior_policy)
+            pi_s_a = k_log(pi_prediction) * pi
+            loss = k_sum(discounted_reward * importance_weight * pi_s_a) 
+            return -loss
         return gradient_loss
 
     @staticmethod
@@ -121,15 +123,13 @@ class QPolicyNetwork(object):
             network_input = {
                              'state':memory.states,
                              'discounted_reward':memory.rewards,
-                             'behavior_policy': memory.behaviors
+                             'behavior_policy': memory.behaviors,
+                             'current_policy':self.policy_predictor.predict(memory.states)
                             } if self.flag is TrainingEnum.FULL_TRAINING else {
                              'state':memory.states
                             }
 
-            if message != "":
-                print(message)
-
-            self.policy_trainer.fit(network_input, memory.actions, epochs=1)
+            self.policy_trainer.fit(network_input, memory.actions, epochs=1, verbose=0)
 
         except Exception as e:
             print(e)
