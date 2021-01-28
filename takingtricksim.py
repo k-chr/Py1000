@@ -7,7 +7,7 @@ config = tf.compat.v1.ConfigProto(gpu_options =
 config.gpu_options.allow_growth = True
 session = tf.compat.v1.Session(config=config)
 tf.compat.v1.keras.backend.set_session(session)
-
+tf.compat.v1.disable_eager_execution()
 from functools import reduce
 from game.states.takingtrickstate import TakingTrickState
 from game import NetworkOutput, Constraint
@@ -140,52 +140,57 @@ class Sim(QObject):
     @pyqtSlot()
     def run(self):
         episode = 0
+        try:
+            while episode < self.episodes:
+                done = False
+                obs = self.env.reset()
+                steps = 0
 
-        while episode < self.episodes:
-            done = False
-            obs = self.env.reset()
-            steps = 0
+                while not done:
+                    player = self.player1 if obs["is_player1_turn"] else self.player2
+                    op = self.player2 if obs["is_player1_turn"] else self.player1
+                    state: TakingTrickState =obs["data"]
+                    output: NetworkOutput =player.get_action(state) if len(state.hand_cards) > 1 else get_default_action(state)
+                    steps += 1
+                    obs, rewards, done = self.env.step(output)
+                    if len(state.hand_cards) > 1:
+                        if rewards[0] < 0 and ((not self.flag is TrainingEnum.FULL_TRAINING
+                                ) or (self.flag is TrainingEnum.FULL_TRAINING and rewards[1] is None
+                            )):
+                            player.remember_traumatic_S_A_R_B(state, output.action, rewards[0], output.probs)
+                        else:
+                            player.remember_S_A_R_B(state, output.action, rewards[0], output.probs)
 
-            while not done:
-                player = self.player1 if obs["is_player1_turn"] else self.player2
-                op = self.player2 if obs["is_player1_turn"] else self.player1
-                state: TakingTrickState =obs["data"]
-                output: NetworkOutput =player.get_action(state) if len(state.hand_cards) > 1 else get_default_action(state)
-                steps += 1
-                obs, rewards, done = self.env.step(output)
-                if len(state.hand_cards) > 1:
-                    if rewards[0] < 0 and ((not self.flag is TrainingEnum.FULL_TRAINING
-                            ) or (self.flag is TrainingEnum.FULL_TRAINING and rewards[1] is None
-                        )):
-                        player.remember_traumatic_S_A_R_B(state, output.action, rewards[0], output.action_prob)
-                    else:
-                        player.remember_S_A_R_B(state, output.action, rewards[0], output.action_prob)
+                    #delayed reward
+                        if(len(rewards) > 1 and rewards[1] is not None):
+                            op.memory.update_last_reward(rewards[1], state)
 
-                #delayed reward
-                    if(len(rewards) > 1 and rewards[1] is not None):
-                        op.memory.update_last_reward(rewards[1])
+                self.env.log_episode_info()
+                print(f"[{episode + 1}/{self.episodes}]")
 
-            self.env.log_episode_info()
-            print(f"[{episode + 1}/{self.episodes}]")
+                if self.flag is TrainingEnum.FULL_TRAINING:
+                    self.player1.set_score(self.env.player1.score)
+                    self.player1.set_invalid_actions_count(self.env.player1.invalid_actions)
+                    self.player2.set_score(self.env.player2.score)
+                    self.player2.set_invalid_actions_count(self.env.player2.invalid_actions)
 
-            if self.flag is TrainingEnum.FULL_TRAINING:
-                self.player1.set_score(self.env.player1.score)
-                self.player1.set_invalid_actions_count(self.env.player1.invalid_actions)
-                self.player2.set_score(self.env.player2.score)
-                self.player2.set_invalid_actions_count(self.env.player2.invalid_actions)
+                self.player1.replay()
+                self.player2.replay()
 
-            self.player1.replay()
-            self.player2.replay()
+                if (episode + 1) % DUMP_PERIOD == 0:
+                    self.player1.model.save_weights_to_date()
+                    self.player2.model.save_weights_to_date()
 
-            if (episode + 1) % DUMP_PERIOD == 0:
-                self.player1.model.save_weights_to_date()
-                self.player2.model.save_weights_to_date()
-
-            episode += 1
+                episode += 1
+        except Exception as e:
+            print(e)
         self.finished.emit()
         
     def sigint_handler(self, *args):
-        self.env.end_logging()
+        try:
+            self.env.end_logging()
+        except:
+            pass
         QCoreApplication.exit()
 
 def main(args: List[str]):
