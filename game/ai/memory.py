@@ -16,7 +16,7 @@ class Memory:
     def length(self):
         return self._length
 
-    def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
+    def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: List[float]):
         self.states.append(state)
         self.actions.append(action)
         self.rewards.append(reward)
@@ -26,7 +26,7 @@ class Memory:
         self.actions_queue: Deque[int] =deque(maxlen=self.max_size)
         self.states_queue: Deque[State] =deque(maxlen=self.max_size)
         self.rewards_queue: Deque[float] =deque(maxlen=self.max_size)
-        self.behaviors_queue: Deque[float] =deque(maxlen=self.max_size)
+        self.behaviors_queue: Deque[List[float]] =deque(maxlen=self.max_size)
 
     def save_data_for_replay_and_clean_temp(self, reward_mapper: fun[[float], float] =None,
                                                   rewards_mapper: fun[[List[float]], List[float]] =None):
@@ -52,7 +52,7 @@ class Memory:
         self.states: List[State] =[]
         self.actions: List[int] =[]
         self.rewards: List[float] =[]
-        self.behaviors: List[float] =[]
+        self.behaviors: List[List[float]] =[]
 
-    def update_last_reward(self, reward: float):
+    def update_last_reward(self, reward: float, state: State):
         self.rewards[len(self.rewards) - 1] += reward
