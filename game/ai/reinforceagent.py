@@ -1,5 +1,5 @@
 from .qpolicynetwork import QPolicyNetwork
-from . import (zeros, State, array, List, Dict,
+from . import (zeros, State, array, List, Dict, reshape,
                choice, TrainingEnum, ndarray, NetworkOutput,
                argmax, int64, fun, Batch, NetworkMode)
 from .memory import Memory
@@ -93,7 +93,7 @@ class ReinforceAgent(object):
         pass
 
     def get_action_from_probs(self, vec: ndarray, **args) -> NetworkOutput:
-        probs = self.model.predict_probs(vec, **args)[0]
+        probs = self.model.predict_probs(reshape(vec, [1, self.state_size]), **args)[0]
         try:
             action = choice(range(self.action_size), 1, p=probs)[0]
             return NetworkOutput(action, probs[action], probs)
@@ -102,7 +102,7 @@ class ReinforceAgent(object):
             raise Exception
 
     def get_action_from_value(self, vec: ndarray, **args) -> NetworkOutput:    
-        values = self.model.predict_values(vec, **args)[0]
+        values = self.model.predict_values(reshape(vec, [1, self.state_size]), **args)[0]
         indices = argmax(values)
         action = 0
         if isinstance(indices, int64):

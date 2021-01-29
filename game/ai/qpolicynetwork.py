@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from . import (Activation, Input, Dense, n_sum, NetworkMode,
-               TrainingEnum, relu, softmax, datetime,
-               Adam, Model, ndarray, nan_to_num, path, div_no_nan,
-               k_sum, k_log, List, SGD, Tensor, MSE, Batch, reshape)
+               TrainingEnum, relu, softmax, datetime, clip, 
+               Adam, Model, ndarray, nan_to_num, path, Tensor,
+               div_no_nan, k_sum, k_log, List, SGD, MSE, Batch,
+               clip_by_value, MIN_PROB, MAX_PROB)
 
 MEM_DIR = "previous_memories"
 
@@ -29,12 +30,13 @@ class QPolicyNetwork(object):
         self.mode = mode
         self.layer_scale = 16 if self.mode & NetworkMode.LARGE else 4
         
-    def predict_probs(self, vec: ndarray, **args):
-        probs = nan_to_num(self.policy_predictor.predict(reshape(vec, [1, self.states_one_hot_len])))
+    def predict_probs(self, vec: ndarray, **args) -> ndarray:
+        probs = nan_to_num(self.policy_predictor.predict(vec).astype(float))
+        probs = clip(probs, MIN_PROB, MAX_PROB)
         return probs / n_sum(probs)
 
-    def predict_values(self, vec: ndarray, **args):
-        values = self.policy_predictor.predict(reshape(vec, [1, self.states_one_hot_len]))
+    def predict_values(self, vec: ndarray, **args) -> ndarray:
+        values = self.policy_predictor.predict(vec)
         return values
 
     def build_network(self):
@@ -88,6 +90,7 @@ class QPolicyNetwork(object):
             return MSE
 
         def gradient_loss(pi: Tensor, pi_prediction: Tensor):
+            pi_prediction = clip_by_value(pi_prediction, MIN_PROB, MAX_PROB)
             importance_weight = div_no_nan( current_policy, behavior_policy)
             pi_s_a = k_log(pi_prediction) * pi
             loss = k_sum(discounted_reward * importance_weight * pi_s_a) 
@@ -124,7 +127,7 @@ class QPolicyNetwork(object):
                              'state':memory.states,
                              'discounted_reward':memory.rewards,
                              'behavior_policy': memory.behaviors,
-                             'current_policy':self.policy_predictor.predict(memory.states)
+                             'current_policy':self.predict_probs(memory.states)
                             } if self.flag is TrainingEnum.FULL_TRAINING else {
                              'state':memory.states
                             }
