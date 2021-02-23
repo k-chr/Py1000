@@ -22,7 +22,7 @@ from ..states.giveawaystate import GiveawayState
 from ..states.takingtrickstate import TakingTrickState
 from ..states.state import State
 from ..utils.gamerules import GameRules
-
+from ..utils.csvlogger import CSVLogger
 k_sum = keras.backend.sum
 k_log = keras.backend.log
 k_pow = keras.backend.pow

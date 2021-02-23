@@ -1,7 +1,7 @@
 from . import (List, State, deque,
                Deque, fun)
 
-MAX_DATA_SIZE = 0x2000
+MAX_DATA_SIZE = 0x4000
 
 
 class Memory:

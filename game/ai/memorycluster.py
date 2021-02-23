@@ -2,7 +2,7 @@ from .memory import Memory, fun, List
 from . import Dict, MIN_CARDS_IN_HAND, MAX_CARDS_IN_HAND
 from ..states.takingtrickstate import TakingTrickState
 
-SINGLE_CLUSTER_SIZE = 0x1000
+SINGLE_CLUSTER_SIZE = 0x2000
 
 class TakingTrickClusterMemory(Memory):
 

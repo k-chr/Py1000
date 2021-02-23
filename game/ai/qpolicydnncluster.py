@@ -63,3 +63,6 @@ class TakingTrickQPolicyDNNCluster(QPolicyNetwork):
 
         return __instance
     
+    def clean(self):
+        for _, node in self.nodes.items():
+            node.clean()

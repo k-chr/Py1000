@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 from . import (Activation, Input, Dense, n_sum, NetworkMode,
-               TrainingEnum, relu, softmax, datetime, clip, 
+               TrainingEnum, relu, softmax, datetime, clip, Deque,
                Adam, Model, ndarray, nan_to_num, path, Tensor,
                div_no_nan, k_sum, k_log, List, SGD, MSE, Batch,
-               clip_by_value, MIN_PROB, MAX_PROB)
+               clip_by_value, MIN_PROB, MAX_PROB, CSVLogger, deque)
 
 MEM_DIR = "previous_memories"
+
+def mean(collection: Deque):
+    if len(collection) == 0: return 0
+    return sum(collection, 0) / len(collection)
 
 
 class QPolicyNetwork(object):
@@ -17,15 +21,20 @@ class QPolicyNetwork(object):
                  mem_dir: str, n_one_hot: int, start_from: datetime, flag: TrainingEnum, mode: NetworkMode):
         self.batch_size = batch_size
         self.session = session
+        self.logger = CSVLogger(self.session, f"{fname}_loss.csv", ('loss', 'mean of 100 losses'))
         self.states_one_hot_len = n_one_hot
         self.action_output_size = n_actions
         self.network_name = fname
         self.alpha = alpha
+        self.loss_queue = deque(maxlen=100)
         self.init_date = start_from
         self.created_date = datetime.now()
         self.memories_directory = mem_dir
         self.policy_predictor: Model =None
         self.policy_trainer: Model =None
+        self.tmp_loss = 0
+        self.counter = 0
+        self.wait_guard = 2 if flag is TrainingEnum.FULL_TRAINING else 4
         self.flag = flag
         self.mode = mode
         self.layer_scale = 16 if self.mode & NetworkMode.LARGE else 4
@@ -33,7 +42,7 @@ class QPolicyNetwork(object):
     def predict_probs(self, vec: ndarray, **args) -> ndarray:
         probs = nan_to_num(self.policy_predictor.predict(vec).astype(float))
         probs = clip(probs, MIN_PROB, MAX_PROB)
-        return probs / n_sum(probs)
+        return probs / n_sum(probs, axis=1, keepdims=True)
 
     def predict_values(self, vec: ndarray, **args) -> ndarray:
         values = self.policy_predictor.predict(vec)
@@ -91,6 +100,7 @@ class QPolicyNetwork(object):
 
         def gradient_loss(pi: Tensor, pi_prediction: Tensor):
             pi_prediction = clip_by_value(pi_prediction, MIN_PROB, MAX_PROB)
+            pi_prediction = pi_prediction / k_sum(pi_prediction, axis=1, keepdims=True)
             importance_weight = div_no_nan( current_policy, behavior_policy)
             pi_s_a = k_log(pi_prediction) * pi
             loss = k_sum(discounted_reward * importance_weight * pi_s_a) 
@@ -132,7 +142,18 @@ class QPolicyNetwork(object):
                              'state':memory.states
                             }
 
-            self.policy_trainer.fit(network_input, memory.actions, epochs=1, verbose=0)
+            history = self.policy_trainer.fit(network_input, memory.actions, verbose=0,epochs=1).history
+            self.tmp_loss += history["loss"][0]
+            self.counter += 1
+
+            if self.counter == self.wait_guard:
+                self.loss_queue.append(self.tmp_loss)
+                self.logger.log((self.tmp_loss, mean(self.loss_queue)))
+                self.tmp_loss = 0
+                self.counter = 0
 
         except Exception as e:
             print(e)
+
+    def clean(self):
+        self.logger.save()
