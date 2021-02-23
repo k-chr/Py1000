@@ -130,8 +130,7 @@ class ReinforceAgent(object):
     def replay(self):
         self.persist_episode_and_clean_memory()
         self._replay(self.memory, message="Learning positive memories...")
-        if self.flag is not TrainingEnum.FULL_TRAINING:
-            self._replay(self.traumatic_memory, message="Learning negative memories...")
+        self._replay(self.traumatic_memory, message="Learning negative memories...")
 
     def sample(self, action: int) -> ndarray:
         z: ndarray =zeros(self.action_size)
@@ -145,4 +144,7 @@ class ReinforceAgent(object):
         pass
 
     def _replay(self, memory: Memory, message=""):
+        pass
+
+    def clean_up(self):
         pass
