@@ -24,3 +24,7 @@ session_*
 /sessions
 env/*
 .vscode
+.ipynb_checkpoints/Lab. 6-checkpoint.ipynb
+backup.zip
+Lab. 6.ipynb
+backup
