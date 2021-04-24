@@ -3,6 +3,8 @@ from game.card import Card
 from game.enums import Cards, Suits
 from game.utils.gamerules import GameRules
 from net.utils import get_address_of_interfaces_that_are_up
+
+
 def test():
 
  

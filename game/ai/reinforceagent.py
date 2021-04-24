@@ -1,5 +1,5 @@
 from .qpolicynetwork import QPolicyNetwork
-from . import (zeros, State, array, List, Dict,
+from . import (zeros, State, array, List, Dict, reshape,
                choice, TrainingEnum, ndarray, NetworkOutput,
                argmax, int64, fun, Batch, NetworkMode)
 from .memory import Memory
@@ -67,9 +67,10 @@ PENALTIES = {
 
 class ReinforceAgent(object):
     
-    def __init__(self, state_size: int, action_size: int, 
+    def __init__(self, session: str, state_size: int, action_size: int, 
                  gamma: float =0.99, alpha: float =0.001, flag: TrainingEnum =TrainingEnum.FULL_TRAINING, mode: NetworkMode = NetworkMode.SINGLE):
         self.state_size = state_size
+        self.session = session
         self.action_size = action_size
         self.gamma = gamma
         self.learning_rate = alpha
@@ -82,17 +83,17 @@ class ReinforceAgent(object):
         self.invalid_actions = 0
         self._action_getter = self.get_action_from_probs if self.flag is TrainingEnum.FULL_TRAINING else self.get_action_from_value
 
-    def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
+    def remember_S_A_R_B(self, state: State, action: int, reward: float, behavior: List[float]):
         self.memory.remember_S_A_R_B(state, action, reward, behavior)
         
-    def remember_traumatic_S_A_R_B(self, state: State, action: int, reward: float, behavior: float):
+    def remember_traumatic_S_A_R_B(self, state: State, action: int, reward: float, behavior: List[float]):
         self.traumatic_memory.remember_S_A_R_B(state, action, reward, behavior)
 
     def get_action(self, state: State) -> NetworkOutput:
         pass
 
     def get_action_from_probs(self, vec: ndarray, **args) -> NetworkOutput:
-        probs = self.model.predict_probs(vec, **args)
+        probs = self.model.predict_probs(reshape(vec, [1, self.state_size]), **args)[0]
         try:
             action = choice(range(self.action_size), 1, p=probs)[0]
             return NetworkOutput(action, probs[action], probs)
@@ -101,7 +102,7 @@ class ReinforceAgent(object):
             raise Exception
 
     def get_action_from_value(self, vec: ndarray, **args) -> NetworkOutput:    
-        values = self.model.predict_values(vec, **args)[0]
+        values = self.model.predict_values(reshape(vec, [1, self.state_size]), **args)[0]
         indices = argmax(values)
         action = 0
         if isinstance(indices, int64):
@@ -143,4 +144,7 @@ class ReinforceAgent(object):
         pass
 
     def _replay(self, memory: Memory, message=""):
+        pass
+
+    def clean_up(self):
         pass

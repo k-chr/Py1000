@@ -1,4 +1,4 @@
-from . import Card, Suits, Cards, randint, shuffle, deepcopy
+from . import Card, Suits, Cards, randint, shuffle, deepcopy, List
 
 class RandomCardGenerator:
 
@@ -22,10 +22,10 @@ class RandomCardGenerator:
         cards = deepcopy(self.__cards)
         for i in range(0, end_value):
             shuffle(cards)
-        stack1 = []
-        stack2 = []
-        player1 = []
-        player2 = []
+        stack1: List[Card] =[]
+        stack2: List[Card] =[]
+        player1: List[Card] =[]
+        player2: List[Card] =[]
         first_player_served = False
         stack1_served = False
         stack2_served = False
