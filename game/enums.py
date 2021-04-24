@@ -1,5 +1,6 @@
 from . import Enum, IntFlag
 
+
 class Suits(Enum):
     S = 40
     C = 60

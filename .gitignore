@@ -20,5 +20,7 @@ dist
 *.csv
 *.h5
 *.xlsx
+session_*
+/sessions
 env/*
 .vscode
